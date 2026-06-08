@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NBA Fan Engagement — Azure Cloud & AI Reference Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#070a12; --bg2:#0c111d; --panel:#101626; --panel2:#141c2e;
+  --line:#1f2a40; --line2:#293650;
+  --ink:#eaf0fb; --ink-soft:#9fb0cc; --ink-faint:#5f6f8c;
+  --az:#2899f5; --az-deep:#0a6ed1; --az-bg:#0e2236;
+  --nba-red:#c8102e; --nba-blue:#1d428a;
+  --edge:#8b7bff; --app:#ff7a45; --ai:#2899f5; --data:#2bb673; --gov:#ff5d8f;
+  --gold:#f6c344;
+  --shadow:0 18px 50px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+  background-image:
+    radial-gradient(1200px 600px at 18% -10%, rgba(29,66,138,.22), transparent 60%),
+    radial-gradient(1000px 560px at 100% 110%, rgba(200,16,46,.14), transparent 55%),
+    linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:auto,auto,30px 30px,30px 30px;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none;}
+
+/* ===== Top bar ===== */
+.topbar{display:flex;align-items:center;gap:18px;padding:12px 20px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(16,22,38,.95),rgba(7,10,18,.7));backdrop-filter:blur(8px);
+  position:relative;z-index:30;height:62px;}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;}
+.brand .mark{width:34px;height:34px;border-radius:9px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--nba-blue),var(--nba-red));position:relative;
+  box-shadow:0 4px 14px rgba(200,16,46,.35);display:grid;place-items:center;}
+.brand .mark::before{content:"";width:7px;height:18px;background:#fff;border-radius:40%;
+  box-shadow:0 0 0 2px var(--nba-blue);}
+.brand .tt{line-height:1.05;min-width:0;}
+.brand .tt b{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:.02em;
+  text-transform:uppercase;display:block;white-space:nowrap;}
+.brand .tt span{font-size:10.5px;color:var(--ink-faint);letter-spacing:.16em;text-transform:uppercase;}
+.spacer{flex:1;}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px;}
+.seg button{font-size:12px;padding:7px 11px;border-radius:8px;color:var(--ink-soft);
+  display:flex;align-items:center;gap:6px;font-weight:600;transition:.15s;}
+.seg button.on{background:linear-gradient(180deg,var(--az),var(--az-deep));color:#fff;box-shadow:0 3px 10px rgba(40,153,245,.35);}
+.seg button:hover:not(.on){color:var(--ink);}
+.seg .ic{font-size:13px;}
+.modeToggle{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);
+  border-radius:11px;padding:5px 12px 5px 14px;}
+.modeToggle .lbl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);}
+.modeToggle .pill{display:flex;background:var(--bg);border-radius:8px;padding:2px;border:1px solid var(--line);}
+.modeToggle .pill button{font-size:11.5px;padding:5px 10px;border-radius:6px;font-weight:700;color:var(--ink-soft);}
+.modeToggle .pill button.on{color:#fff;}
+.modeToggle .pill button[data-mode="home"].on{background:linear-gradient(180deg,#2bb673,#179259);}
+.modeToggle .pill button[data-mode="venue"].on{background:linear-gradient(180deg,var(--nba-red),#8f0b20);}
+.disclosure{font-size:10px;color:var(--gold);border:1px solid rgba(246,195,68,.35);background:rgba(246,195,68,.08);
+  padding:6px 10px;border-radius:8px;max-width:230px;line-height:1.25;letter-spacing:.01em;}
+
+/* ===== Stage ===== */
+.stage{position:relative;height:calc(100vh - 62px);width:100%;overflow:hidden;}
+#wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;}
+
+/* architecture node clusters */
+.cluster{position:absolute;z-index:8;width:206px;display:flex;flex-direction:column;gap:8px;}
+.cluster .clabel{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-faint);display:flex;align-items:center;gap:7px;margin-bottom:1px;}
+.cluster .clabel::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--tc,var(--ink-faint));box-shadow:0 0 8px var(--tc);}
+.cl-clients{top:18px;left:50%;transform:translateX(-50%);width:560px;}
+.cl-clients .nodes{flex-direction:row;display:flex;gap:8px;justify-content:center;}
+.cl-edge{top:96px;left:24px;}
+.cl-ai{bottom:150px;left:24px;}
+.cl-exp{top:96px;right:24px;}
+.cl-data{bottom:150px;right:24px;}
+.cl-gov{bottom:16px;left:50%;transform:translateX(-50%);width:660px;}
+.cl-gov .nodes{flex-direction:row;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+
+.node{position:relative;background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-left:3px solid var(--nc,var(--az));border-radius:9px;
+  padding:8px 11px;transition:transform .3s,box-shadow .3s,border-color .3s,background .3s,opacity .3s;
+  opacity:.5;flex:1 1 0;min-width:0;}
+.node .nm{font-size:12px;font-weight:600;letter-spacing:-.005em;line-height:1.15;color:var(--ink);}
+.node .ty{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-faint);margin-top:3px;}
+.node .az{position:absolute;top:7px;right:8px;width:13px;height:13px;border-radius:3px;
+  background:linear-gradient(135deg,#52b4ff,#0a6ed1);opacity:.55;transition:.3s;
+  clip-path:polygon(38% 0,100% 100%,62% 100%,50% 72%,30% 100%,0 100%);}
+.node.active{opacity:1;border-color:var(--nc);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--nc) 22%,var(--panel)),var(--panel));
+  box-shadow:0 0 0 1px var(--nc), 0 8px 26px color-mix(in srgb,var(--nc) 40%,transparent);
+  transform:translateY(-2px) scale(1.025);}
+.node.active .az{opacity:1;animation:azpulse 1.4s ease-in-out infinite;}
+.node.active .nm{color:#fff;}
+.node.active::after{content:"";position:absolute;inset:-3px;border-radius:11px;border:1px solid var(--nc);
+  opacity:.5;animation:ring 1.6s ease-out infinite;}
+@keyframes azpulse{0%,100%{transform:scale(1);}50%{transform:scale(1.25);}}
+@keyframes ring{0%{transform:scale(1);opacity:.5;}100%{transform:scale(1.18);opacity:0;}}
+
+/* ===== Device dock (center) ===== */
+.dock{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:12;
+  display:flex;flex-direction:column;align-items:center;gap:14px;}
+
+.device{position:relative;background:#05070d;box-shadow:var(--shadow),0 0 0 1px #243149;transition:.4s;}
+.device .screen{position:relative;overflow:hidden;background:var(--bg2);}
+
+/* iPhone */
+.device.iphone{width:332px;height:684px;border-radius:46px;padding:13px;border:2px solid #2a3247;}
+.device.iphone .screen{border-radius:34px;height:100%;}
+.device.iphone .notch{position:absolute;top:22px;left:50%;transform:translateX(-50%);
+  width:104px;height:27px;background:#05070d;border-radius:16px;z-index:40;}
+/* iPad */
+.device.ipad{width:560px;height:700px;border-radius:30px;padding:16px;border:2px solid #2a3247;}
+.device.ipad .screen{border-radius:16px;height:100%;}
+/* Watch */
+.device.watch{width:226px;height:272px;border-radius:56px;padding:14px;border:2px solid #2a3247;
+  background:linear-gradient(160deg,#11151f,#05070d);}
+.device.watch .screen{border-radius:44px;height:100%;background:#000;}
+.device.watch::after{content:"";position:absolute;right:-6px;top:88px;width:6px;height:48px;border-radius:4px;
+  background:#2a3247;}
+/* Web */
+.device.web{width:660px;height:660px;border-radius:14px;padding:0;border:1px solid #2a3247;overflow:hidden;}
+.device.web .chrome{height:38px;background:#0c111d;border-bottom:1px solid var(--line);display:flex;
+  align-items:center;gap:8px;padding:0 14px;}
+.device.web .chrome .dots{display:flex;gap:6px;}
+.device.web .chrome .dots i{width:11px;height:11px;border-radius:50%;display:block;}
+.device.web .chrome .url{flex:1;background:#05070d;border:1px solid var(--line);border-radius:7px;height:22px;
+  display:flex;align-items:center;padding:0 10px;font-size:10.5px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;}
+.device.web .screen{border-radius:0;height:calc(100% - 38px);}
+
+.device-cap{font-size:10.5px;color:var(--ink-faint);letter-spacing:.14em;text-transform:uppercase;
+  font-family:'IBM Plex Mono',monospace;}
+.device-cap b{color:var(--az);}
+
+/* ===== App UI inside the screen ===== */
+.app{height:100%;display:flex;flex-direction:column;background:
+  radial-gradient(120% 60% at 50% -10%, rgba(29,66,138,.35), transparent 60%), var(--bg2);color:var(--ink);}
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:30px 22px 6px;font-size:11px;
+  font-weight:600;color:#dfe7f5;flex:0 0 auto;}
+.statusbar .r{display:flex;gap:5px;align-items:center;font-size:10px;}
+.app-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 16px 14px;scrollbar-width:thin;scrollbar-color:#2a3650 transparent;}
+.app-body::-webkit-scrollbar{width:5px;}
+.app-body::-webkit-scrollbar-thumb{background:#2a3650;border-radius:3px;}
+.app-head{display:flex;align-items:center;justify-content:space-between;margin:6px 2px 12px;}
+.app-head h2{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:25px;text-transform:uppercase;
+  letter-spacing:.01em;line-height:1;}
+.app-head .sub{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+.app-head .av{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold);flex:0 0 auto;
+  background:linear-gradient(135deg,#552,#fc6) center/cover;}
+
+.tabbar{flex:0 0 auto;display:flex;justify-content:space-around;padding:9px 6px 16px;border-top:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(12,17,29,.4),rgba(7,10,18,.9));}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;color:var(--ink-faint);
+  font-weight:600;letter-spacing:.02em;flex:1;transition:.15s;}
+.tabbar button .ic{font-size:18px;line-height:1;}
+.tabbar button.on{color:var(--az);}
+.tabbar button.on .ic{filter:drop-shadow(0 0 8px rgba(40,153,245,.6));}
+
+/* generic app components */
+.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+  border-radius:14px;padding:13px;margin-bottom:11px;}
+.card.tap{cursor:pointer;transition:.15s;}
+.card.tap:active{transform:scale(.985);}
+.row{display:flex;gap:10px;}
+.chiprow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px;}
+.chip{font-size:11px;font-weight:600;padding:6px 11px;border-radius:20px;background:var(--panel2);
+  border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap;}
+.chip.on{background:linear-gradient(180deg,var(--az),var(--az-deep));color:#fff;border-color:transparent;}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-faint);margin:14px 2px 8px;display:flex;align-items:center;gap:7px;}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--line);}
+.btn{display:block;width:100%;text-align:center;padding:13px;border-radius:13px;font-weight:700;font-size:14px;
+  background:linear-gradient(180deg,var(--nba-red),#9c0c22);color:#fff;box-shadow:0 8px 22px rgba(200,16,46,.32);
+  letter-spacing:.02em;margin-top:6px;}
+.btn.blue{background:linear-gradient(180deg,var(--az),var(--az-deep));box-shadow:0 8px 22px rgba(40,153,245,.32);}
+.btn.ghost{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);box-shadow:none;}
+.live{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;color:#fff;
+  background:var(--nba-red);padding:3px 8px;border-radius:6px;letter-spacing:.08em;}
+.live::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:blink 1s steps(2) infinite;}
+@keyframes blink{50%{opacity:.25;}}
+.muted{color:var(--ink-soft);font-size:12px;line-height:1.5;}
+.tiny{font-size:10.5px;color:var(--ink-faint);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px;text-align:center;}
+.stat b{font-family:'Barlow Condensed',sans-serif;font-size:24px;display:block;line-height:1;}
+.stat span{font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em;}
+.teamlogo{width:42px;height:42px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;color:#fff;letter-spacing:-.02em;}
+.scorebar{display:flex;align-items:center;justify-content:space-between;}
+.scorebar .t{display:flex;flex-direction:column;align-items:center;gap:5px;width:74px;}
+.scorebar .t .nm{font-size:11px;font-weight:700;}
+.scorebar .sc{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:700;line-height:.9;}
+.scorebar .mid{text-align:center;}
+.povwrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line2);
+  aspect-ratio:16/10;background:linear-gradient(135deg,#13325e,#0a1730);margin-bottom:11px;}
+.povwrap .court{position:absolute;inset:0;background:
+  repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 2px,transparent 2px 60px);}
+.povwrap .badge{position:absolute;top:9px;left:9px;}
+.povwrap .ctr{position:absolute;inset:0;display:grid;place-items:center;}
+.povwrap .play{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.16);backdrop-filter:blur(4px);
+  display:grid;place-items:center;border:1px solid rgba(255,255,255,.3);font-size:20px;color:#fff;padding-left:4px;}
+.povwrap .pov{position:absolute;bottom:9px;left:9px;right:9px;display:flex;gap:6px;}
+.povwrap .pov button{flex:1;font-size:10px;font-weight:700;padding:7px;border-radius:8px;color:#cfe;
+  background:rgba(5,10,20,.55);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(4px);}
+.povwrap .pov button.on{background:linear-gradient(180deg,var(--az),var(--az-deep));color:#fff;border-color:transparent;}
+.listitem{display:flex;align-items:center;gap:11px;padding:10px 2px;border-bottom:1px solid var(--line);}
+.listitem:last-child{border:none;}
+.listitem .ico{width:38px;height:38px;border-radius:10px;flex:0 0 auto;display:grid;place-items:center;font-size:17px;
+  background:var(--panel);border:1px solid var(--line);}
+.listitem .gr{flex:1;min-width:0;}
+.listitem .gr b{font-size:12.5px;display:block;}
+.listitem .gr span{font-size:10.5px;color:var(--ink-faint);}
+.listitem .rt{font-size:11px;font-weight:700;color:var(--az);white-space:nowrap;}
+.ailine{display:flex;gap:9px;background:linear-gradient(180deg,rgba(40,153,245,.1),rgba(40,153,245,.03));
+  border:1px solid rgba(40,153,245,.3);border-radius:13px;padding:11px 12px;margin-bottom:11px;}
+.ailine .sp{width:22px;height:22px;border-radius:7px;flex:0 0 auto;display:grid;place-items:center;font-size:12px;
+  background:linear-gradient(135deg,#52b4ff,#0a6ed1);}
+.ailine .tx{font-size:11.5px;line-height:1.45;color:#dbe7f8;}
+.ailine .tx b{color:#fff;}
+
+/* watch app */
+.watchapp{height:100%;display:flex;flex-direction:column;color:#fff;padding:18px 14px 14px;
+  background:radial-gradient(120% 80% at 50% 0,rgba(29,66,138,.5),#000);}
+.watchapp .wtime{font-size:11px;color:var(--gold);font-weight:700;text-align:right;}
+.watchapp .wmid{flex:1;display:flex;flex-direction:column;justify-content:center;gap:4px;}
+
+/* ===== Inspector ===== */
+.inspector{position:absolute;top:80px;right:24px;width:206px;z-index:14;display:none;}
+.inspToggle{position:absolute;top:14px;right:24px;z-index:20;font-size:11px;font-weight:700;color:var(--ink-soft);
+  background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:7px 11px;display:flex;gap:7px;align-items:center;}
+
+/* ===== Bottom inspector panel ===== */
+.brainpanel{position:absolute;left:24px;bottom:64px;width:320px;z-index:16;
+  background:linear-gradient(180deg,rgba(16,22,38,.97),rgba(10,14,24,.97));border:1px solid var(--line2);
+  border-radius:16px;box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(10px);transition:.3s;}
+.brainpanel .bp-head{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:10px;}
+.brainpanel .bp-head .ic{width:30px;height:30px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;font-size:16px;
+  background:linear-gradient(135deg,var(--az),var(--az-deep));box-shadow:0 4px 12px rgba(40,153,245,.4);}
+.brainpanel .bp-head .h b{font-family:'Barlow Condensed',sans-serif;font-size:18px;text-transform:uppercase;letter-spacing:.01em;display:block;line-height:1;}
+.brainpanel .bp-head .h span{font-size:10px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;}
+.brainpanel .bp-body{padding:10px 15px 14px;max-height:230px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a3650 transparent;}
+.brainpanel .bp-body::-webkit-scrollbar{width:5px;}
+.brainpanel .bp-body::-webkit-scrollbar-thumb{background:#2a3650;border-radius:3px;}
+.svc{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);}
+.svc:last-child{border:none;}
+.svc .dot{width:9px;height:9px;border-radius:3px;flex:0 0 auto;margin-top:4px;background:var(--sc,var(--az));box-shadow:0 0 8px var(--sc,var(--az));}
+.svc .sg b{font-size:12px;display:block;}
+.svc .sg span{font-size:10.5px;color:var(--ink-soft);line-height:1.4;display:block;margin-top:1px;}
+.bp-foot{padding:9px 15px;border-top:1px solid var(--line);font-size:10px;color:var(--ink-faint);
+  display:flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;letter-spacing:.06em;}
+.bp-foot .lg{width:7px;height:7px;border-radius:50%;background:var(--data);box-shadow:0 0 8px var(--data);animation:blink 1.4s infinite;}
+
+.hint{position:absolute;left:50%;bottom:78px;transform:translateX(-50%);z-index:16;font-size:11px;color:var(--ink-faint);
+  background:rgba(10,14,24,.8);border:1px solid var(--line);border-radius:20px;padding:7px 14px;
+  font-family:'IBM Plex Mono',monospace;letter-spacing:.04em;pointer-events:none;animation:fadehint 1s ease;}
+@keyframes fadehint{from{opacity:0;}to{opacity:1;}}
+
+@media (max-width:1180px){
+  .cluster{width:170px;} .cl-edge,.cl-ai{left:12px;} .cl-exp,.cl-data{right:12px;}
+  .brainpanel{width:280px;left:12px;}
+}
+@media (max-width:920px){
+  .cluster:not(.cl-clients):not(.cl-gov){display:none;}
+  .brainpanel{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;width:92%;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<div class="topbar">
+  <div class="brand">
+    <div class="mark"></div>
+    <div class="tt"><b>NBA Fan Engagement</b><span>Azure Cloud &amp; AI · Reference Simulator</span></div>
+  </div>
+  <div class="spacer"></div>
+
+  <div class="seg" id="deviceSeg">
+    <button data-device="iphone" class="on"><span class="ic">📱</span>iPhone</button>
+    <button data-device="ipad"><span class="ic">▭</span>iPad</button>
+    <button data-device="watch"><span class="ic">⌚</span>Watch</button>
+    <button data-device="web"><span class="ic">🖥</span>Web</button>
+  </div>
+
+  <div class="modeToggle">
+    <span class="lbl">Context</span>
+    <div class="pill" id="modePill">
+      <button data-mode="home" class="on">🏠 At Home</button>
+      <button data-mode="venue">🏟 At Venue</button>
+    </div>
+  </div>
+
+  <div class="disclosure">⚠︎ Prototype to showcase Microsoft Azure Cloud &amp; AI reference architecture. Not affiliated with or endorsed by the NBA or its teams.</div>
+</div>
+
+<!-- ============ STAGE ============ -->
+<div class="stage" id="stage">
+  <svg id="wires"></svg>
+
+  <!-- Architecture clusters (the 360° brain) -->
+  <div class="cluster cl-clients" style="--tc:#8a93a8">
+    <div class="clabel">Tier 0 · Fan Clients</div>
+    <div class="nodes">
+      <div class="node" data-node="web" style="--nc:#8a93a8"><div class="az"></div><div class="nm">Web App</div><div class="ty">browser</div></div>
+      <div class="node" data-node="ios" style="--nc:#8a93a8"><div class="az"></div><div class="nm">iOS / Android</div><div class="ty">mobile · watch</div></div>
+      <div class="node" data-node="signalr" style="--nc:#8a93a8"><div class="az"></div><div class="nm">Web PubSub / SignalR</div><div class="ty">realtime push</div></div>
+    </div>
+  </div>
+
+  <div class="cluster cl-edge" style="--tc:var(--edge)">
+    <div class="clabel">Tier 1 · Edge &amp; Identity</div>
+    <div class="nodes" style="display:flex;flex-direction:column;gap:8px;">
+      <div class="node" data-node="frontdoor" style="--nc:var(--edge)"><div class="az"></div><div class="nm">Front Door + WAF</div><div class="ty">global edge · L7</div></div>
+      <div class="node" data-node="ddos" style="--nc:var(--edge)"><div class="az"></div><div class="nm">DDoS Protection</div><div class="ty">network</div></div>
+      <div class="node" data-node="entra" style="--nc:var(--edge)"><div class="az"></div><div class="nm">Entra External ID</div><div class="ty">fan identity</div></div>
+      <div class="node" data-node="apim" style="--nc:var(--edge)"><div class="az"></div><div class="nm">API Management</div><div class="ty">api gateway</div></div>
+    </div>
+  </div>
+
+  <div class="cluster cl-ai" style="--tc:var(--ai)">
+    <div class="clabel">Tier 4 · AI Office Core</div>
+    <div class="nodes" style="display:flex;flex-direction:column;gap:8px;">
+      <div class="node" data-node="aoai" style="--nc:var(--ai)"><div class="az"></div><div class="nm">Azure OpenAI / AI Foundry</div><div class="ty">generative · agent</div></div>
+      <div class="node" data-node="search" style="--nc:var(--ai)"><div class="az"></div><div class="nm">Azure AI Search</div><div class="ty">rag · retrieval</div></div>
+      <div class="node" data-node="aml" style="--nc:var(--ai)"><div class="az"></div><div class="nm">Azure Machine Learning</div><div class="ty">recommenders</div></div>
+      <div class="node" data-node="vindex" style="--nc:var(--ai)"><div class="az"></div><div class="nm">AI Video Indexer</div><div class="ty">video ai</div></div>
+    </div>
+  </div>
+
+  <div class="cluster cl-exp" style="--tc:var(--app)">
+    <div class="clabel">Tier 2–3 · App &amp; Channels</div>
+    <div class="nodes" style="display:flex;flex-direction:column;gap:8px;">
+      <div class="node" data-node="appsvc" style="--nc:var(--app)"><div class="az"></div><div class="nm">App Service / AKS</div><div class="ty">the hub</div></div>
+      <div class="node" data-node="cdn" style="--nc:var(--app)"><div class="az"></div><div class="nm">Azure CDN</div><div class="ty">delivery</div></div>
+      <div class="node" data-node="media" style="--nc:var(--app)"><div class="az"></div><div class="nm">Media Partner Encode</div><div class="ty">live video</div></div>
+      <div class="node" data-node="commerce" style="--nc:var(--app)"><div class="az"></div><div class="nm">Dynamics 365 Commerce</div><div class="ty">commerce</div></div>
+      <div class="node" data-node="maps" style="--nc:var(--app)"><div class="az"></div><div class="nm">Azure Maps</div><div class="ty">venue · wayfind</div></div>
+    </div>
+  </div>
+
+  <div class="cluster cl-data" style="--tc:var(--data)">
+    <div class="clabel">Tier 5 · Data &amp; Analytics</div>
+    <div class="nodes" style="display:flex;flex-direction:column;gap:8px;">
+      <div class="node" data-node="fabric" style="--nc:var(--data)"><div class="az"></div><div class="nm">Microsoft Fabric</div><div class="ty">Fan 360 · lakehouse</div></div>
+      <div class="node" data-node="eventhubs" style="--nc:var(--data)"><div class="az"></div><div class="nm">Event Hubs</div><div class="ty">ingestion</div></div>
+      <div class="node" data-node="stream" style="--nc:var(--data)"><div class="az"></div><div class="nm">Stream Analytics</div><div class="ty">real-time</div></div>
+      <div class="node" data-node="cosmos" style="--nc:var(--data)"><div class="az"></div><div class="nm">Cosmos DB / Azure SQL</div><div class="ty">operational</div></div>
+      <div class="node" data-node="lake" style="--nc:var(--data)"><div class="az"></div><div class="nm">Data Lake Storage</div><div class="ty">storage</div></div>
+    </div>
+  </div>
+
+  <div class="cluster cl-gov" style="--tc:var(--gov)">
+    <div class="clabel">Cross-cutting · Security &amp; Governance Ops</div>
+    <div class="nodes">
+      <div class="node" data-node="defender" style="--nc:var(--gov)"><div class="az"></div><div class="nm">Defender for Cloud</div><div class="ty">posture</div></div>
+      <div class="node" data-node="sentinel" style="--nc:var(--gov)"><div class="az"></div><div class="nm">Microsoft Sentinel</div><div class="ty">siem</div></div>
+      <div class="node" data-node="purview" style="--nc:var(--gov)"><div class="az"></div><div class="nm">Microsoft Purview</div><div class="ty">governance</div></div>
+      <div class="node" data-node="keyvault" style="--nc:var(--gov)"><div class="az"></div><div class="nm">Key Vault</div><div class="ty">secrets</div></div>
+    </div>
+  </div>
+
+  <!-- Device dock -->
+  <div class="dock">
+    <div class="device iphone" id="device">
+      <div class="notch"></div>
+      <div class="screen" id="screen"></div>
+    </div>
+    <div class="device-cap">Simulator · <b id="devName">iPhone 16 Pro</b> · tap a tab to <b>activate the brain</b></div>
+  </div>
+
+  <!-- Brain inspector panel -->
+  <div class="brainpanel" id="brainpanel">
+    <div class="bp-head">
+      <div class="ic" id="bpIcon">🏀</div>
+      <div class="h"><b id="bpTitle">Welcome</b><span id="bpType">select a module</span></div>
+    </div>
+    <div class="bp-body" id="bpBody"></div>
+    <div class="bp-foot"><span class="lg"></span><span id="bpFoot">idle · governance rail monitoring all tiers</span></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ARCHITECTURE NODE METADATA  (color used in the brain panel)
+   ============================================================ */
+const NODE_META = {
+  web:{n:"Web App",c:"#8a93a8"}, ios:{n:"iOS / Android",c:"#8a93a8"}, signalr:{n:"Web PubSub / SignalR",c:"#8a93a8"},
+  frontdoor:{n:"Front Door + WAF",c:"#8b7bff"}, ddos:{n:"DDoS Protection",c:"#8b7bff"}, entra:{n:"Entra External ID",c:"#8b7bff"}, apim:{n:"API Management",c:"#8b7bff"},
+  appsvc:{n:"App Service / AKS",c:"#ff7a45"}, cdn:{n:"Azure CDN",c:"#ff7a45"}, media:{n:"Media Partner Encode",c:"#ff7a45"}, commerce:{n:"Dynamics 365 Commerce",c:"#ff7a45"}, maps:{n:"Azure Maps",c:"#ff7a45"},
+  aoai:{n:"Azure OpenAI / AI Foundry",c:"#2899f5"}, search:{n:"Azure AI Search",c:"#2899f5"}, aml:{n:"Azure Machine Learning",c:"#2899f5"}, vindex:{n:"AI Video Indexer",c:"#2899f5"},
+  fabric:{n:"Microsoft Fabric",c:"#2bb673"}, eventhubs:{n:"Event Hubs",c:"#2bb673"}, stream:{n:"Stream Analytics",c:"#2bb673"}, cosmos:{n:"Cosmos DB / Azure SQL",c:"#2bb673"}, lake:{n:"Data Lake Storage",c:"#2bb673"},
+  defender:{n:"Defender for Cloud",c:"#ff5d8f"}, sentinel:{n:"Microsoft Sentinel",c:"#ff5d8f"}, purview:{n:"Microsoft Purview",c:"#ff5d8f"}, keyvault:{n:"Key Vault",c:"#ff5d8f"}
+};
+
+/* ============================================================
+   MODULE DEFINITIONS
+   Each module: title, icon, tab grouping, the Azure nodes it
+   "activates", a per-service rationale, and a screen renderer.
+   ============================================================ */
+const ALWAYS_ON = ["frontdoor","entra","apim","appsvc","defender","sentinel","purview","keyvault"];
+
+const MODULES = {
+  setup:{ title:"Fan Onboarding", icon:"🎟", type:"identity flow",
+    nodes:["entra","apim","appsvc","fabric","cosmos","aoai","keyvault","frontdoor"],
+    story:[
+      ["entra","Sign-in / sign-up runs on Entra External ID (CIAM) — social + passwordless for fans."],
+      ["fabric","Your team + favorite player seed your <b>Fan 360</b> profile in Microsoft Fabric."],
+      ["cosmos","Preferences persist to Cosmos DB for low-latency reads on every screen."],
+      ["aoai","Azure OpenAI drafts a personalized welcome + suggested players to follow."],
+      ["keyvault","OAuth secrets & tokens are sealed in Key Vault — nothing in app config."]
+    ]},
+  home:{ title:"For-You Feed", icon:"🏀", type:"personalization",
+    nodes:["aml","search","aoai","cdn","fabric","cosmos","frontdoor"],
+    story:[
+      ["aml","Azure ML recommender ranks your feed (replaces retired Personalizer) from Fan 360 signals."],
+      ["search","Azure AI Search retrieves relevant stories, stats & moments for grounding."],
+      ["aoai","Azure OpenAI writes the natural-language 'why you're seeing this' summaries."],
+      ["cdn","Cards, images & clips delivered from Azure CDN edge — globally cached."],
+      ["fabric","Engagement events stream back to Fabric to sharpen tomorrow's feed."]
+    ]},
+  live:{ title:"Live Game · Player POV", icon:"📺", type:"real-time video",
+    nodes:["media","cdn","vindex","signalr","eventhubs","stream","aml","frontdoor"],
+    story:[
+      ["media","Live encode/packaging via media partner (Bitmovin/MediaKind) on Azure — Media Services retired."],
+      ["cdn","Adaptive-bitrate streams fan out through Azure CDN to every device."],
+      ["signalr","Web PubSub / SignalR pushes score, play-by-play & POV switches in real time."],
+      ["vindex","AI Video Indexer tags plays, players & moments to enable Player-POV camera cuts."],
+      ["eventhubs","Tracking & telemetry land in Event Hubs; Stream Analytics computes live win-probability."],
+      ["aml","ML picks which alternate camera/POV to surface based on who you follow."]
+    ]},
+  stats:{ title:"Live Stats & Win Probability", icon:"📊", type:"streaming analytics",
+    nodes:["eventhubs","stream","signalr","fabric","aml","frontdoor"],
+    story:[
+      ["eventhubs","Play-by-play & player-tracking feeds ingest through Event Hubs at game speed."],
+      ["stream","Azure Stream Analytics computes box scores, runs & win-probability on the fly."],
+      ["signalr","SignalR fan-out keeps every fan's numbers ticking in lockstep with the floor."],
+      ["aml","ML models surface 'about to go on a run' momentum alerts."]
+    ]},
+  trivia:{ title:"Trivia & Team History", icon:"🧠", type:"RAG knowledge",
+    nodes:["search","aoai","lake","fabric","cdn"],
+    story:[
+      ["search","Azure AI Search indexes decades of franchise records, box scores & lore."],
+      ["aoai","Azure OpenAI generates trivia, athlete bios & 'on this day' stories, grounded by search."],
+      ["lake","Historical media & datasets live in Data Lake Storage as the source of truth."]
+    ]},
+  highlights:{ title:"Game Highlights", icon:"🎬", type:"video AI",
+    nodes:["vindex","cdn","aoai","media","lake","frontdoor"],
+    story:[
+      ["vindex","AI Video Indexer auto-clips dunks, threes & blocks and tags the player + moment."],
+      ["aoai","Azure OpenAI writes the recap captions and a spoken-style narration script."],
+      ["cdn","Clips stream instantly from Azure CDN — same edge as the live game."],
+      ["lake","Source footage archived in Data Lake for re-cuts and personalized reels."]
+    ]},
+  watchguide:{ title:"Where to Watch", icon:"📡", type:"AI concierge",
+    nodes:["aoai","search","cosmos","apim","frontdoor"],
+    story:[
+      ["search","AI Search maps tonight's matchup to rights windows (Peacock, HBO Max, Apple TV, YouTube TV…)."],
+      ["aoai","Azure OpenAI answers 'where can I watch the Lakers tonight?' in plain language."],
+      ["apim","Partner streaming availability pulled via governed APIs through API Management."]
+    ]},
+  merch:{ title:"Merch & Memorabilia", icon:"🛍", type:"commerce + digital",
+    nodes:["commerce","cosmos","cdn","aml","aoai","frontdoor"],
+    story:[
+      ["commerce","Dynamics 365 Commerce runs catalog, cart, payments & fulfillment — physical + digital drops."],
+      ["aml","ML recommends jerseys & collectibles by your team, player & past purchases."],
+      ["cosmos","Inventory & order state in Cosmos DB / Azure SQL for instant availability."],
+      ["aoai","Azure OpenAI authenticates & describes digital memorabilia (signed moments, NFTs)."]
+    ]},
+  tickets:{ title:"Tickets & Smart Venue", icon:"🎫", type:"commerce + maps",
+    nodes:["commerce","maps","cosmos","aml","aoai","frontdoor"],
+    story:[
+      ["commerce","Ticket purchase + upgrades flow through Dynamics 365 Commerce."],
+      ["maps","Azure Maps powers seat view, concourse wayfinding & 'best stands near you'."],
+      ["aml","ML recommends seats, food stands & products from your tastes and crowd flow."],
+      ["aoai","Azure OpenAI concierge answers 'shortest beer line right now?' at the arena."]
+    ]},
+  betting:{ title:"Responsible Sports Betting", icon:"🎰", type:"partner + ML",
+    nodes:["apim","aml","stream","eventhubs","cosmos","sentinel","keyvault"],
+    story:[
+      ["apim","Licensed sportsbook partners integrated through governed API Management."],
+      ["stream","Stream Analytics drives live in-play odds off the same game event feed."],
+      ["aml","ML powers personalized markets <b>and</b> responsible-gaming guardrails / limit nudges."],
+      ["sentinel","Sentinel + geofencing enforce jurisdiction & fraud monitoring on every wager."]
+    ]},
+  social:{ title:"Social & Watch Party", icon:"💬", type:"community",
+    nodes:["aoai","signalr","eventhubs","search","cosmos","defender"],
+    story:[
+      ["signalr","Live group chat, reactions & predictions sync via Web PubSub / SignalR."],
+      ["aoai","Azure OpenAI moderates content & generates shareable, branded fan cards."],
+      ["eventhubs","Reaction & sentiment events stream to Event Hubs for trend detection."],
+      ["search","AI Search surfaces trending takes and fellow fans near your section."]
+    ]},
+  events:{ title:"Athlete Local Events", icon:"📍", type:"discovery",
+    nodes:["search","aoai","maps","cosmos","frontdoor"],
+    story:[
+      ["search","AI Search indexes appearances, camps & charity events your players promote."],
+      ["maps","Azure Maps shows what's near you and routes you there."],
+      ["aoai","Azure OpenAI summarizes 'what your favorite players are up to this week.'"]
+    ]},
+  memory:{ title:"Memory Lane", icon:"📸", type:"Fan 360 recall",
+    nodes:["fabric","lake","vindex","aoai","aml","cdn"],
+    story:[
+      ["fabric","Microsoft Fabric Fan 360 remembers every game you attended — your personal arc."],
+      ["vindex","AI Video Indexer pulls the highlights from the exact games you were in the building for."],
+      ["aoai","Azure OpenAI narrates a personal recap: 'You were there when Steph dropped 50.'"],
+      ["lake","Tickets, photos & clips archived in Data Lake become your savorable memory reel."],
+      ["aml","ML predicts which upcoming game you'll most want to attend next."]
+    ]}
+};
+
+/* tab grouping per device context */
+const TABS = [
+  {id:"home", grp:"home", venueGrp:"home", icon:"🏀", label:"For You"},
+  {id:"live", grp:"watch", venueGrp:"watch", icon:"📺", label:"Watch"},
+  {id:"tickets", grp:"venue", venueGrp:"venue", icon:"🎫", label:"Venue"},
+  {id:"merch", grp:"shop", venueGrp:"shop", icon:"🛍", label:"Shop"},
+  {id:"memory", grp:"me", venueGrp:"me", icon:"📸", label:"Memory"}
+];
+
+/* ============================================================
+   FAN STATE  (chosen team / player)
+   ============================================================ */
+const TEAMS = {
+  LAL:{name:"Lakers", city:"Los Angeles", a:"#552583", b:"#FDB927", ab:"LAL", star:"LeBron James"},
+  GSW:{name:"Warriors", city:"Golden State", a:"#1D428A", b:"#FFC72C", ab:"GSW", star:"Stephen Curry"},
+  BOS:{name:"Celtics", city:"Boston", a:"#007A33", b:"#BA9653", ab:"BOS", star:"Jayson Tatum"},
+  DEN:{name:"Nuggets", city:"Denver", a:"#0E2240", b:"#FEC524", ab:"DEN", star:"Nikola Jokić"},
+  MIL:{name:"Bucks", city:"Milwaukee", a:"#00471B", b:"#EEE1C6", ab:"MIL", star:"Giannis Antetokounmpo"},
+  DAL:{name:"Mavericks", city:"Dallas", a:"#00538C", b:"#B8C4CA", ab:"DAL", star:"Luka Dončić"}
+};
+const fan = { team:null, player:null, onboarded:false, pov:"broadcast" };
+
+/* ============================================================
+   RENDERERS
+   ============================================================ */
+function logo(ab){ const t=TEAMS[ab]; return `<div class="teamlogo" style="background:linear-gradient(135deg,${t.a},${t.b})">${ab}</div>`; }
+
+const SCREENS = {
+  /* ---- onboarding ---- */
+  setup(){
+    if(!fan.team){
+      return appShell("Pick Your Team", "Step 1 of 2 · build your Fan 360", `
+        <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI:</b> Welcome! Choose your team and I'll personalize everything — your feed, your POV, your memory lane.</div></div>
+        <div class="grid2">
+          ${Object.keys(TEAMS).map(ab=>`<div class="card tap" onclick="pickTeam('${ab}')" style="display:flex;align-items:center;gap:11px;margin:0;">
+            ${logo(ab)}<div><b style="font-size:13px">${TEAMS[ab].name}</b><div class="tiny">${TEAMS[ab].city}</div></div></div>`).join("")}
+        </div>`, false);
+    }
+    const t=TEAMS[fan.team];
+    const roster=ROSTERS[fan.team];
+    return appShell("Pick Your Player", "Step 2 of 2 · "+t.city+" "+t.name, `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI:</b> Great pick. Who's your guy? You'll get their POV cam, news & local events.</div></div>
+      ${roster.map(p=>`<div class="card tap listitem" style="margin-bottom:9px" onclick="pickPlayer('${p.n}')">
+        <div class="ico" style="background:linear-gradient(135deg,${t.a},${t.b});color:#fff;font-family:'Barlow Condensed';font-weight:700">${p.no}</div>
+        <div class="gr"><b>${p.n}</b><span>${p.pos} · ${p.note}</span></div><div class="rt">Follow →</div></div>`).join("")}
+    `, false);
+  },
+
+  /* ---- For You ---- */
+  home(){
+    const t=TEAMS[fan.team]; const venue = state.mode==="venue";
+    return appShell("For You", `${t.city} ${t.name} · following ${fan.player.split(" ")[1]||fan.player}`, `
+      ${venue?`<div class="card" style="border-color:#c8102e;background:linear-gradient(180deg,rgba(200,16,46,.14),rgba(200,16,46,.03))">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="live">IN ARENA</span><b style="font-size:12px">Welcome to ${arenaOf(fan.team)}</b></div>
+        <div class="muted">Section 104 · Row 12. Your seat upgrade & food order are one tap away in the Venue tab.</div></div>`:""}
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>For you, ${fan.player.split(" ")[0]}-style:</b> ${fan.player} is questionable tonight (rest) but trending — here's why this game matters.</div></div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px"><span class="live">LIVE · Q3</span><span class="tiny">${arenaOf(fan.team)}</span></div>
+        <div class="scorebar">
+          <div class="t">${logo(fan.team)}<span class="nm">${t.ab}</span></div>
+          <div class="mid"><span class="sc">78</span><span class="sc" style="opacity:.5"> · </span><span class="sc">74</span><div class="tiny" style="margin-top:4px">7:42 remaining</div></div>
+          <div class="t">${logo(opp(fan.team))}<span class="nm">${opp(fan.team)}</span></div>
+        </div>
+        <button class="btn blue" style="margin-top:12px" onclick="go('live')">▶ Watch ${state.mode==='venue'?'Replays & POV':'Live · Player POV'}</button>
+      </div>
+      <div class="eyebrow">Trending for you</div>
+      <div class="card tap listitem" onclick="go('highlights')"><div class="ico">🎬</div><div class="gr"><b>${fan.player}: Top 5 plays</b><span>Auto-clipped · AI Video Indexer</span></div><div class="rt">2m</div></div>
+      <div class="card tap listitem" onclick="go('trivia')"><div class="ico">🧠</div><div class="gr"><b>On this day: ${t.name} history</b><span>Daily trivia drop</span></div><div class="rt">Play</div></div>
+      <div class="card tap listitem" onclick="go('events')"><div class="ico">📍</div><div class="gr"><b>${fan.player.split(" ")[0]} hosts a youth camp</b><span>This weekend · near you</span></div><div class="rt">2.4mi</div></div>
+    `);
+  },
+
+  /* ---- Live game / POV ---- */
+  live(){
+    const t=TEAMS[fan.team];
+    const povs = [["broadcast","Broadcast"],["player",fan.player.split(" ")[1]||"Player"],["rail","Baseline"],["allcam","All-22"]];
+    return appShell("Live", `${t.ab} vs ${opp(fan.team)} · Q3 7:42`, `
+      <div class="povwrap">
+        <div class="court"></div>
+        <div class="badge"><span class="live">LIVE 4K</span></div>
+        <div class="ctr"><div class="play">▶</div></div>
+        <div class="pov">${povs.map(p=>`<button class="${fan.pov===p[0]?'on':''}" onclick="setPov('${p[0]}')">${p[1]==='Broadcast'?'📺 '+p[1]:p[0]==='player'?'⭐ '+p[1]:p[1]}</button>`).join("")}</div>
+      </div>
+      <div class="ailine"><div class="sp">✦</div><div class="tx">${fan.pov==='player'?`<b>${fan.player} POV active:</b> tracking-data + AI Video Indexer cut you to his on-court camera. Win-prob ${t.ab} 64%.`:`<b>Companion mode:</b> sync to your big screen. Tap a player camera to ride along. Win-prob ${t.ab} 64%.`}</div></div>
+      <div class="grid3">
+        <div class="stat"><b>27</b><span>${fan.player.split(" ")[1]||'Star'} PTS</span></div>
+        <div class="stat"><b>9</b><span>AST</span></div>
+        <div class="stat"><b>64%</b><span>Win Prob</span></div>
+      </div>
+      <div class="eyebrow">Live play-by-play</div>
+      <div class="card" style="padding:4px 13px">
+        <div class="listitem"><div class="ico" style="font-size:13px">3PT</div><div class="gr"><b>${fan.player} — 26' three</b><span>Q3 7:42 · +1 momentum</span></div><div class="rt">SignalR</div></div>
+        <div class="listitem"><div class="ico" style="font-size:13px">AST</div><div class="gr"><b>Fast-break assist</b><span>Q3 8:10</span></div><div class="rt">live</div></div>
+      </div>
+      <button class="btn ghost" onclick="go('stats')">📊 Open full live stats</button>
+    `);
+  },
+
+  /* ---- Stats ---- */
+  stats(){
+    const t=TEAMS[fan.team];
+    return appShell("Live Stats", "Streaming Analytics · win probability", `
+      <div class="card">
+        <div class="tiny" style="margin-bottom:7px">WIN PROBABILITY · updates every possession</div>
+        <div style="height:54px;border-radius:9px;overflow:hidden;display:flex;border:1px solid var(--line)">
+          <div style="width:64%;background:linear-gradient(180deg,${t.a},${t.b});display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff">${t.ab} 64%</div>
+          <div style="flex:1;background:var(--panel);display:grid;place-items:center;font-weight:700;font-size:12px;color:var(--ink-soft)">${opp(fan.team)} 36%</div>
+        </div>
+      </div>
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Momentum alert (Azure ML):</b> ${t.ab} on an 11-2 run. Model says ${fan.player.split(" ")[1]} is heating up — 3 straight makes.</div></div>
+      <div class="grid2">
+        <div class="stat"><b>78</b><span>${t.ab} pts</span></div>
+        <div class="stat"><b>74</b><span>${opp(fan.team)} pts</span></div>
+        <div class="stat"><b>48%</b><span>FG ${t.ab}</span></div>
+        <div class="stat"><b>13</b><span>${t.ab} lead runs</span></div>
+      </div>
+      <div class="eyebrow">${fan.player} — live line</div>
+      <div class="grid3">
+        <div class="stat"><b>27</b><span>PTS</span></div><div class="stat"><b>9</b><span>AST</span></div><div class="stat"><b>6</b><span>REB</span></div>
+      </div>
+    `);
+  },
+
+  /* ---- Trivia ---- */
+  trivia(){
+    const t=TEAMS[fan.team];
+    return appShell("Trivia", "RAG · grounded in franchise history", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure AI Search + OpenAI:</b> Every answer is grounded in real ${t.name} records — no hallucinations.</div></div>
+      <div class="card">
+        <div class="tiny" style="margin-bottom:8px">QUESTION 1 OF 5 · ${t.name.toUpperCase()} LORE</div>
+        <b style="font-size:15px;line-height:1.3;display:block;margin-bottom:12px">Which season did the ${t.city} ${t.name} most recently appear in the NBA Finals?</b>
+        <button class="btn ghost" style="margin-top:0;margin-bottom:8px">2021–22</button>
+        <button class="btn ghost" style="margin:0 0 8px">2022–23</button>
+        <button class="btn ghost" style="margin:0">2023–24</button>
+      </div>
+      <div class="eyebrow">Did you know</div>
+      <div class="card listitem"><div class="ico">📚</div><div class="gr"><b>${fan.player} milestone watch</b><span>147 pts from a franchise record · AI-tracked</span></div></div>
+    `);
+  },
+
+  /* ---- Highlights ---- */
+  highlights(){
+    return appShell("Highlights", "AI Video Indexer · auto-clipped", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>AI Video Indexer:</b> I tagged every ${fan.player.split(" ")[1]} moment tonight and cut a 90-second reel — narrated by Azure OpenAI.</div></div>
+      ${[["Poster dunk on the break","0:14","🔥"],["Step-back three, ties it","0:09","🎯"],["Chase-down block","0:11","🛡"],["No-look dime","0:08","🎩"]].map(h=>`
+        <div class="card tap" style="padding:0;overflow:hidden">
+          <div class="povwrap" style="margin:0;border:none;border-radius:0;aspect-ratio:16/8">
+            <div class="court"></div><div class="ctr"><div class="play">▶</div></div>
+            <div class="badge"><span class="chip" style="background:rgba(5,10,20,.6);font-size:10px">${h[1]}</span></div>
+          </div>
+          <div style="padding:10px 12px;display:flex;align-items:center;gap:9px"><span style="font-size:17px">${h[2]}</span><b style="font-size:12.5px">${h[0]}</b><span class="rt" style="margin-left:auto">Share</span></div>
+        </div>`).join("")}
+    `);
+  },
+
+  /* ---- Where to watch ---- */
+  watchguide(){
+    const t=TEAMS[fan.team];
+    return appShell("Where to Watch", "AI concierge · rights-aware", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>You asked:</b> "Where can I watch the ${t.name} tonight?" Here's every legal stream, ranked by what you subscribe to.</div></div>
+      ${[["Peacock","Exclusive · 7:30 ET","✓ subscribed","#000"],["Amazon Prime","National window","Add-on","#00A8E1"],["NBA League Pass","Out-of-market","✓ subscribed","#C8102E"],["Local RSN","Regional","Cable","#1D428A"]].map(s=>`
+        <div class="card listitem"><div class="ico" style="background:${s[3]}">📡</div><div class="gr"><b>${s[0]}</b><span>${s[1]}</span></div><div class="rt">${s[2]}</div></div>`).join("")}
+    `);
+  },
+
+  /* ---- Merch ---- */
+  merch(){
+    const t=TEAMS[fan.team];
+    return appShell("Shop", "Dynamics 365 Commerce · physical + digital", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Recommended for you (Azure ML):</b> based on your ${fan.player.split(" ")[1]} fandom + last season's order.</div></div>
+      <div class="chiprow"><span class="chip on">For You</span><span class="chip">Jerseys</span><span class="chip">Digital Drops</span><span class="chip">Vintage</span></div>
+      <div class="grid2">
+        ${[[`${fan.player.split(" ")[1]} Icon Jersey`,"$129","👕","physical"],["Signed Moment #044","$59","🎴","digital · verified"],[`${t.name} '24 Hoodie`,"$85","🧥","physical"],["Championship NFT","$249","🏆","digital · 1 of 500"]].map(m=>`
+          <div class="card tap" style="margin:0"><div style="aspect-ratio:1;border-radius:10px;background:linear-gradient(135deg,${t.a},${t.b});display:grid;place-items:center;font-size:34px;margin-bottom:9px">${m[2]}</div>
+          <b style="font-size:12px;display:block;line-height:1.2">${m[0]}</b><div class="tiny" style="margin:3px 0">${m[3]}</div><div class="rt">${m[1]}</div></div>`).join("")}
+      </div>
+    `);
+  },
+
+  /* ---- Tickets / venue ---- */
+  tickets(){
+    const t=TEAMS[fan.team]; const venue=state.mode==="venue";
+    return appShell(venue?"At the Venue":"Tickets & Venue", venue?"Azure Maps · live wayfinding":"Dynamics 365 Commerce", `
+      ${venue?`
+        <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Concierge (Azure OpenAI):</b> Shortest beer line is Stand 108 — 3 min wait. Want me to pre-order so you don't miss tip-off?</div></div>
+        <div class="card"><div class="tiny" style="margin-bottom:8px">YOUR SEAT · SECTION 104 · ROW 12</div>
+          <div style="height:120px;border-radius:11px;background:radial-gradient(circle at 50% 120%,${t.a},#0a1020);position:relative;border:1px solid var(--line2);overflow:hidden">
+            <div style="position:absolute;inset:20% 26%;border:2px solid rgba(255,255,255,.25);border-radius:60px"></div>
+            <div style="position:absolute;left:50%;top:62%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 16px var(--gold)"></div>
+            <div style="position:absolute;left:50%;bottom:6px;transform:translateX(-50%)" class="tiny">your view</div>
+          </div></div>
+        <div class="grid2">
+          <div class="card tap listitem" style="margin:0"><div class="ico">🍔</div><div class="gr"><b>Order to seat</b><span>Stand 108 · 3 min</span></div></div>
+          <div class="card tap listitem" style="margin:0"><div class="ico">⬆️</div><div class="gr"><b>Seat upgrade</b><span>Courtside +$140</span></div></div>
+          <div class="card tap listitem" style="margin:0"><div class="ico">🚻</div><div class="gr"><b>Nearest restroom</b><span>40 ft · right</span></div></div>
+          <div class="card tap listitem" style="margin:0"><div class="ico">🛍</div><div class="gr"><b>Team store</b><span>Gate C · 2 min</span></div></div>
+        </div>`:`
+        <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Best seats for you (Azure ML):</b> aisle, lower bowl, near the ${t.name} bench — within your usual budget.</div></div>
+        <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>${t.ab} vs ${opp(fan.team)}</b><span class="tiny">Fri · 7:30 PM</span></div>
+          <div class="muted">${arenaOf(fan.team)}</div></div>
+        ${[["Lower Bowl · 104","Aisle · bench side","$185"],["Club · 210","In-out privileges","$240"],["Courtside","Player walk-out","$1,250"]].map(s=>`
+          <div class="card tap listitem"><div class="ico">🎫</div><div class="gr"><b>${s[0]}</b><span>${s[1]}</span></div><div class="rt">${s[2]}</div></div>`).join("")}
+        <button class="btn">Buy & add to wallet</button>`}
+    `);
+  },
+
+  /* ---- Betting ---- */
+  betting(){
+    const t=TEAMS[fan.team];
+    return appShell("Sportsbook", "Licensed partner · responsible-gaming first", `
+      <div class="card" style="border-color:rgba(246,195,68,.4);background:rgba(246,195,68,.06)">
+        <div style="display:flex;gap:8px"><span style="font-size:16px">🛡</span><div class="muted" style="color:#f6c344;font-size:11px">Responsible-gaming guardrails (Azure ML) active. Session limit, deposit caps & jurisdiction verified via Sentinel geofencing.</div></div>
+      </div>
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Live odds (Stream Analytics):</b> in-play markets recompute every possession off the same game feed your stats use.</div></div>
+      ${[[`${t.ab} ML`,"-145","💵"],[`${fan.player.split(" ")[1]} 30+ pts`,"+220","⭐"],["Next bucket: 3PT","+180","🎯"],["Game total O 224.5","-110","📈"]].map(b=>`
+        <div class="card listitem"><div class="ico">${b[2]}</div><div class="gr"><b>${b[0]}</b><span>live · partner sportsbook</span></div><div class="rt">${b[1]}</div></div>`).join("")}
+      <div class="tiny" style="text-align:center;margin-top:6px">Must be 21+. If you or someone you know has a gambling problem, call 1-800-GAMBLER.</div>
+    `);
+  },
+
+  /* ---- Social ---- */
+  social(){
+    const t=TEAMS[fan.team];
+    return appShell("Watch Party", "SignalR live · AI-moderated", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Watch party synced:</b> 4 friends + 1,240 ${t.name} fans live. Reactions push in real time via Web PubSub / SignalR.</div></div>
+      <div class="card" style="padding:7px 13px">
+        ${[["Mike","That ${p} stepback 🔥","2s"],["AI Card","Auto-made a sharable 'Q3 run' card","now"],["Dana","Win prob just hit 64% 📈","8s"]].map(c=>`
+          <div class="listitem"><div class="ico" style="font-size:13px">${c[0]==='AI Card'?'✦':c[0][0]}</div><div class="gr"><b>${c[0]}</b><span>${c[1].replace('${p}',fan.player.split(' ')[1]||'')}</span></div><div class="rt" style="color:var(--ink-faint)">${c[2]}</div></div>`).join("")}
+      </div>
+      <div class="grid3">
+        <div class="stat tap"><b>🔥</b><span>2.1k</span></div><div class="stat tap"><b>🎯</b><span>880</span></div><div class="stat tap"><b>😱</b><span>1.4k</span></div>
+      </div>
+      <button class="btn blue">Make a fan card with AI</button>
+    `);
+  },
+
+  /* ---- Athlete events ---- */
+  events(){
+    return appShell("Near You", "Athlete events · Azure Maps", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>This week (Azure OpenAI):</b> here's what ${fan.player} and teammates are promoting near you.</div></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:130px;background:linear-gradient(135deg,#13325e,#0a1730);position:relative">
+          <div style="position:absolute;left:30%;top:40%;font-size:22px">📍</div>
+          <div style="position:absolute;left:62%;top:60%;font-size:22px">📍</div>
+          <div style="position:absolute;left:48%;top:25%;font-size:18px">📍</div>
+          <div class="badge" style="top:9px;left:9px"><span class="chip" style="background:rgba(5,10,20,.6);font-size:10px">Azure Maps</span></div>
+        </div>
+      </div>
+      ${[[`${fan.player.split(" ")[0]}'s youth basketball camp`,"Sat 10 AM · 2.4 mi","Free"],["Team charity gala","Thu 7 PM · downtown","RSVP"],["Sneaker launch meet-up","Fri 5 PM · 0.8 mi","Going?"]].map(e=>`
+        <div class="card tap listitem"><div class="ico">📅</div><div class="gr"><b>${e[0]}</b><span>${e[1]}</span></div><div class="rt">${e[2]}</div></div>`).join("")}
+    `);
+  },
+
+  /* ---- Memory lane ---- */
+  memory(){
+    const t=TEAMS[fan.team];
+    return appShell("Memory Lane", "Fan 360 · games you were there for", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI recap:</b> You've been to 7 ${t.name} games. You were in the building when ${fan.player.split(" ")[1]} dropped 50 — relive it.</div></div>
+      <div class="grid3" style="margin-bottom:12px">
+        <div class="stat"><b>7</b><span>games</span></div><div class="stat"><b>5-2</b><span>your record</span></div><div class="stat"><b>1</b><span>50-pt night</span></div>
+      </div>
+      ${[[`The 50-point night`,"vs "+opp(fan.team)+" · last March","W 121-118","🏀"],["Buzzer-beater win","Playoffs Game 4","W 99-98","⏱"],["Your first game","Season opener","L 104-110","🎟"]].map(m=>`
+        <div class="card tap" style="padding:0;overflow:hidden">
+          <div style="height:96px;background:linear-gradient(135deg,${t.a},${t.b});position:relative;display:grid;place-items:center;font-size:32px">${m[3]}
+            <div class="badge" style="top:8px;left:8px"><span class="chip" style="background:rgba(5,10,20,.5);font-size:10px">▶ your highlights</span></div></div>
+          <div style="padding:11px 13px"><b style="font-size:13px;display:block">${m[0]}</b><div class="tiny" style="margin:3px 0">${m[1]}</div><span class="rt">${m[2]}</span></div></div>`).join("")}
+    `);
+  }
+};
+
+/* roster data */
+const ROSTERS = {
+  LAL:[{n:"LeBron James",no:23,pos:"F",note:"Forward · all-time scoring leader"},{n:"Anthony Davis",no:3,pos:"F/C",note:"Two-way anchor"},{n:"Austin Reaves",no:15,pos:"G",note:"Combo guard"}],
+  GSW:[{n:"Stephen Curry",no:30,pos:"G",note:"Greatest shooter ever"},{n:"Draymond Green",no:23,pos:"F",note:"Defensive engine"},{n:"Jonathan Kuminga",no:0,pos:"F",note:"Young wing"}],
+  BOS:[{n:"Jayson Tatum",no:0,pos:"F",note:"All-NBA wing"},{n:"Jaylen Brown",no:7,pos:"G/F",note:"Finals MVP"},{n:"Derrick White",no:9,pos:"G",note:"Two-way guard"}],
+  DEN:[{n:"Nikola Jokić",no:15,pos:"C",note:"3x MVP center"},{n:"Jamal Murray",no:27,pos:"G",note:"Clutch guard"},{n:"Aaron Gordon",no:50,pos:"F",note:"Athletic forward"}],
+  MIL:[{n:"Giannis Antetokounmpo",no:34,pos:"F",note:"Two-time MVP"},{n:"Damian Lillard",no:0,pos:"G",note:"Logo-range guard"},{n:"Brook Lopez",no:11,pos:"C",note:"Rim protector"}],
+  DAL:[{n:"Luka Dončić",no:77,pos:"G",note:"Scoring machine"},{n:"Kyrie Irving",no:11,pos:"G",note:"Handles wizard"},{n:"Klay Thompson",no:31,pos:"G",note:"Splash brother"}]
+};
+
+const ARENAS = {LAL:"Crypto.com Arena",GSW:"Chase Center",BOS:"TD Garden",DEN:"Ball Arena",MIL:"Fiserv Forum",DAL:"American Airlines Center"};
+const OPPS = {LAL:"GSW",GSW:"LAL",BOS:"MIL",DEN:"DAL",MIL:"BOS",DAL:"DEN"};
+function arenaOf(t){return ARENAS[t];}
+function opp(t){return OPPS[t];}
+
+/* ============================================================
+   APP SHELL  (wraps a screen with status bar, header, tab bar)
+   ============================================================ */
+function appShell(title, sub, body, withTabs=true){
+  const venue = state.mode==="venue";
+  return `<div class="app">
+    <div class="statusbar"><span>9:41</span><div class="r"><span>${venue?'📶 Arena Wi-Fi':'📶'}</span><span>🔋</span></div></div>
+    <div class="app-body">
+      <div class="app-head"><div><h2>${title}</h2><div class="sub">${sub}</div></div>${fan.onboarded?`<div class="av"></div>`:""}</div>
+      ${body}
+    </div>
+    ${withTabs?tabBar():""}
+  </div>`;
+}
+function tabBar(){
+  return `<div class="tabbar">${TABS.map(t=>`<button class="${state.module===t.id||groupActive(t.id)?'on':''}" onclick="go('${t.id}')"><span class="ic">${t.icon}</span>${t.label}</button>`).join("")}</div>`;
+}
+function groupActive(tabId){
+  const map={home:["home","trivia","highlights","watchguide","social","events"],live:["live","stats"],tickets:["tickets","betting"],merch:["merch"],memory:["memory"]};
+  return (map[tabId]||[]).includes(state.module);
+}
+
+/* ============================================================
+   WATCH-specific compact renderer
+   ============================================================ */
+function watchScreen(){
+  const t=fan.team?TEAMS[fan.team]:null;
+  if(!fan.onboarded){
+    return `<div class="watchapp"><div class="wtime">9:41</div><div class="wmid" style="text-align:center">
+      <div style="font-size:30px">🏀</div><b style="font-family:'Barlow Condensed';font-size:20px;text-transform:uppercase">Set up on iPhone</b>
+      <div class="tiny">Pick your team to continue</div></div></div>`;
+  }
+  const m=state.module;
+  let body="";
+  if(m==="live"||m==="stats"||m==="home"){
+    body=`<div style="text-align:center"><span class="live" style="font-size:9px">LIVE Q3</span>
+      <div style="display:flex;justify-content:center;gap:14px;align-items:center;margin:10px 0">
+        <div style="text-align:center"><div style="font-family:'Barlow Condensed';font-size:30px;font-weight:700;color:${t.b}">78</div><div class="tiny">${t.ab}</div></div>
+        <div class="tiny">7:42</div>
+        <div style="text-align:center"><div style="font-family:'Barlow Condensed';font-size:30px;font-weight:700">74</div><div class="tiny">${opp(fan.team)}</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--gold)">⭐ ${fan.player.split(" ")[1]}: 27 PTS</div>
+      <div class="tiny" style="margin-top:4px">Win prob ${t.ab} 64%</div></div>`;
+  } else if(m==="memory"){
+    body=`<div style="text-align:center"><div style="font-size:24px">📸</div><b style="font-family:'Barlow Condensed';font-size:18px">7 games</b><div class="tiny">your memory lane</div></div>`;
+  } else {
+    body=`<div style="text-align:center"><div style="font-size:24px">${MODULES[m]?MODULES[m].icon:'🏀'}</div><b style="font-family:'Barlow Condensed';font-size:16px;text-transform:uppercase">${MODULES[m]?MODULES[m].title:'NBA'}</b><div class="tiny">glance on iPhone for more</div></div>`;
+  }
+  return `<div class="watchapp"><div class="wtime">9:41</div><div class="wmid">${body}</div>
+    <div style="display:flex;gap:6px;justify-content:center">
+      <button class="chip ${m==='live'?'on':''}" style="font-size:10px;padding:5px 9px" onclick="go('live')">Live</button>
+      <button class="chip ${m==='home'?'on':''}" style="font-size:10px;padding:5px 9px" onclick="go('home')">Feed</button>
+      <button class="chip ${m==='memory'?'on':''}" style="font-size:10px;padding:5px 9px" onclick="go('memory')">Me</button>
+    </div></div>`;
+}
+
+/* ============================================================
+   STATE + WIRING
+   ============================================================ */
+const state = { device:"iphone", mode:"home", module:"setup" };
+
+function render(){
+  const screen=document.getElementById("screen");
+  if(state.device==="watch"){ screen.innerHTML=watchScreen(); }
+  else {
+    if(!fan.onboarded){ screen.innerHTML=SCREENS.setup(); }
+    else { screen.innerHTML=(SCREENS[state.module]||SCREENS.home)(); }
+  }
+  activateBrain(state.module);
+}
+
+function go(mod){
+  if(!fan.onboarded && mod!=="setup"){ return; }
+  state.module=mod;
+  render();
+}
+
+function pickTeam(ab){ fan.team=ab; fan.player=null; render(); flashBrain("setup"); }
+function pickPlayer(name){ fan.player=name; fan.onboarded=true; state.module="home"; render(); }
+function setPov(p){ fan.pov=p; render(); }
+
+/* device switching */
+const DEV_NAMES={iphone:"iPhone 16 Pro",ipad:"iPad Pro",watch:"Apple Watch Ultra",web:"Web · Edge"};
+document.getElementById("deviceSeg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  [...e.currentTarget.children].forEach(c=>c.classList.toggle("on",c===b));
+  state.device=b.dataset.device;
+  const dev=document.getElementById("device");
+  document.getElementById("devName").textContent=DEV_NAMES[state.device];
+  // rebuild device frame
+  const dock=document.querySelector(".dock");
+  let inner="";
+  if(state.device==="iphone") inner=`<div class="notch"></div><div class="screen" id="screen"></div>`;
+  else if(state.device==="web") inner=`<div class="chrome"><div class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div><div class="url">app.nbafanengagement.azure · prototype</div></div><div class="screen" id="screen"></div>`;
+  else inner=`<div class="screen" id="screen"></div>`;
+  dev.className="device "+state.device; dev.innerHTML=inner;
+  render(); requestAnimationFrame(drawWires);
+});
+
+/* mode toggle */
+document.getElementById("modePill").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  [...e.currentTarget.children].forEach(c=>c.classList.toggle("on",c===b));
+  state.mode=b.dataset.mode;
+  // venue context nudges you to the venue tab once onboarded
+  if(fan.onboarded){ state.module = state.mode==="venue" ? "tickets" : "home"; }
+  render();
+});
+
+/* ============================================================
+   BRAIN ACTIVATION + WIRES
+   ============================================================ */
+let activeNodes=[];
+function activeSetFor(mod){
+  const m=MODULES[mod]; if(!m) return [];
+  // union of module nodes + always-on backbone (deduped)
+  return [...new Set([...m.nodes, ...ALWAYS_ON])];
+}
+function activateBrain(mod){
+  const m=MODULES[mod];
+  document.querySelectorAll(".node").forEach(n=>n.classList.remove("active"));
+  if(!m){ updatePanel(null); activeNodes=[]; drawWires(); return; }
+  const setIds=new Set(m.nodes); // only the *highlighted* (story) nodes pulse strongly
+  activeNodes=[];
+  let i=0;
+  document.querySelectorAll(".node").forEach(n=>{
+    if(setIds.has(n.dataset.node)){
+      setTimeout(()=>n.classList.add("active"), (i++)*55);
+      activeNodes.push(n.dataset.node);
+    }
+  });
+  updatePanel(mod);
+  setTimeout(drawWires,60);
+  setTimeout(drawWires,120*4);
+}
+function flashBrain(mod){ activateBrain(mod); }
+
+function updatePanel(mod){
+  const m=mod?MODULES[mod]:null;
+  document.getElementById("bpIcon").textContent=m?m.icon:"🏀";
+  document.getElementById("bpTitle").textContent=m?m.title:"Welcome";
+  document.getElementById("bpType").textContent=m?m.type:"select a module";
+  const body=document.getElementById("bpBody");
+  if(!m){ body.innerHTML=`<div class="muted" style="font-size:11.5px">Pick a team to boot the simulator. As you navigate, the Azure services powering each screen light up around the device.</div>`;
+    document.getElementById("bpFoot").textContent="idle · governance rail monitoring all tiers"; return; }
+  body.innerHTML=m.story.map(s=>{
+    const meta=NODE_META[s[0]]||{n:s[0],c:"#2899f5"};
+    return `<div class="svc"><div class="dot" style="--sc:${meta.c}"></div><div class="sg"><b>${meta.n}</b><span>${s[1]}</span></div></div>`;
+  }).join("");
+  document.getElementById("bpFoot").textContent=`${m.nodes.length} services engaged · ${state.mode==='venue'?'venue':'home'} context`;
+}
+
+/* draw connector lines from each active node to the device center */
+function drawWires(){
+  const svg=document.getElementById("wires");
+  const stage=document.getElementById("stage");
+  const sb=stage.getBoundingClientRect();
+  svg.setAttribute("viewBox",`0 0 ${sb.width} ${sb.height}`);
+  const dev=document.getElementById("device").getBoundingClientRect();
+  const cx=dev.left+dev.width/2-sb.left, cy=dev.top+dev.height/2-sb.top;
+  let html="";
+  activeNodes.forEach((id,idx)=>{
+    const el=document.querySelector(`.node[data-node="${id}"]`);
+    if(!el) return;
+    const r=el.getBoundingClientRect();
+    if(getComputedStyle(el).display==="none") return;
+    const nx=r.left+r.width/2-sb.left, ny=r.top+r.height/2-sb.top;
+    const meta=NODE_META[id]||{c:"#2899f5"};
+    // gentle curve toward center
+    const mx=(nx+cx)/2, my=(ny+cy)/2;
+    const cox= mx + (cy-ny)*0.06, coy= my + (nx-cx)*0.06;
+    html+=`<path d="M${nx} ${ny} Q ${cox} ${coy} ${cx} ${cy}" fill="none" stroke="${meta.c}" stroke-width="1.4" opacity="0.5" stroke-dasharray="4 6">
+      <animate attributeName="stroke-dashoffset" from="40" to="0" dur="1s" repeatCount="indefinite"/></path>
+      <circle r="2.6" fill="${meta.c}"><animateMotion dur="${1.6+idx*0.12}s" repeatCount="indefinite" path="M${nx} ${ny} Q ${cox} ${coy} ${cx} ${cy}"/></circle>`;
+  });
+  svg.innerHTML=html;
+}
+window.addEventListener("resize",()=>requestAnimationFrame(drawWires));
+
+/* boot */
+render();
+setTimeout(drawWires,200);
+</script>
+</body>
+</html>

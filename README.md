@@ -1,7 +1,7 @@
-# NBA Fan Engagement — Azure Cloud & AI Reference Simulator
+# Fan Engagement — Azure Cloud & AI Reference Simulator
 
-An **architectural "art of the possible" prototype**: a Major League Sports (NBA) fan-engagement
-platform rendered as an **Xcode-style device simulator**. Pick a device (iPhone / iPad / Apple
+An **architectural "art of the possible" prototype**: a **Major League Sports fan-engagement**
+platform — showcased here with the NBA — rendered as an **Xcode-style device simulator**. Pick a device (iPhone / iPad / Apple
 Watch / Web), navigate the fan app in the center, and watch the **Microsoft Azure reference
 architecture light up 360° around it** — every screen "activates the brain," pulsing the exact
 Azure services that power it and explaining *why*.

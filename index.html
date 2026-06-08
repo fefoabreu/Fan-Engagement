@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NBA Fan Engagement — Azure Cloud & AI Reference Simulator</title>
+<title>Fan Engagement — Azure Cloud & AI Reference Simulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -325,7 +325,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 <div class="topbar">
   <div class="brand">
     <div class="mark"></div>
-    <div class="tt"><b>NBA Fan Engagement</b><span>Azure Cloud &amp; AI · Reference Simulator</span></div>
+    <div class="tt"><b>Fan Engagement</b><span>Major League Sports · Azure Cloud &amp; AI</span></div>
   </div>
   <div class="spacer"></div>
 
@@ -1302,7 +1302,7 @@ document.getElementById("deviceSeg").addEventListener("click",e=>{
   const dock=document.querySelector(".dock");
   let inner="";
   if(state.device==="iphone") inner=`<div class="notch"></div><div class="screen" id="screen"></div>`;
-  else if(state.device==="web") inner=`<div class="chrome"><div class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div><div class="url">app.nbafanengagement.azure · prototype</div></div><div class="screen" id="screen"></div>`;
+  else if(state.device==="web") inner=`<div class="chrome"><div class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div><div class="url">app.fanengagement.azure · prototype</div></div><div class="screen" id="screen"></div>`;
   else inner=`<div class="screen" id="screen"></div>`;
   dev.className="device "+state.device; dev.innerHTML=inner;
   render(); requestAnimationFrame(drawWires);

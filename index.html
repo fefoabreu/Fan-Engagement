@@ -274,6 +274,41 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
   font-family:'IBM Plex Mono',monospace;letter-spacing:.04em;pointer-events:none;animation:fadehint 1s ease;}
 @keyframes fadehint{from{opacity:0;}to{opacity:1;}}
 
+/* nodes are clickable for deep dives */
+.node{cursor:pointer;}
+.node::before{content:"ⓘ";position:absolute;bottom:6px;right:8px;font-size:9px;color:var(--ink-faint);opacity:0;transition:.2s;}
+.node:hover{opacity:.92;transform:translateY(-2px);}
+.node:hover::before{opacity:.7;}
+.svc{cursor:pointer;border-radius:7px;transition:.15s;}
+.svc:hover{background:rgba(40,153,245,.07);}
+
+/* deep-dive modal */
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+  background:rgba(3,5,10,.68);backdrop-filter:blur(5px);padding:24px;}
+.modal.open{display:flex;animation:fadehint .18s ease;}
+.modal-card{width:min(456px,95vw);max-height:90vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a3650 transparent;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:18px;box-shadow:var(--shadow);
+  animation:rise .25s cubic-bezier(.2,.7,.3,1);}
+.modal-card::-webkit-scrollbar{width:6px;} .modal-card::-webkit-scrollbar-thumb{background:#2a3650;border-radius:3px;}
+@keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.mc-head{padding:18px 20px 16px;border-bottom:1px solid var(--line);display:flex;gap:13px;align-items:flex-start;position:relative;}
+.mc-ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:21px;flex:0 0 auto;box-shadow:0 6px 16px rgba(0,0,0,.4);}
+.mc-tier{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;}
+.mc-head h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;text-transform:uppercase;line-height:.95;margin-top:4px;letter-spacing:.01em;}
+.mc-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:8px;background:var(--panel);border:1px solid var(--line);font-size:13px;color:var(--ink-soft);display:grid;place-items:center;}
+.mc-close:hover{color:#fff;border-color:var(--line2);}
+.mc-body{padding:16px 20px 20px;}
+.mc-row{margin-bottom:15px;}
+.mc-row .lbl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px;display:flex;align-items:center;gap:7px;}
+.mc-row p{font-size:12.5px;line-height:1.55;color:var(--ink);}
+.mc-row p b{color:#fff;}
+.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:4px 0 15px;}
+.mc-cell{background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:10px 12px;}
+.mc-cell .lbl{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:4px;display:flex;gap:5px;align-items:center;}
+.mc-cell b{font-size:12px;line-height:1.35;display:block;color:var(--ink);font-weight:600;}
+.mc-foot{font-size:11.5px;color:var(--gold);background:rgba(246,195,68,.07);border:1px solid rgba(246,195,68,.3);border-radius:11px;padding:10px 12px;line-height:1.5;display:flex;gap:8px;}
+.mc-foot .k{flex:0 0 auto;}
+
 @media (max-width:1180px){
   .cluster{width:170px;} .cl-edge,.cl-ai{left:12px;} .cl-exp,.cl-data{right:12px;}
   .brainpanel{width:280px;left:12px;}
@@ -309,7 +344,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
     </div>
   </div>
 
-  <div class="disclosure">⚠︎ Prototype to showcase Microsoft Azure Cloud &amp; AI reference architecture. Not affiliated with or endorsed by the NBA or its teams.</div>
+  <div class="disclosure">⚠︎ Prototype to showcase Microsoft Azure Cloud &amp; AI reference architecture. Not affiliated with or endorsed by the NBA or its teams. Team marks shown are stylized color crests, not official logos.</div>
 </div>
 
 <!-- ============ STAGE ============ -->
@@ -384,7 +419,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
       <div class="notch"></div>
       <div class="screen" id="screen"></div>
     </div>
-    <div class="device-cap">Simulator · <b id="devName">iPhone 16 Pro</b> · tap a tab to <b>activate the brain</b></div>
+    <div class="device-cap">Simulator · <b id="devName">iPhone 16 Pro</b> · tap a tab to <b>activate the brain</b> · click any service for a <b>deep dive</b></div>
   </div>
 
   <!-- Brain inspector panel -->
@@ -398,6 +433,9 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
   </div>
 </div>
 
+<!-- deep-dive modal -->
+<div class="modal" id="ddModal"><div class="modal-card" id="ddCard"></div></div>
+
 <script>
 /* ============================================================
    ARCHITECTURE NODE METADATA  (color used in the brain panel)
@@ -409,6 +447,163 @@ const NODE_META = {
   aoai:{n:"Azure OpenAI / AI Foundry",c:"#2899f5"}, search:{n:"Azure AI Search",c:"#2899f5"}, aml:{n:"Azure Machine Learning",c:"#2899f5"}, vindex:{n:"AI Video Indexer",c:"#2899f5"},
   fabric:{n:"Microsoft Fabric",c:"#2bb673"}, eventhubs:{n:"Event Hubs",c:"#2bb673"}, stream:{n:"Stream Analytics",c:"#2bb673"}, cosmos:{n:"Cosmos DB / Azure SQL",c:"#2bb673"}, lake:{n:"Data Lake Storage",c:"#2bb673"},
   defender:{n:"Defender for Cloud",c:"#ff5d8f"}, sentinel:{n:"Microsoft Sentinel",c:"#ff5d8f"}, purview:{n:"Microsoft Purview",c:"#ff5d8f"}, keyvault:{n:"Key Vault",c:"#ff5d8f"}
+};
+
+/* ============================================================
+   PER-SERVICE DEEP DIVES  (Technical-PM reference cards)
+   role · why-this-service · SLA · scale · cost · gotcha
+   ============================================================ */
+const DEEPDIVE = {
+  web:{tier:"Tier 0 · Client", icon:"🖥",
+    role:"The browser experience of the fan platform — the watch-at-home companion and admin surfaces.",
+    why:"A responsive web client reaches fans with zero install and is the fastest channel to ship and A/B test.",
+    sla:"Hosted via Front Door + App Service (99.99% composite)", scale:"Stateless; scales horizontally behind the edge",
+    cost:"Bundled into App Service / Static Web Apps hosting + CDN egress",
+    note:"Keep the web + mobile clients thin — business logic lives behind API Management, not in the client."},
+  ios:{tier:"Tier 0 · Client", icon:"📱",
+    role:"Native iOS / Android / watchOS apps — POV video, push, wallet tickets, and Core Haptics crowd-sync.",
+    why:"Native unlocks low-latency video, secure payments, geofencing at the arena, and the Watch haptics that a browser can't do.",
+    sla:"Client-side; depends on backend services it calls", scale:"Per-device; push fan-out via Notification Hubs / SignalR",
+    cost:"Store fees + push messaging; compute is server-side",
+    note:"Use Entra External ID SDKs for sign-in; never embed secrets in the app binary."},
+  signalr:{tier:"Tier 0 · Realtime", icon:"⚡",
+    role:"Pushes live score, play-by-play, POV switches, watch-party chat and haptic triggers to every client.",
+    why:"Managed WebSockets at fan-out scale — you don't run your own socket farm, and it auto-scales for tip-off spikes.",
+    sla:"99.9%", scale:"Up to ~1M concurrent connections per resource (Premium); shardable",
+    cost:"Per unit/day + outbound messages; serverless mode bills per message",
+    note:"Web PubSub is the newer, protocol-agnostic sibling; SignalR if you're .NET-native."},
+  frontdoor:{tier:"Tier 1 · Edge", icon:"🌐",
+    role:"Global L7 entry point — TLS termination, smart routing, caching, and Web Application Firewall.",
+    why:"Anycast edge puts the app close to fans worldwide and absorbs/inspects traffic before it ever hits your origin.",
+    sla:"99.99%", scale:"Global anycast across 100s of edge PoPs; built for flash crowds at game time",
+    cost:"Standard/Premium base + per-GB + per-request; WAF rules billed separately",
+    note:"Premium adds managed WAF rules, bot protection and Private Link to origins."},
+  ddos:{tier:"Tier 1 · Network", icon:"🛡",
+    role:"Always-on volumetric & protocol DDoS mitigation across the virtual network perimeter.",
+    why:"A nationally-watched game is a target; this keeps the platform up during attack and gives cost-protection credits.",
+    sla:"Mitigation SLA on protected resources", scale:"Tbps-class absorption at the Azure backbone",
+    cost:"Network Protection plan: flat monthly (covers up to 100 public IPs) + overage",
+    note:"Pairs with Front Door WAF — DDoS is L3/4, WAF is L7. You want both."},
+  entra:{tier:"Tier 1 · Identity", icon:"🪪",
+    role:"Customer identity (CIAM) for fans — social, passwordless and email sign-in, profile, and consent.",
+    why:"Purpose-built consumer identity: handles millions of fan accounts, MFA, and privacy/consent without you building auth.",
+    sla:"99.99%", scale:"Millions of MAU; global token issuance",
+    cost:"Per monthly active user (first 50k MAU free), tiered after",
+    note:"Formerly Azure AD B2C. Issues the tokens API Management validates on every call."},
+  apim:{tier:"Tier 1 · API Gateway", icon:"🚪",
+    role:"Single governed front door for all internal & partner APIs — auth, rate-limiting, versioning, and analytics.",
+    why:"Decouples clients from microservices, enforces quotas on partner integrations (sportsbook, streaming, commerce), and centralizes policy.",
+    sla:"99.95% (99.99% multi-region Premium)", scale:"Scale units + multi-region gateways; Consumption tier auto-scales per call",
+    cost:"Per unit/hour by tier (Dev→Premium) or pay-per-call (Consumption)",
+    note:"Put product-level rate limits here so a noisy partner can't starve fan traffic."},
+  appsvc:{tier:"Tier 2 · Application", icon:"⚙️",
+    role:"The hub: orchestrates every channel and calls the AI Office core. Runs on App Service or AKS.",
+    why:"App Service for fast PaaS delivery; graduate hot paths (live game, betting) to AKS when you need fine-grained scale and control.",
+    sla:"App Service 99.95% · AKS uptime SLA 99.95%", scale:"Autoscale rules / KEDA event-driven scaling for game-time bursts",
+    cost:"App Service: per instance-hour by plan · AKS: pay for node VMs + control-plane SLA",
+    note:"Keep it stateless; push session/state to Cosmos + cache so any instance can serve any fan."},
+  cdn:{tier:"Tier 3 · Delivery", icon:"📦",
+    role:"Caches and delivers app assets, images, clips and HLS/DASH video segments from the edge.",
+    why:"Offloads origin and slashes latency for highlights and live segments — the difference between buffering and buttery 4K.",
+    sla:"99.9%", scale:"Global edge cache; absorbs viral-clip spikes",
+    cost:"Per-GB egress + requests; cheaper per-GB as volume grows",
+    note:"Now delivered via Front Door's CDN capabilities; tune cache TTLs short for live, long for VOD."},
+  media:{tier:"Tier 3 · Live Video", icon:"🎥",
+    role:"Live encode, packaging and DRM for the broadcast — runs via a media partner (Bitmovin / MediaKind) on Azure.",
+    why:"Azure Media Services retired in 2024, so live workflows run on a partner; you still get adaptive-bitrate + DRM on Azure infra.",
+    sla:"Partner SLA on Azure compute", scale:"Elastic encode pipelines per concurrent game/feed (incl. each player POV)",
+    cost:"Partner licensing + Azure VM/GPU compute + egress",
+    note:"This is the #1 'currency' tell — say 'media partner on Azure', not 'Azure Media Services'."},
+  commerce:{tier:"Tier 3 · Commerce", icon:"🛒",
+    role:"Catalog, cart, payments and fulfillment for tickets, merch and digital memorabilia — Dynamics 365 Commerce.",
+    why:"A full commerce engine (omnichannel, promotions, tax, fraud) you configure instead of building a store from scratch.",
+    sla:"Dynamics 365 service SLA", scale:"Handles drop spikes (ticket on-sales, limited memorabilia) with queue-based throttling",
+    cost:"D365 licensing (per-user/tenant) + transaction & payment fees",
+    note:"Inventory & order state cached in Cosmos/SQL so availability reads stay single-digit-ms."},
+  maps:{tier:"Tier 3 · Geospatial", icon:"🗺",
+    role:"Seat-view, concourse wayfinding, 'best stand near you', athlete-event discovery and leave-now routing.",
+    why:"Managed geospatial (search, routing, traffic, indoor maps) so you don't license and stitch a maps stack yourself.",
+    sla:"99.9%", scale:"Per-transaction API; scales with request volume",
+    cost:"Per-transaction (geocode, route, traffic, render) with tiered pricing",
+    note:"Indoor venue maps + live traffic are what power both in-arena wayfinding and the egress timer."},
+  aoai:{tier:"Tier 4 · AI Core", icon:"✨",
+    role:"Generative brain: feed summaries, trivia, concierge, the Sixth Man Realtime voice agent and hype-reel narration (neural TTS).",
+    why:"Frontier models with enterprise data-handling, regional hosting, content filters and provisioned throughput — the safe way to run GenAI at fan scale.",
+    sla:"99.9% (provisioned)", scale:"Scale via PTUs (reserved throughput) or pay-go TPM; Realtime API for low-latency voice",
+    cost:"Per 1K input/output tokens (pay-go) or PTU reservation for steady load",
+    note:"Always ground with AI Search (RAG) so trivia & the co-host cite real stats, not hallucinations."},
+  search:{tier:"Tier 4 · Retrieval", icon:"🔎",
+    role:"Vector + keyword retrieval over franchise history, stats, rights windows and catalog — the RAG grounding layer.",
+    why:"Hybrid (semantic + keyword) search with built-in vectorization is what keeps the AI factual and current.",
+    sla:"99.9%", scale:"Replicas (QPS) × partitions (index size); scale each independently",
+    cost:"Per search unit/hour by tier (Basic→L-series) = replicas × partitions",
+    note:"It grounds Azure OpenAI everywhere: feed, trivia, watch-guide, and the Sixth Man agent."},
+  aml:{tier:"Tier 4 · ML", icon:"🧮",
+    role:"Trains & serves recommenders, win-probability, momentum/haptic classifiers, egress forecasts and responsible-gaming models.",
+    why:"Azure Personalizer is retiring — bespoke ML on Azure ML gives you ownership of recommendation & risk models with MLOps.",
+    sla:"Managed online endpoints 99.9%", scale:"Autoscaling online endpoints + batch scoring; GPU pools for training",
+    cost:"Compute hours (train) + endpoint instance-hours (serve)",
+    note:"The other big 'currency' tell — recommendations run here, not on the retiring Personalizer."},
+  vindex:{tier:"Tier 4 · Video AI", icon:"🎞",
+    role:"Auto-indexes the game: detects players, plays and moments to power auto-highlights, Player-POV cuts and hype reels.",
+    why:"Azure Media Services retired but Video Indexer survived — it's the AI layer that makes video searchable and clippable.",
+    sla:"Service-level on indexing jobs", scale:"Per-minute indexing; parallelize across feeds/games",
+    cost:"Per minute of video indexed (audio/video models)",
+    note:"Tagged moments are the join key for Memory Lane (games you attended) and personalized reels."},
+  fabric:{tier:"Tier 5 · Data", icon:"🪟",
+    role:"The Fan 360 lakehouse + Power BI: unifies every fan signal, powers personalization and Memory Lane.",
+    why:"One SaaS analytics platform (OneLake, Spark, warehouse, BI) instead of stitching five services — fastest path to a 360 profile.",
+    sla:"Backed by underlying Azure SLAs", scale:"Capacity Units (F-SKUs); OneLake decouples storage from compute",
+    cost:"Reserved or pay-go capacity (F-series CUs); storage in OneLake",
+    note:"Fan 360 here is the 'memory' that makes onboarding, the feed and Memory Lane feel personal."},
+  eventhubs:{tier:"Tier 5 · Ingestion", icon:"📡",
+    role:"High-throughput front door for streaming events: play-by-play, player tracking, arena decibels, reactions, wagers.",
+    why:"Kafka-compatible ingestion that buffers millions of events/sec so downstream analytics never drops a possession.",
+    sla:"99.95%", scale:"Millions of events/sec; partitioned; Standard→Premium→Dedicated",
+    cost:"Throughput/processing units (Standard) or capacity units (Premium/Dedicated)",
+    note:"It's the shared spine for live stats, betting odds, crowd-sync haptics and the Sixth Man's context."},
+  stream:{tier:"Tier 5 · Real-time", icon:"🌊",
+    role:"Continuous SQL over the event stream: live box scores, win-probability, momentum spikes, in-play odds, egress timing.",
+    why:"Serverless stream processing with sub-second windows — no cluster to manage, scales with streaming units.",
+    sla:"99.9%", scale:"Streaming Units (SU) parallelism; tip-off bursts handled by scaling SUs",
+    cost:"Per Streaming Unit/hour",
+    note:"One pipeline feeds many surfaces: stats, betting markets and the leave-now prediction all read the same computed state."},
+  cosmos:{tier:"Tier 5 · Operational DB", icon:"🗄",
+    role:"Low-latency operational store for profiles, prefs, session, inventory and order state. Azure SQL for relational workloads.",
+    why:"Turnkey global distribution + single-digit-ms reads is what keeps every screen instant for fans anywhere.",
+    sla:"Up to 99.999% (multi-region)", scale:"Elastic RU/s (provisioned or serverless) + auto-partitioning",
+    cost:"Provisioned RU/s or serverless per-request + storage",
+    note:"Pick the right consistency level — session consistency is the usual sweet spot for fan apps."},
+  lake:{tier:"Tier 5 · Storage", icon:"💾",
+    role:"Cheap, massive object store: raw video, datasets, historical archives — the source of truth behind Fabric & Video Indexer.",
+    why:"ADLS Gen2 gives hierarchical namespace + tiering so petabytes of footage and history stay queryable and cheap.",
+    sla:"99.9% (RA-GRS read 99.99%)", scale:"Effectively unlimited; hot/cool/cold/archive tiers",
+    cost:"Per-GB stored (tiered) + transactions + egress",
+    note:"Tier aggressively — live game hot, last season cool, deep archive cold."},
+  defender:{tier:"Cross-cutting · Posture", icon:"🔰",
+    role:"Cloud security posture + workload protection across every tier inside the trust boundary.",
+    why:"Continuous misconfiguration detection and threat protection — defense-in-depth the reference architecture calls out.",
+    sla:"Management-plane service", scale:"Per-resource coverage across the estate",
+    cost:"Per protected resource/server/DB per month (plan-based)",
+    note:"Feeds findings into Sentinel; together they're the 'governance rail' that spans all tiers."},
+  sentinel:{tier:"Cross-cutting · SIEM", icon:"👁",
+    role:"Cloud-native SIEM/SOAR: collects logs, hunts threats, and enforces geofencing/fraud rules (e.g. betting jurisdiction).",
+    why:"Centralized detection & automated response across identity, edge, app and data — and the compliance backbone for wagering.",
+    sla:"Management-plane service", scale:"Petabyte-scale log ingestion; KQL hunting",
+    cost:"Per-GB ingested (commitment tiers reduce rate)",
+    note:"In this design it also powers responsible-gaming: geofence + anomaly detection on every wager."},
+  purview:{tier:"Cross-cutting · Governance", icon:"🏷",
+    role:"Data catalog, lineage, classification and privacy governance across the fan data estate.",
+    why:"Know where fan PII lives and how it flows — essential for consent, GDPR/CCPA and trustworthy personalization.",
+    sla:"Management-plane service", scale:"Scans across data sources; capacity-based",
+    cost:"Per capacity unit / data-map + scan compute",
+    note:"Governs the Fan 360 in Fabric so personalization stays compliant and auditable."},
+  keyvault:{tier:"Cross-cutting · Secrets", icon:"🔑",
+    role:"Central vault for secrets, keys and certificates — OAuth secrets, partner API keys, DRM and encryption keys.",
+    why:"Nothing sensitive in app config or code; managed identities pull secrets at runtime with full audit.",
+    sla:"99.99%", scale:"High-throughput secret/key ops; HSM-backed (Premium)",
+    cost:"Per operation + per key/cert; Premium HSM keys cost more",
+    note:"Pair with Managed Identity so services authenticate without ever holding a credential."}
 };
 
 /* ============================================================
@@ -576,12 +771,36 @@ const TABS = [
    FAN STATE  (chosen team / player)
    ============================================================ */
 const TEAMS = {
-  LAL:{name:"Lakers", city:"Los Angeles", a:"#552583", b:"#FDB927", ab:"LAL", star:"LeBron James"},
-  GSW:{name:"Warriors", city:"Golden State", a:"#1D428A", b:"#FFC72C", ab:"GSW", star:"Stephen Curry"},
+  ATL:{name:"Hawks", city:"Atlanta", a:"#E03A3E", b:"#C1D32F", ab:"ATL", star:"Trae Young"},
   BOS:{name:"Celtics", city:"Boston", a:"#007A33", b:"#BA9653", ab:"BOS", star:"Jayson Tatum"},
+  BKN:{name:"Nets", city:"Brooklyn", a:"#1A1A1A", b:"#4A4A4A", ab:"BKN", star:"Cam Thomas"},
+  CHA:{name:"Hornets", city:"Charlotte", a:"#1D1160", b:"#00788C", ab:"CHA", star:"LaMelo Ball"},
+  CHI:{name:"Bulls", city:"Chicago", a:"#CE1141", b:"#1A1A1A", ab:"CHI", star:"Coby White"},
+  CLE:{name:"Cavaliers", city:"Cleveland", a:"#860038", b:"#FDBB30", ab:"CLE", star:"Donovan Mitchell"},
+  DAL:{name:"Mavericks", city:"Dallas", a:"#00538C", b:"#0F2E50", ab:"DAL", star:"Kyrie Irving"},
   DEN:{name:"Nuggets", city:"Denver", a:"#0E2240", b:"#FEC524", ab:"DEN", star:"Nikola Jokić"},
-  MIL:{name:"Bucks", city:"Milwaukee", a:"#00471B", b:"#EEE1C6", ab:"MIL", star:"Giannis Antetokounmpo"},
-  DAL:{name:"Mavericks", city:"Dallas", a:"#00538C", b:"#B8C4CA", ab:"DAL", star:"Luka Dončić"}
+  DET:{name:"Pistons", city:"Detroit", a:"#C8102E", b:"#1D42BA", ab:"DET", star:"Cade Cunningham"},
+  GSW:{name:"Warriors", city:"Golden State", a:"#1D428A", b:"#FFC72C", ab:"GSW", star:"Stephen Curry"},
+  HOU:{name:"Rockets", city:"Houston", a:"#CE1141", b:"#1A1A1A", ab:"HOU", star:"Alperen Şengün"},
+  IND:{name:"Pacers", city:"Indiana", a:"#002D62", b:"#FDBB30", ab:"IND", star:"Tyrese Haliburton"},
+  LAC:{name:"Clippers", city:"Los Angeles", a:"#1D428A", b:"#C8102E", ab:"LAC", star:"Kawhi Leonard"},
+  LAL:{name:"Lakers", city:"Los Angeles", a:"#552583", b:"#FDB927", ab:"LAL", star:"LeBron James"},
+  MEM:{name:"Grizzlies", city:"Memphis", a:"#5D76A9", b:"#12173F", ab:"MEM", star:"Ja Morant"},
+  MIA:{name:"Heat", city:"Miami", a:"#98002E", b:"#F9A01B", ab:"MIA", star:"Bam Adebayo"},
+  MIL:{name:"Bucks", city:"Milwaukee", a:"#00471B", b:"#1F7A3F", ab:"MIL", star:"Giannis Antetokounmpo"},
+  MIN:{name:"Timberwolves", city:"Minnesota", a:"#0C2340", b:"#78BE20", ab:"MIN", star:"Anthony Edwards"},
+  NOP:{name:"Pelicans", city:"New Orleans", a:"#0C2340", b:"#C8102E", ab:"NOP", star:"Zion Williamson"},
+  NYK:{name:"Knicks", city:"New York", a:"#006BB6", b:"#F58426", ab:"NYK", star:"Jalen Brunson"},
+  OKC:{name:"Thunder", city:"Oklahoma City", a:"#007AC1", b:"#EF3B24", ab:"OKC", star:"Shai Gilgeous-Alexander"},
+  ORL:{name:"Magic", city:"Orlando", a:"#0077C0", b:"#1A2A4A", ab:"ORL", star:"Paolo Banchero"},
+  PHI:{name:"76ers", city:"Philadelphia", a:"#006BB6", b:"#ED174C", ab:"PHI", star:"Joel Embiid"},
+  PHX:{name:"Suns", city:"Phoenix", a:"#1D1160", b:"#E56020", ab:"PHX", star:"Devin Booker"},
+  POR:{name:"Trail Blazers", city:"Portland", a:"#E03A3E", b:"#1A1A1A", ab:"POR", star:"Anfernee Simons"},
+  SAC:{name:"Kings", city:"Sacramento", a:"#5A2D81", b:"#2E2E33", ab:"SAC", star:"Domantas Sabonis"},
+  SAS:{name:"Spurs", city:"San Antonio", a:"#1A1A1A", b:"#5A6772", ab:"SAS", star:"Victor Wembanyama"},
+  TOR:{name:"Raptors", city:"Toronto", a:"#CE1141", b:"#1A1A1A", ab:"TOR", star:"Scottie Barnes"},
+  UTA:{name:"Jazz", city:"Utah", a:"#002B5C", b:"#F9A01B", ab:"UTA", star:"Lauri Markkanen"},
+  WAS:{name:"Wizards", city:"Washington", a:"#002B5C", b:"#E31837", ab:"WAS", star:"Jordan Poole"}
 };
 const fan = { team:null, player:null, onboarded:false, pov:"broadcast" };
 
@@ -938,16 +1157,47 @@ const SCREENS = {
 
 /* roster data */
 const ROSTERS = {
-  LAL:[{n:"LeBron James",no:23,pos:"F",note:"Forward · all-time scoring leader"},{n:"Anthony Davis",no:3,pos:"F/C",note:"Two-way anchor"},{n:"Austin Reaves",no:15,pos:"G",note:"Combo guard"}],
-  GSW:[{n:"Stephen Curry",no:30,pos:"G",note:"Greatest shooter ever"},{n:"Draymond Green",no:23,pos:"F",note:"Defensive engine"},{n:"Jonathan Kuminga",no:0,pos:"F",note:"Young wing"}],
+  ATL:[{n:"Trae Young",no:11,pos:"G",note:"Floor general"},{n:"Jalen Johnson",no:1,pos:"F",note:"Rising forward"},{n:"Dyson Daniels",no:5,pos:"G",note:"Defensive pest"}],
   BOS:[{n:"Jayson Tatum",no:0,pos:"F",note:"All-NBA wing"},{n:"Jaylen Brown",no:7,pos:"G/F",note:"Finals MVP"},{n:"Derrick White",no:9,pos:"G",note:"Two-way guard"}],
+  BKN:[{n:"Cam Thomas",no:24,pos:"G",note:"Bucket-getter"},{n:"Nic Claxton",no:33,pos:"C",note:"Rim runner"},{n:"Noah Clowney",no:21,pos:"F",note:"Stretch four"}],
+  CHA:[{n:"LaMelo Ball",no:1,pos:"G",note:"Playmaking flash"},{n:"Brandon Miller",no:24,pos:"F",note:"Scoring wing"},{n:"Miles Bridges",no:0,pos:"F",note:"Athletic forward"}],
+  CHI:[{n:"Coby White",no:0,pos:"G",note:"Downhill scorer"},{n:"Nikola Vučević",no:9,pos:"C",note:"Stretch big"},{n:"Josh Giddey",no:3,pos:"G",note:"Triple-double threat"}],
+  CLE:[{n:"Donovan Mitchell",no:45,pos:"G",note:"Spida · All-Star"},{n:"Darius Garland",no:10,pos:"G",note:"Crafty lead guard"},{n:"Evan Mobley",no:4,pos:"F/C",note:"Defensive anchor"}],
+  DAL:[{n:"Kyrie Irving",no:11,pos:"G",note:"Handles wizard"},{n:"Anthony Davis",no:3,pos:"F/C",note:"Two-way anchor"},{n:"Klay Thompson",no:31,pos:"G",note:"Splash sniper"}],
   DEN:[{n:"Nikola Jokić",no:15,pos:"C",note:"3x MVP center"},{n:"Jamal Murray",no:27,pos:"G",note:"Clutch guard"},{n:"Aaron Gordon",no:50,pos:"F",note:"Athletic forward"}],
+  DET:[{n:"Cade Cunningham",no:2,pos:"G",note:"Franchise guard"},{n:"Jaden Ivey",no:23,pos:"G",note:"Explosive scorer"},{n:"Jalen Duren",no:0,pos:"C",note:"Lob threat"}],
+  GSW:[{n:"Stephen Curry",no:30,pos:"G",note:"Greatest shooter ever"},{n:"Draymond Green",no:23,pos:"F",note:"Defensive engine"},{n:"Jonathan Kuminga",no:0,pos:"F",note:"Young wing"}],
+  HOU:[{n:"Alperen Şengün",no:28,pos:"C",note:"Point center"},{n:"Jalen Green",no:4,pos:"G",note:"Bouncy scorer"},{n:"Amen Thompson",no:1,pos:"G/F",note:"Two-way athlete"}],
+  IND:[{n:"Tyrese Haliburton",no:0,pos:"G",note:"Elite passer"},{n:"Pascal Siakam",no:43,pos:"F",note:"Versatile forward"},{n:"Myles Turner",no:33,pos:"C",note:"Shot-blocker"}],
+  LAC:[{n:"Kawhi Leonard",no:2,pos:"F",note:"Two-way star"},{n:"James Harden",no:1,pos:"G",note:"Iso maestro"},{n:"Norman Powell",no:24,pos:"G",note:"Microwave scorer"}],
+  LAL:[{n:"LeBron James",no:23,pos:"F",note:"All-time scoring leader"},{n:"Luka Dončić",no:77,pos:"G",note:"Scoring machine"},{n:"Austin Reaves",no:15,pos:"G",note:"Combo guard"}],
+  MEM:[{n:"Ja Morant",no:12,pos:"G",note:"Highlight machine"},{n:"Jaren Jackson Jr.",no:13,pos:"F/C",note:"DPOY rim protector"},{n:"Desmond Bane",no:22,pos:"G",note:"Sharpshooter"}],
+  MIA:[{n:"Bam Adebayo",no:13,pos:"C",note:"Two-way anchor"},{n:"Tyler Herro",no:14,pos:"G",note:"Sixth-man scorer"},{n:"Jaime Jaquez Jr.",no:11,pos:"F",note:"Crafty wing"}],
   MIL:[{n:"Giannis Antetokounmpo",no:34,pos:"F",note:"Two-time MVP"},{n:"Damian Lillard",no:0,pos:"G",note:"Logo-range guard"},{n:"Brook Lopez",no:11,pos:"C",note:"Rim protector"}],
-  DAL:[{n:"Luka Dončić",no:77,pos:"G",note:"Scoring machine"},{n:"Kyrie Irving",no:11,pos:"G",note:"Handles wizard"},{n:"Klay Thompson",no:31,pos:"G",note:"Splash brother"}]
+  MIN:[{n:"Anthony Edwards",no:5,pos:"G",note:"Rising superstar"},{n:"Julius Randle",no:30,pos:"F",note:"Bully-ball forward"},{n:"Rudy Gobert",no:27,pos:"C",note:"4x DPOY"}],
+  NOP:[{n:"Zion Williamson",no:1,pos:"F",note:"Force of nature"},{n:"CJ McCollum",no:3,pos:"G",note:"Veteran scorer"},{n:"Trey Murphy III",no:25,pos:"F",note:"3-and-D wing"}],
+  NYK:[{n:"Jalen Brunson",no:11,pos:"G",note:"Clutch captain"},{n:"Karl-Anthony Towns",no:32,pos:"C",note:"Stretch big"},{n:"Mikal Bridges",no:25,pos:"F",note:"Iron-man wing"}],
+  OKC:[{n:"Shai Gilgeous-Alexander",no:2,pos:"G",note:"MVP candidate"},{n:"Jalen Williams",no:8,pos:"F",note:"Two-way wing"},{n:"Chet Holmgren",no:7,pos:"C",note:"Unicorn big"}],
+  ORL:[{n:"Paolo Banchero",no:5,pos:"F",note:"Franchise cornerstone"},{n:"Franz Wagner",no:22,pos:"F",note:"Smooth scorer"},{n:"Jalen Suggs",no:4,pos:"G",note:"Defensive guard"}],
+  PHI:[{n:"Joel Embiid",no:21,pos:"C",note:"Former MVP"},{n:"Tyrese Maxey",no:0,pos:"G",note:"Speed scorer"},{n:"Paul George",no:8,pos:"F",note:"Two-way wing"}],
+  PHX:[{n:"Devin Booker",no:1,pos:"G",note:"Elite scorer"},{n:"Kevin Durant",no:35,pos:"F",note:"All-time bucket"},{n:"Bradley Beal",no:3,pos:"G",note:"Three-level scorer"}],
+  POR:[{n:"Anfernee Simons",no:1,pos:"G",note:"Microwave guard"},{n:"Deni Avdija",no:8,pos:"F",note:"Playmaking forward"},{n:"Donovan Clingan",no:23,pos:"C",note:"Rookie rim protector"}],
+  SAC:[{n:"Domantas Sabonis",no:10,pos:"C",note:"Double-double king"},{n:"Zach LaVine",no:8,pos:"G",note:"High-flying scorer"},{n:"DeMar DeRozan",no:11,pos:"F",note:"Mid-range master"}],
+  SAS:[{n:"Victor Wembanyama",no:1,pos:"C",note:"Generational unicorn"},{n:"De'Aaron Fox",no:4,pos:"G",note:"Lightning guard"},{n:"Stephon Castle",no:5,pos:"G",note:"ROY wing"}],
+  TOR:[{n:"Scottie Barnes",no:4,pos:"F",note:"Point-forward"},{n:"RJ Barrett",no:9,pos:"G/F",note:"Slashing wing"},{n:"Brandon Ingram",no:3,pos:"F",note:"Smooth scorer"}],
+  UTA:[{n:"Lauri Markkanen",no:23,pos:"F",note:"Stretch forward"},{n:"Walker Kessler",no:24,pos:"C",note:"Shot-blocker"},{n:"Keyonte George",no:3,pos:"G",note:"Young lead guard"}],
+  WAS:[{n:"Jordan Poole",no:13,pos:"G",note:"Bucket-getter"},{n:"Alex Sarr",no:20,pos:"C",note:"Mobile big"},{n:"Bilal Coulibaly",no:0,pos:"G",note:"Two-way prospect"}]
 };
 
-const ARENAS = {LAL:"Crypto.com Arena",GSW:"Chase Center",BOS:"TD Garden",DEN:"Ball Arena",MIL:"Fiserv Forum",DAL:"American Airlines Center"};
-const OPPS = {LAL:"GSW",GSW:"LAL",BOS:"MIL",DEN:"DAL",MIL:"BOS",DAL:"DEN"};
+const ARENAS = {ATL:"State Farm Arena",BOS:"TD Garden",BKN:"Barclays Center",CHA:"Spectrum Center",CHI:"United Center",
+  CLE:"Rocket Mortgage FieldHouse",DAL:"American Airlines Center",DEN:"Ball Arena",DET:"Little Caesars Arena",GSW:"Chase Center",
+  HOU:"Toyota Center",IND:"Gainbridge Fieldhouse",LAC:"Intuit Dome",LAL:"Crypto.com Arena",MEM:"FedExForum",MIA:"Kaseya Center",
+  MIL:"Fiserv Forum",MIN:"Target Center",NOP:"Smoothie King Center",NYK:"Madison Square Garden",OKC:"Paycom Center",
+  ORL:"Kia Center",PHI:"Wells Fargo Center",PHX:"Footprint Center",POR:"Moda Center",SAC:"Golden 1 Center",
+  SAS:"Frost Bank Center",TOR:"Scotiabank Arena",UTA:"Delta Center",WAS:"Capital One Arena"};
+const OPPS = {ATL:"BOS",BOS:"LAL",BKN:"NYK",CHA:"MIA",CHI:"DET",CLE:"GSW",DAL:"HOU",DEN:"MIN",DET:"CHI",GSW:"LAL",
+  HOU:"DAL",IND:"MIL",LAC:"LAL",LAL:"BOS",MEM:"GSW",MIA:"BOS",MIL:"BOS",MIN:"DEN",NOP:"DAL",NYK:"BKN",OKC:"DEN",
+  ORL:"MIA",PHI:"BOS",PHX:"LAL",POR:"GSW",SAC:"GSW",SAS:"DAL",TOR:"BOS",UTA:"DEN",WAS:"NYK"};
 function arenaOf(t){return ARENAS[t];}
 function opp(t){return OPPS[t];}
 
@@ -1106,7 +1356,7 @@ function updatePanel(mod){
     document.getElementById("bpFoot").textContent="idle · governance rail monitoring all tiers"; return; }
   body.innerHTML=m.story.map(s=>{
     const meta=NODE_META[s[0]]||{n:s[0],c:"#2899f5"};
-    return `<div class="svc"><div class="dot" style="--sc:${meta.c}"></div><div class="sg"><b>${meta.n}</b><span>${s[1]}</span></div></div>`;
+    return `<div class="svc" data-dd="${s[0]}"><div class="dot" style="--sc:${meta.c}"></div><div class="sg"><b>${meta.n}</b><span>${s[1]}</span></div></div>`;
   }).join("");
   document.getElementById("bpFoot").textContent=`${m.nodes.length} services engaged · ${state.mode==='venue'?'venue':'home'} context`;
 }
@@ -1137,6 +1387,43 @@ function drawWires(){
   svg.innerHTML=html;
 }
 window.addEventListener("resize",()=>requestAnimationFrame(drawWires));
+
+/* ============================================================
+   DEEP-DIVE MODAL  (click a node or a brain-panel service row)
+   ============================================================ */
+function openDeepDive(id){
+  const d=DEEPDIVE[id], meta=NODE_META[id];
+  if(!d||!meta) return;
+  document.getElementById("ddCard").innerHTML=`
+    <div class="mc-head">
+      <div class="mc-ic" style="background:linear-gradient(135deg,${meta.c},color-mix(in srgb,${meta.c} 55%,#000))">${d.icon}</div>
+      <div><div class="mc-tier" style="color:${meta.c}">${d.tier}</div><h3>${meta.n}</h3></div>
+      <button class="mc-close" onclick="closeDeepDive()">✕</button>
+    </div>
+    <div class="mc-body">
+      <div class="mc-row"><div class="lbl">⚙ Role in this platform</div><p>${d.role}</p></div>
+      <div class="mc-row"><div class="lbl">★ Why this service</div><p>${d.why}</p></div>
+      <div class="mc-grid">
+        <div class="mc-cell"><div class="lbl">⏱ SLA</div><b>${d.sla}</b></div>
+        <div class="mc-cell"><div class="lbl">📈 Scale</div><b>${d.scale}</b></div>
+        <div class="mc-cell" style="grid-column:1/3"><div class="lbl">💵 Cost model</div><b>${d.cost}</b></div>
+      </div>
+      <div class="mc-foot"><span class="k">💡</span><span><b>PM note:</b> ${d.note}</span></div>
+    </div>`;
+  document.getElementById("ddModal").classList.add("open");
+}
+function closeDeepDive(){ document.getElementById("ddModal").classList.remove("open"); }
+document.getElementById("ddModal").addEventListener("click",e=>{ if(e.target.id==="ddModal") closeDeepDive(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeDeepDive(); });
+
+/* clicking an architecture node opens its deep dive */
+document.querySelectorAll(".node").forEach(n=>{
+  n.addEventListener("click",()=>openDeepDive(n.dataset.node));
+});
+/* clicking a service row in the brain panel opens its deep dive */
+document.getElementById("bpBody").addEventListener("click",e=>{
+  const row=e.target.closest(".svc"); if(row&&row.dataset.dd) openDeepDive(row.dataset.dd);
+});
 
 /* boot */
 render();

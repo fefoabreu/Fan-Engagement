@@ -24,11 +24,12 @@ body{
   font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);
   -webkit-font-smoothing:antialiased;overflow:hidden;
   background-image:
-    radial-gradient(1200px 600px at 18% -10%, rgba(29,66,138,.22), transparent 60%),
-    radial-gradient(1000px 560px at 100% 110%, rgba(200,16,46,.14), transparent 55%),
-    linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
-  background-size:auto,auto,30px 30px,30px 30px;
+    radial-gradient(1100px 580px at 16% -12%, rgba(28,110,90,.20), transparent 60%),
+    radial-gradient(1000px 560px at 100% 110%, rgba(43,182,115,.18), transparent 55%),
+    radial-gradient(900px 520px at 50% 124%, rgba(20,120,80,.12), transparent 62%),
+    linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+  background-size:auto,auto,auto,30px 30px,30px 30px;
 }
 .mono{font-family:'IBM Plex Mono',monospace;}
 button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none;}
@@ -67,9 +68,9 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
   border-radius:11px;padding:5px 11px 5px 12px;transition:.2s;min-width:178px;}
 .brainTrigger:hover{border-color:var(--line2);}
 .brainTrigger.live{border-color:rgba(40,153,245,.6);box-shadow:0 0 0 1px rgba(40,153,245,.35),0 6px 18px rgba(40,153,245,.18);}
-.brainTrigger.pulse{animation:btpulse .8s ease;}
-@keyframes btpulse{0%{box-shadow:0 0 0 0 rgba(40,153,245,.5);}100%{box-shadow:0 0 0 10px rgba(40,153,245,0);}}
-.brainTrigger .bt-ic{font-size:16px;line-height:1;}
+.brainTrigger .bt-ic{font-size:16px;line-height:1;display:inline-block;}
+.brainTrigger.pulse .bt-ic{animation:ballspin .85s cubic-bezier(.25,.7,.3,1);}
+@keyframes ballspin{from{transform:rotate(0);}to{transform:rotate(360deg);}}
 .brainTrigger .bt-tx{display:flex;flex-direction:column;line-height:1.1;text-align:left;min-width:0;}
 .brainTrigger .bt-tx b{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;}
 .brainTrigger .bt-tx span{font-size:9px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;letter-spacing:.06em;white-space:nowrap;}
@@ -367,7 +368,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
   </div>
 
   <button class="brainTrigger" id="brainTrigger" onclick="toggleBrain()">
-    <span class="bt-ic">🧠</span>
+    <span class="bt-ic">🏀</span>
     <span class="bt-tx"><b id="btTitle">Architecture</b><span id="btMeta">idle · tap to inspect</span></span>
     <span class="bt-caret" id="btCaret">▾</span>
   </button>

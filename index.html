@@ -810,7 +810,7 @@ const MODULES = {
       ["aoai","Azure OpenAI tells you plainly: 'Leave at the 2-min timeout to save 18 minutes — game's iced.'"],
       ["eventhubs","Real-time venue & traffic feeds stream through Event Hubs to keep the call fresh."]
     ]},
-  celebs:{ title:"Star Sightings", icon:"⭐", type:"venue · celebrity AI",
+  celebs:{ title:"Celebrity Row", icon:"⭐", type:"venue · celebrity AI",
     nodes:["vindex","search","aoai","maps","signalr","cosmos","purview","frontdoor"],
     story:[
       ["vindex","AI Video Indexer runs <b>celebrity recognition</b> on the broadcast & arena cameras to identify public figures courtside."],
@@ -1109,7 +1109,7 @@ const SCREENS = {
           </div></div>
         <div class="card tap" onclick="go('celebs')" style="border-color:#c8102e;background:linear-gradient(180deg,rgba(200,16,46,.16),rgba(200,16,46,.03));display:flex;align-items:center;gap:11px">
           <div class="ico" style="font-size:20px;background:none;border:none">⭐</div>
-          <div class="gr"><b style="color:#fff">Star Sightings · ${celebsOf(fan.team).length} courtside tonight</b><span>see which celebrities are here &amp; where they're sitting</span></div><div class="rt">Spot →</div></div>
+          <div class="gr"><b style="color:#fff">Celebrity Row · ${celebsOf(fan.team).length} courtside tonight</b><span>see which celebrities are here &amp; where they're sitting</span></div><div class="rt">Spot →</div></div>
         <div class="grid2">
           <div class="card tap listitem" style="margin:0"><div class="ico">🍔</div><div class="gr"><b>Order to seat</b><span>Stand 108 · 3 min</span></div></div>
           <div class="card tap listitem" style="margin:0"><div class="ico">⬆️</div><div class="gr"><b>Seat upgrade</b><span>Courtside +$140</span></div></div>
@@ -1280,11 +1280,11 @@ const SCREENS = {
     `);
   },
 
-  /* ---- Star Sightings · who's courtside tonight ---- */
+  /* ---- Celebrity Row · who's courtside tonight ---- */
   celebs(){
     const t=TEAMS[fan.team]; const list=celebsOf(fan.team);
     const near=list.find(c=>c.near);
-    return appShell("Star Sightings", "AI Video Indexer · celebrity recognition", `
+    return appShell("Celebrity Row", "AI Video Indexer · celebrity recognition", `
       <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Spotlight (AI Video Indexer):</b> I scanned tonight's broadcast & arena cams and matched <b>${list.length} verified public figures</b> at ${arenaOf(fan.team)}. Tap a star to find their section.</div></div>
 
       <div class="card" style="padding:0;overflow:hidden">

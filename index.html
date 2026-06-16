@@ -809,6 +809,16 @@ const MODULES = {
       ["maps","Azure Maps computes live traffic-aware routes & the optimal exit gate for your seat."],
       ["aoai","Azure OpenAI tells you plainly: 'Leave at the 2-min timeout to save 18 minutes — game's iced.'"],
       ["eventhubs","Real-time venue & traffic feeds stream through Event Hubs to keep the call fresh."]
+    ]},
+  celebs:{ title:"Star Sightings", icon:"⭐", type:"venue · celebrity AI",
+    nodes:["vindex","search","aoai","maps","signalr","cosmos","purview","frontdoor"],
+    story:[
+      ["vindex","AI Video Indexer runs <b>celebrity recognition</b> on the broadcast & arena cameras to identify public figures courtside."],
+      ["search","Azure AI Search grounds each match to a verified bio — who they are & why fans care."],
+      ["maps","Azure Maps pins each star to their section/seat and measures the walk from yours."],
+      ["aoai","Azure OpenAI writes the fun one-liner — 'hasn't missed a home opener in 30 years.'"],
+      ["signalr","SignalR pushes a 'just spotted' alert the instant a new face is matched courtside."],
+      ["purview","Microsoft Purview enforces consent — only opted-in public figures surface; private fans are never shown."]
     ]}
 };
 
@@ -1097,6 +1107,9 @@ const SCREENS = {
             <div style="position:absolute;left:50%;top:62%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 16px var(--gold)"></div>
             <div style="position:absolute;left:50%;bottom:6px;transform:translateX(-50%)" class="tiny">your view</div>
           </div></div>
+        <div class="card tap" onclick="go('celebs')" style="border-color:#c8102e;background:linear-gradient(180deg,rgba(200,16,46,.16),rgba(200,16,46,.03));display:flex;align-items:center;gap:11px">
+          <div class="ico" style="font-size:20px;background:none;border:none">⭐</div>
+          <div class="gr"><b style="color:#fff">Star Sightings · ${celebsOf(fan.team).length} courtside tonight</b><span>see which celebrities are here &amp; where they're sitting</span></div><div class="rt">Spot →</div></div>
         <div class="grid2">
           <div class="card tap listitem" style="margin:0"><div class="ico">🍔</div><div class="gr"><b>Order to seat</b><span>Stand 108 · 3 min</span></div></div>
           <div class="card tap listitem" style="margin:0"><div class="ico">⬆️</div><div class="gr"><b>Seat upgrade</b><span>Courtside +$140</span></div></div>
@@ -1265,6 +1278,53 @@ const SCREENS = {
       <button class="btn blue">Start walking directions</button>
       <button class="btn ghost" onclick="go('live')">Stay — I'll risk it 🍿</button>
     `);
+  },
+
+  /* ---- Star Sightings · who's courtside tonight ---- */
+  celebs(){
+    const t=TEAMS[fan.team]; const list=celebsOf(fan.team);
+    const near=list.find(c=>c.near);
+    return appShell("Star Sightings", "AI Video Indexer · celebrity recognition", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Spotlight (AI Video Indexer):</b> I scanned tonight's broadcast & arena cams and matched <b>${list.length} verified public figures</b> at ${arenaOf(fan.team)}. Tap a star to find their section.</div></div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:150px;background:radial-gradient(circle at 50% 118%,${t.a},#0a1020);position:relative;border-bottom:1px solid var(--line2)">
+          <div style="position:absolute;inset:20% 24%;border:2px solid rgba(255,255,255,.22);border-radius:60px"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30px;height:30px;border:2px solid rgba(255,255,255,.18);border-radius:50%"></div>
+          ${list.map(c=>`<div title="${c.n}" style="position:absolute;left:${c.mx}%;top:${c.my}%;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,${t.a},${t.b});display:grid;place-items:center;font-size:13px;border:2px solid ${c.near?'var(--gold)':'rgba(255,255,255,.55)'};box-shadow:0 0 0 ${c.near?'3px rgba(246,195,68,.25)':'2px rgba(0,0,0,.3)'}">${c.e}</div>`).join("")}
+          <div style="position:absolute;left:50%;top:86%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 16px var(--gold)"></div>
+          <div style="position:absolute;left:50%;top:96%;transform:translateX(-50%)" class="tiny">your seat · Sec 104</div>
+          <div class="badge" style="top:9px;left:9px"><span class="chip" style="background:rgba(5,10,20,.6);font-size:10px">Azure Maps · live</span></div>
+        </div>
+        <div class="grid3" style="margin:0">
+          <div class="stat" style="border:none;border-radius:0"><b>${list.length}</b><span>spotted</span></div>
+          <div class="stat" style="border:none;border-radius:0;border-left:1px solid var(--line)"><b>${list.filter(c=>c.dist==='Courtside').length}</b><span>courtside</span></div>
+          <div class="stat" style="border:none;border-radius:0;border-left:1px solid var(--line)"><b>${near?near.dist:'—'}</b><span>nearest to you</span></div>
+        </div>
+      </div>
+
+      ${near?`<div class="ailine" style="border-color:var(--gold);background:rgba(246,195,68,.07)"><div class="sp">⭐</div><div class="tx"><b>${near.n} is near you</b> — ${near.dist.toLowerCase()}. Want walking directions to spot them at a break?</div></div>`:""}
+
+      <div class="eyebrow">Courtside &amp; in the building</div>
+      ${list.map(c=>`
+        <div class="card" style="${c.near?'border-color:var(--gold);background:rgba(246,195,68,.05)':''}">
+          <div style="display:flex;align-items:center;gap:11px">
+            <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,${t.a},${t.b});display:grid;place-items:center;font-size:20px;border:1px solid var(--line2);flex:none">${c.e}</div>
+            <div style="flex:1"><b style="font-size:13.5px">${c.n}</b><div class="tiny" style="margin-top:1px">${c.f}</div></div>
+            <span class="live" style="font-size:9px">SPOTTED ${c.since}</span>
+          </div>
+          <div class="muted" style="margin-top:9px;font-style:italic">“${c.vibe}”</div>
+          <div class="row" style="margin:9px 0 0">
+            <div class="stat" style="flex:1;margin:0"><b style="font-size:12.5px">${c.sec}</b><span>${c.seat}</span></div>
+            <div class="stat" style="flex:1;margin:0"><b style="font-size:12.5px">${c.dist}</b><span>from your seat</span></div>
+          </div>
+          <button class="btn ghost" style="margin-top:9px" onclick="event.stopPropagation()">📍 Show on arena map</button>
+        </div>`).join("")}
+
+      <div class="card" style="border-color:rgba(246,195,68,.4);background:rgba(246,195,68,.06)">
+        <div style="display:flex;gap:8px"><span style="font-size:16px">🛡</span><div class="muted" style="color:#f6c344;font-size:11px">Only verified public figures who opted into <b>Fan Spotlight</b> appear here. Consent &amp; data use are governed by Microsoft Purview — private attendees are never recognized, tracked, or shown.</div></div>
+      </div>
+    `);
   }
 };
 
@@ -1315,6 +1375,33 @@ function arenaOf(t){return ARENAS[t];}
 function opp(t){return OPPS[t];}
 
 /* ============================================================
+   STAR SIGHTINGS  (venue · celebrity-in-attendance data)
+   Marquee arenas get their real courtside regulars; everyone
+   else gets archetype "spotlight" personas. mx/my = map pin %.
+   ============================================================ */
+const CELEBS = {
+  NYK:[
+    {n:"Spike Lee", f:"Filmmaker · MSG legend", e:"🎬", sec:"Courtside", seat:"Baseline · Seat 1", dist:"Courtside", since:"Q1", vibe:"Hasn't missed a home opener in 30 years — orange-and-blue from head to toe.", mx:30, my:30},
+    {n:"Timothée Chalamet", f:"Actor", e:"🎭", sec:"Courtside", seat:"Celebrity Row A", dist:"Courtside", since:"Q1", vibe:"Showed up in a vintage 90s Knicks warm-up jacket.", mx:68, my:31},
+    {n:"Ben Stiller", f:"Actor · director", e:"😎", sec:"Courtside", seat:"Celebrity Row B", dist:"Courtside", since:"Q2", vibe:"Lifelong, long-suffering Knicks loyalist — and he's smiling tonight.", mx:72, my:68},
+    {n:"Tracy Morgan", f:"Comedian", e:"🎙", sec:"Sec 6", seat:"Row 2", dist:"2 sections over", since:"Q2", vibe:"Closest star to you — just up the tunnel to your right.", mx:38, my:70, near:true}
+  ],
+  LAL:[
+    {n:"Jack Nicholson", f:"Hollywood icon", e:"🕶", sec:"Courtside", seat:"Seat 1, Lakers bench", dist:"Courtside", since:"Q1", vibe:"The original celebrity seat — same spot since the Showtime era.", mx:29, my:31},
+    {n:"Rihanna", f:"Music & fashion mogul", e:"🎤", sec:"Courtside", seat:"Baseline", dist:"Courtside", since:"Q1", vibe:"Courtside in head-to-toe designer — already trending on the jumbotron.", mx:69, my:30},
+    {n:"Denzel Washington", f:"Two-time Oscar winner", e:"🎬", sec:"Courtside", seat:"Celebrity Row", dist:"Courtside", since:"Q2", vibe:"Animated as ever — working the refs from his seat.", mx:71, my:69},
+    {n:"Hometown Olympic gold medalist", f:"Team USA legend", e:"🥇", sec:"Sec 110", seat:"Row 3", dist:"1 section over", since:"Q2", vibe:"Closest star to you — lower bowl, one section to your left.", mx:38, my:70, near:true}
+  ],
+  DEFAULT:[
+    {n:"Grammy-winning artist", f:"Chart-topping musician", e:"🎤", sec:"Courtside", seat:"Baseline · Seat 2", dist:"Courtside", since:"Q1", vibe:"Pulled up courtside after soundcheck across town.", mx:30, my:31},
+    {n:"A-list movie star", f:"Marvel franchise lead", e:"🎬", sec:"Courtside", seat:"Celebrity Row A", dist:"Courtside", since:"Q1", vibe:"In a custom team jacket — the crowd already spotted them.", mx:69, my:30},
+    {n:"Billion-dollar founder", f:"Tech superfan & part-owner", e:"💻", sec:"Suite 12", seat:"Owner's box", dist:"Upper level", since:"Q1", vibe:"Watching from the suite with the front office.", mx:72, my:22},
+    {n:"Hometown Olympic gold medalist", f:"Team USA legend", e:"🥇", sec:"Sec 106", seat:"Row 4", dist:"2 sections over", since:"Q2", vibe:"Closest star to you — lower bowl, a short walk to your right.", mx:38, my:70, near:true}
+  ]
+};
+function celebsOf(team){ return CELEBS[team] || CELEBS.DEFAULT; }
+
+/* ============================================================
    APP SHELL  (wraps a screen with status bar, header, tab bar)
    ============================================================ */
 function appShell(title, sub, body, withTabs=true){
@@ -1332,7 +1419,7 @@ function tabBar(){
   return `<div class="tabbar">${TABS.map(t=>`<button class="${state.module===t.id||groupActive(t.id)?'on':''}" onclick="go('${t.id}')"><span class="ic">${t.icon}</span>${t.label}</button>`).join("")}</div>`;
 }
 function groupActive(tabId){
-  const map={home:["home","trivia","highlights","watchguide","social","events","hype"],live:["live","stats","sixthman","haptic"],tickets:["tickets","betting","routing"],merch:["merch"],memory:["memory"]};
+  const map={home:["home","trivia","highlights","watchguide","social","events","hype"],live:["live","stats","sixthman","haptic"],tickets:["tickets","betting","routing","celebs"],merch:["merch"],memory:["memory"]};
   return (map[tabId]||[]).includes(state.module);
 }
 
@@ -1365,6 +1452,13 @@ function watchScreen(){
         ${Array.from({length:16}).map((_,i)=>`<span class="eqbar tall" style="animation-delay:${i*0.05}s;background:${i%4===0?t.b:'var(--az)'}"></span>`).join("")}
       </div>
       <div class="tiny" style="color:${t.b}">🔊 feeling the arena · live</div></div>`;
+  } else if(m==="celebs"){
+    const list=celebsOf(fan.team); const near=list.find(c=>c.near)||list[0];
+    body=`<div style="text-align:center">
+      <div style="font-size:24px">⭐</div>
+      <b style="font-family:'Barlow Condensed';font-size:20px;text-transform:uppercase">${list.length} stars here</b>
+      <div class="tiny" style="margin-top:4px;color:var(--gold)">nearest: ${near.e} ${near.n.split(" ")[0]}</div>
+      <div class="tiny" style="margin-top:2px">${near.dist} · ${near.sec}</div></div>`;
   } else if(m==="memory"){
     body=`<div style="text-align:center"><div style="font-size:24px">📸</div><b style="font-family:'Barlow Condensed';font-size:18px">7 games</b><div class="tiny">your memory lane</div></div>`;
   } else {
@@ -1372,9 +1466,10 @@ function watchScreen(){
   }
   return `<div class="watchapp"><div class="wtime">9:41</div><div class="wmid">${body}</div>
     <div style="display:flex;gap:6px;justify-content:center">
-      <button class="chip ${m==='live'?'on':''}" style="font-size:10px;padding:5px 9px" onclick="go('live')">Live</button>
-      <button class="chip ${m==='haptic'?'on':''}" style="font-size:10px;padding:5px 9px" onclick="go('haptic')">Sync</button>
-      <button class="chip ${m==='memory'?'on':''}" style="font-size:10px;padding:5px 9px" onclick="go('memory')">Me</button>
+      <button class="chip ${m==='live'?'on':''}" style="font-size:10px;padding:5px 8px" onclick="go('live')">Live</button>
+      <button class="chip ${m==='haptic'?'on':''}" style="font-size:10px;padding:5px 8px" onclick="go('haptic')">Sync</button>
+      <button class="chip ${m==='celebs'?'on':''}" style="font-size:10px;padding:5px 8px" onclick="go('celebs')">⭐</button>
+      <button class="chip ${m==='memory'?'on':''}" style="font-size:10px;padding:5px 8px" onclick="go('memory')">Me</button>
     </div></div>`;
 }
 

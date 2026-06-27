@@ -1411,11 +1411,17 @@ const LEAGUE_META = {
   nba:{ title:"Fan Engagement", tag:"Major League Sports · Azure Cloud &amp; AI", emoji:"🏀",
         disc:"Prototype to showcase Microsoft Azure Cloud &amp; AI reference architecture. Not affiliated with or endorsed by the NBA, its teams, or its players. Team marks and player images shown are stylized illustrations, not official logos or photographs." },
   fifa:{ title:"Fan Engagement", tag:"FIFA World Cup 2026 · Azure Cloud &amp; AI", emoji:"⚽",
-        disc:"Prototype to showcase Microsoft Azure Cloud &amp; AI reference architecture. Not affiliated with or endorsed by FIFA, its member associations, national teams, or any player. Country marks and player images shown are stylized illustrations, not official emblems or photographs." }
+        disc:"Prototype to showcase Microsoft Azure Cloud &amp; AI reference architecture. Not affiliated with or endorsed by FIFA, its member associations, national teams, or any player. Country marks and player images shown are stylized illustrations, not official emblems or photographs." },
+  brasa:{ title:"Fan Engagement", tag:"FIFA Brasileirão Série A · Azure Cloud &amp; AI", emoji:"⚽",
+        disc:"Prototype to showcase Microsoft Azure Cloud &amp; AI reference architecture. Not affiliated with or endorsed by FIFA, CBF, the Campeonato Brasileiro, its clubs, or any player. Club marks and player images shown are stylized illustrations, not official crests or photographs." },
+  f1:{ title:"Fan Engagement", tag:"Formula 1 · Azure Cloud &amp; AI", emoji:"🏎",
+        disc:"Prototype to showcase Microsoft Azure Cloud &amp; AI reference architecture. Not affiliated with or endorsed by Formula 1, the FIA, any constructor, team, or driver. Team marks and driver images shown are stylized illustrations, not official liveries or photographs." }
 };
 function setLeague(id){
   state.league = id;
   if(id==="fifa"){ TEAMS=FIFA_TEAMS; ROSTERS=FIFA_ROSTERS; ARENAS=FIFA_VENUES; OPPS=FIFA_OPPS; CELEBS=FIFA_CELEBS; }
+  else if(id==="brasa"){ TEAMS=BRASA_TEAMS; ROSTERS=BRASA_ROSTERS; ARENAS=BRASA_VENUES; OPPS=BRASA_OPPS; CELEBS=BRASA_CELEBS; }
+  else if(id==="f1"){ TEAMS=F1_TEAMS; ROSTERS=F1_ROSTERS; ARENAS=F1_VENUES; OPPS=F1_OPPS; CELEBS=F1_CELEBS; }
   else           { TEAMS=NBA_TEAMS;  ROSTERS=NBA_ROSTERS;  ARENAS=NBA_ARENAS;  OPPS=NBA_OPPS;  CELEBS=NBA_CELEBS; }
   const meta=LEAGUE_META[id]||LEAGUE_META.nba;
   document.getElementById("brandTitle").innerHTML=meta.title;
@@ -1424,7 +1430,13 @@ function setLeague(id){
   document.getElementById("discText").innerHTML=meta.disc;
   document.title=meta.title+" — "+(id==="fifa"?"FIFA World Cup 2026":"NBA")+" · Azure Cloud & AI Simulator";
 }
-function activeScreens(){ return state.league==="fifa" ? FIFA_SCREENS : SCREENS; }
+function activeScreens(){
+  return state.league==="fifa" ? FIFA_SCREENS
+       : state.league==="brasa" ? BRASA_SCREENS
+       : state.league==="f1" ? F1_SCREENS
+       : SCREENS;
+}
+function isSoccer(){ return state.league==="fifa" || state.league==="brasa"; }
 
 /* ============================================================
    FIFA WORLD CUP 2026 DATA PACK  (countries · players · venues)
@@ -1991,6 +2003,907 @@ const FIFA_SCREENS = {
 };
 
 /* ============================================================
+   BRASILEIRÃO SÉRIE A DATA PACK  (2026 clubs · key players)
+   name = club · city = home city · star = craque
+   ============================================================ */
+const BRASA_TEAMS = {
+  FLA:{name:"Flamengo", city:"Rio de Janeiro", a:"#E30613", b:"#1A1A1A", ab:"FLA", star:"Giorgian de Arrascaeta"},
+  PAL:{name:"Palmeiras", city:"São Paulo", a:"#006437", b:"#1A1A1A", ab:"PAL", star:"Raphael Veiga"},
+  BOT:{name:"Botafogo", city:"Rio de Janeiro", a:"#1A1A1A", b:"#D9D9D9", ab:"BOT", star:"Jefferson Savarino"},
+  SAO:{name:"São Paulo", city:"São Paulo", a:"#C8102E", b:"#1A1A1A", ab:"SAO", star:"Lucas Moura"},
+  COR:{name:"Corinthians", city:"São Paulo", a:"#1A1A1A", b:"#D9D9D9", ab:"COR", star:"Memphis Depay"},
+  FLU:{name:"Fluminense", city:"Rio de Janeiro", a:"#9F022F", b:"#0B6B3A", ab:"FLU", star:"Thiago Silva"},
+  GRE:{name:"Grêmio", city:"Porto Alegre", a:"#1565C0", b:"#1A1A1A", ab:"GRE", star:"Franco Cristaldo"},
+  INT:{name:"Internacional", city:"Porto Alegre", a:"#E30613", b:"#1A1A1A", ab:"INT", star:"Alan Patrick"},
+  CRU:{name:"Cruzeiro", city:"Belo Horizonte", a:"#1E3FAA", b:"#D9D9D9", ab:"CRU", star:"Matheus Pereira"},
+  CAM:{name:"Atlético Mineiro", city:"Belo Horizonte", a:"#1A1A1A", b:"#D9D9D9", ab:"CAM", star:"Hulk"},
+  VAS:{name:"Vasco da Gama", city:"Rio de Janeiro", a:"#1A1A1A", b:"#E30613", ab:"VAS", star:"Philippe Coutinho"},
+  BAH:{name:"Bahia", city:"Salvador", a:"#0A4DA3", b:"#E30613", ab:"BAH", star:"Everton Ribeiro"},
+  RBB:{name:"RB Bragantino", city:"Bragança Paulista", a:"#E30613", b:"#1A1A1A", ab:"RBB", star:"Eduardo Sasha"},
+  VIT:{name:"Vitória", city:"Salvador", a:"#E30613", b:"#1A1A1A", ab:"VIT", star:"Matheusinho"},
+  MIR:{name:"Mirassol", city:"Mirassol", a:"#009639", b:"#FFD200", ab:"MIR", star:"Reinaldo"},
+  SAN:{name:"Santos", city:"Santos", a:"#1A1A1A", b:"#D9D9D9", ab:"SAN", star:"Neymar Jr"},
+  CTB:{name:"Coritiba", city:"Curitiba", a:"#00683C", b:"#D9D9D9", ab:"CTB", star:"Sebastián Gómez"},
+  CAP:{name:"Athletico-PR", city:"Curitiba", a:"#E30613", b:"#1A1A1A", ab:"CAP", star:"Pablo"},
+  CHA:{name:"Chapecoense", city:"Chapecó", a:"#00723F", b:"#D9D9D9", ab:"CHA", star:"Neto Pessoa"},
+  REM:{name:"Remo", city:"Belém", a:"#0033A0", b:"#D9D9D9", ab:"REM", star:"Pedro Rocha"}
+};
+const BRASA_ROSTERS = {
+  FLA:[{n:"Giorgian de Arrascaeta",no:10,pos:"MF",note:"Playmaker · captain"},{n:"Pedro",no:9,pos:"FW",note:"Clinical striker"},{n:"Bruno Henrique",no:27,pos:"FW",note:"Big-game winger"}],
+  PAL:[{n:"Raphael Veiga",no:23,pos:"MF",note:"Set-piece maestro"},{n:"Vitor Roque",no:9,pos:"FW",note:"Young striker"},{n:"Weverton",no:21,pos:"GK",note:"Captain · keeper"}],
+  BOT:[{n:"Jefferson Savarino",no:10,pos:"MF",note:"Creative spark"},{n:"Igor Jesus",no:99,pos:"FW",note:"Powerful striker"},{n:"John",no:1,pos:"GK",note:"Shot-stopper"}],
+  SAO:[{n:"Lucas Moura",no:7,pos:"FW",note:"Icon · winger"},{n:"Jonathan Calleri",no:9,pos:"FW",note:"Penalty-box striker"},{n:"Oscar",no:8,pos:"MF",note:"Returning maestro"}],
+  COR:[{n:"Memphis Depay",no:10,pos:"FW",note:"Star signing"},{n:"Yuri Alberto",no:9,pos:"FW",note:"Goal-getter"},{n:"Rodrigo Garro",no:11,pos:"MF",note:"Creative mid"}],
+  FLU:[{n:"Thiago Silva",no:3,pos:"DF",note:"Legend · captain"},{n:"Germán Cano",no:14,pos:"FW",note:"Veteran scorer"},{n:"Paulo Henrique Ganso",no:10,pos:"MF",note:"Playmaker"}],
+  GRE:[{n:"Franco Cristaldo",no:10,pos:"MF",note:"Creative engine"},{n:"Yeferson Soteldo",no:7,pos:"FW",note:"Tricky winger"},{n:"Walter Kannemann",no:4,pos:"DF",note:"Defensive rock"}],
+  INT:[{n:"Alan Patrick",no:10,pos:"MF",note:"Captain · playmaker"},{n:"Rafael Borré",no:9,pos:"FW",note:"Mobile striker"},{n:"Thiago Maia",no:5,pos:"MF",note:"Midfield anchor"}],
+  CRU:[{n:"Matheus Pereira",no:10,pos:"MF",note:"Creative star"},{n:"Kaio Jorge",no:19,pos:"FW",note:"Sharp striker"},{n:"Gabriel Barbosa",no:9,pos:"FW",note:"Gabigol · finisher"}],
+  CAM:[{n:"Hulk",no:7,pos:"FW",note:"Talisman · power"},{n:"Gustavo Scarpa",no:14,pos:"MF",note:"Set-piece ace"},{n:"Everson",no:22,pos:"GK",note:"Reliable keeper"}],
+  VAS:[{n:"Philippe Coutinho",no:11,pos:"MF",note:"Star playmaker"},{n:"Pablo Vegetti",no:99,pos:"FW",note:"Captain · poacher"},{n:"Dimitri Payet",no:10,pos:"MF",note:"Veteran magician"}],
+  BAH:[{n:"Everton Ribeiro",no:10,pos:"MF",note:"Experienced creator"},{n:"Willian José",no:9,pos:"FW",note:"Target striker"},{n:"Cauly",no:8,pos:"MF",note:"Attacking mid"}],
+  RBB:[{n:"Eduardo Sasha",no:9,pos:"FW",note:"Experienced striker"},{n:"Helinho",no:11,pos:"FW",note:"Direct winger"},{n:"Jhon Jhon",no:16,pos:"MF",note:"Young creator"}],
+  VIT:[{n:"Matheusinho",no:18,pos:"MF",note:"Creative winger"},{n:"Osvaldo",no:11,pos:"FW",note:"Veteran forward"},{n:"Lucas Arcanjo",no:1,pos:"GK",note:"Shot-stopper"}],
+  MIR:[{n:"Reinaldo",no:6,pos:"DF",note:"Attacking full-back"},{n:"José Aldo",no:8,pos:"MF",note:"Midfield engine"},{n:"Alesson",no:9,pos:"FW",note:"Mobile striker"}],
+  SAN:[{n:"Neymar Jr",no:10,pos:"FW",note:"Returning icon"},{n:"Guilherme",no:11,pos:"FW",note:"Direct winger"},{n:"João Schmidt",no:5,pos:"MF",note:"Midfield anchor"}],
+  CTB:[{n:"Sebastián Gómez",no:5,pos:"MF",note:"Midfield engine"},{n:"Robson",no:9,pos:"FW",note:"Veteran striker"},{n:"Pedro Morisco",no:1,pos:"GK",note:"Keeper"}],
+  CAP:[{n:"Pablo",no:9,pos:"FW",note:"Veteran striker"},{n:"Luiz Fernando",no:97,pos:"FW",note:"Direct winger"},{n:"Mycael",no:1,pos:"GK",note:"Young keeper"}],
+  CHA:[{n:"Neto Pessoa",no:9,pos:"FW",note:"Goal-getter"},{n:"Marcinho",no:7,pos:"MF",note:"Winger"},{n:"Bruno Leonardo",no:4,pos:"DF",note:"Defender"}],
+  REM:[{n:"Pedro Rocha",no:11,pos:"FW",note:"Experienced forward"},{n:"Nicolas",no:9,pos:"FW",note:"Striker"},{n:"Marcelo Rangel",no:1,pos:"GK",note:"Keeper"}]
+};
+const BRASA_VENUES = {
+  FLA:"Maracanã · Rio de Janeiro", PAL:"Allianz Parque · São Paulo", BOT:"Estádio Nilton Santos · Rio",
+  SAO:"MorumBIS · São Paulo", COR:"Neo Química Arena · São Paulo", FLU:"Maracanã · Rio de Janeiro",
+  GRE:"Arena do Grêmio · Porto Alegre", INT:"Beira-Rio · Porto Alegre", CRU:"Mineirão · Belo Horizonte",
+  CAM:"Arena MRV · Belo Horizonte", VAS:"São Januário · Rio de Janeiro", BAH:"Arena Fonte Nova · Salvador",
+  RBB:"Cícero de Souza Marques · Bragança", VIT:"Barradão · Salvador", MIR:"Campos Maia · Mirassol",
+  SAN:"Vila Belmiro · Santos", CTB:"Couto Pereira · Curitiba", CAP:"Ligga Arena · Curitiba",
+  CHA:"Arena Condá · Chapecó", REM:"Estádio Baenão · Belém"
+};
+const BRASA_OPPS = {
+  FLA:"FLU", FLU:"FLA", PAL:"COR", COR:"PAL", SAO:"SAN", SAN:"SAO", GRE:"INT", INT:"GRE",
+  CRU:"CAM", CAM:"CRU", VAS:"BOT", BOT:"VAS", BAH:"VIT", VIT:"BAH", CAP:"CTB", CTB:"CAP",
+  RBB:"MIR", MIR:"RBB", CHA:"REM", REM:"CHA"
+};
+const BRASA_CELEBS = {
+  FLA:[
+    {n:"Zico", f:"Flamengo idol · legend", e:"🐐", sec:"Pitchside", seat:"Tribuna · Seat 1", dist:"Pitchside", since:"1H", vibe:"O Galinho — the greatest Flamenguista of all, leading the Maracanã in song.", mx:30, my:30},
+    {n:"Anitta", f:"Global pop star · Flamengo fan", e:"🎤", sec:"VIP Box", seat:"Centre line", dist:"Pitchside", since:"1H", vibe:"Repping rubro-negro and filming a story for 200M followers.", mx:68, my:31},
+    {n:"Grammy-winning artist", f:"Chart-topping musician", e:"🎶", sec:"Suite", seat:"Owner's box", dist:"Upper tier", since:"1H", vibe:"Watching from the suite after a show in Rio.", mx:72, my:22},
+    {n:"Hometown Olympic gold medalist", f:"Brazilian hero", e:"🥇", sec:"Sec 12", seat:"Row 3", dist:"1 section over", since:"2H", vibe:"Closest star to you — one section to your left.", mx:38, my:70, near:true}
+  ],
+  DEFAULT:[
+    {n:"Samba-school royalty", f:"Carnival icon", e:"🥁", sec:"Pitchside", seat:"VIP · Seat 2", dist:"Pitchside", since:"1H", vibe:"Brought a drumline — the arquibancada is bouncing.", mx:30, my:31},
+    {n:"Brazilian football legend", f:"World Cup winner", e:"🏆", sec:"Pitchside", seat:"Legends box", dist:"Pitchside", since:"1H", vibe:"A boyhood fan of the club — back where it all began.", mx:69, my:30},
+    {n:"Global pop star", f:"Stadium headliner", e:"🎤", sec:"Suite", seat:"Owner's box", dist:"Upper tier", since:"1H", vibe:"Watching from the suite — already trending on the telão.", mx:72, my:22},
+    {n:"Hometown Olympic gold medalist", f:"Brazilian hero", e:"🥇", sec:"Sec 8", seat:"Row 4", dist:"2 sections over", since:"2H", vibe:"Closest star to you — a short walk to your right.", mx:38, my:70, near:true}
+  ]
+};
+
+/* ============================================================
+   BRASILEIRÃO SCREENS  (same modules · Brazilian club football)
+   ============================================================ */
+const BRASA_SCREENS = {
+  setup(){
+    if(!fan.team){
+      return appShell("Pick Your Club", "Step 1 of 2 · build your Fan 360", `
+        <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI:</b> E aí, torcedor! Choose your club and I'll personalize everything — your feed, your POV, your memory lane.</div></div>
+        <div class="grid2">
+          ${Object.keys(TEAMS).map(ab=>`<div class="card tap" onclick="pickTeam('${ab}')" style="display:flex;align-items:center;gap:10px;margin:0;min-width:0;">
+            ${logo(ab)}<div style="min-width:0;overflow:hidden"><b style="font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${TEAMS[ab].name}</b><div class="tiny" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${TEAMS[ab].city}</div></div></div>`).join("")}
+        </div>`, false);
+    }
+    const t=TEAMS[fan.team]; const roster=ROSTERS[fan.team];
+    return appShell("Pick Your Player", "Step 2 of 2 · "+t.name, `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI:</b> Boa escolha. Who's your craque? You'll get their POV cam, news & local events.</div></div>
+      ${roster.map(p=>`<div class="card tap listitem" style="margin-bottom:9px" onclick="pickPlayer('${p.n}')">
+        ${playerAvatar(fan.team,p.n,p.no,42)}
+        <div class="gr"><b>${p.n}</b><span>${p.pos} · ${p.note}</span></div><div class="rt">Follow →</div></div>`).join("")}
+    `, false);
+  },
+
+  home(){
+    const t=TEAMS[fan.team]; const venue = state.mode==="venue";
+    return appShell("For You", `${t.name} · following ${sname(fan.player)}`, `
+      ${venue?`<div class="card" style="border-color:#c8102e;background:linear-gradient(180deg,rgba(200,16,46,.14),rgba(200,16,46,.03))">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="live">NO ESTÁDIO</span><b style="font-size:12px">Welcome to ${arenaOf(fan.team)}</b></div>
+        <div class="muted">Section 104 · Row 12. Your seat upgrade & matchday order are one tap away in the Venue tab.</div></div>`:""}
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>For you, ${fname(fan.player)}-style:</b> ${fan.player} is in the starting XI tonight — here's why this clássico matters.</div></div>
+      <div class="card tap" onclick="go('hype')" style="padding:0;overflow:hidden;border-color:${t.b}">
+        <div class="povwrap" style="margin:0;border:none;border-radius:0;aspect-ratio:16/7;background:linear-gradient(120deg,${t.a},${t.b})">
+          <div class="ctr"><div class="play">▶</div></div>
+          <div class="badge"><span class="chip" style="background:rgba(5,10,20,.5);font-size:10px">🎵 AI HYPE REEL · 0:60</span></div>
+        </div>
+        <div style="padding:10px 13px;display:flex;align-items:center;gap:9px"><span style="font-size:16px">🎵</span><div style="flex:1"><b style="font-size:12.5px">Your pre-match hype reel is ready</b><div class="tiny">Generated in the ${t.name} torcida voice · just for you</div></div><span class="rt">Play</span></div>
+      </div>
+      <div class="row" style="margin-bottom:11px">
+        <div class="card tap" onclick="go('sixthman')" style="margin:0;flex:1;text-align:center"><div style="font-size:22px">🎙</div><b style="font-size:12px;display:block;margin-top:4px">Twelfth Man</b><div class="tiny">AI co-host</div></div>
+        <div class="card tap" onclick="go('haptic')" style="margin:0;flex:1;text-align:center"><div style="font-size:22px">⌚️</div><b style="font-size:12px;display:block;margin-top:4px">Crowd-Sync</b><div class="tiny">feel the torcida</div></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px"><span class="live">LIVE · 2º TEMPO</span><span class="tiny">${arenaOf(fan.team)}</span></div>
+        <div class="scorebar">
+          <div class="t">${logo(fan.team)}<span class="nm">${t.ab}</span></div>
+          <div class="mid"><span class="sc">2</span><span class="sc" style="opacity:.5"> · </span><span class="sc">1</span><div class="tiny" style="margin-top:4px">62' · acréscimos chegando</div></div>
+          <div class="t">${logo(opp(fan.team))}<span class="nm">${opp(fan.team)}</span></div>
+        </div>
+        <button class="btn blue" style="margin-top:12px" onclick="go('live')">▶ Watch ${state.mode==='venue'?'Replays & POV':'Live · Player POV'}</button>
+      </div>
+      <div class="eyebrow">Trending for you</div>
+      <div class="card tap listitem" onclick="go('highlights')"><div class="ico">🎬</div><div class="gr"><b>${fan.player}: Top 5 lances</b><span>Auto-clipped · AI Video Indexer</span></div><div class="rt">2m</div></div>
+      <div class="card tap listitem" onclick="go('trivia')"><div class="ico">🧠</div><div class="gr"><b>On this day: ${t.name} history</b><span>Daily trivia drop</span></div><div class="rt">Play</div></div>
+      <div class="card tap listitem" onclick="go('events')"><div class="ico">📍</div><div class="gr"><b>${fname(fan.player)} hosts a youth clinic</b><span>This weekend · near you</span></div><div class="rt">2.4mi</div></div>
+    `);
+  },
+
+  live(){
+    const t=TEAMS[fan.team];
+    const povs = [["broadcast","Broadcast"],["player",sname(fan.player)],["rail","Tactical"],["allcam","Estádio"]];
+    return appShell("Live", `${t.ab} vs ${opp(fan.team)} · 2º Tempo 62'`, `
+      <div class="povwrap">
+        <div style="position:absolute;inset:0;${PITCH};opacity:.85"></div>
+        <div class="badge"><span class="live">LIVE 4K</span></div>
+        <div class="ctr"><div class="play">▶</div></div>
+        <div class="pov">${povs.map(p=>`<button class="${fan.pov===p[0]?'on':''}" onclick="setPov('${p[0]}')">${p[1]==='Broadcast'?'📺 '+p[1]:p[0]==='player'?'⭐ '+p[1]:p[1]}</button>`).join("")}</div>
+      </div>
+      <div class="ailine"><div class="sp">✦</div><div class="tx">${fan.pov==='player'?`<b>${fan.player} POV active:</b> tracking-data + AI Video Indexer cut you to his on-ball camera. Win-prob ${t.ab} 61%.`:`<b>Companion mode:</b> sync to your big screen. Tap a player camera to ride along. Win-prob ${t.ab} 61%.`}</div></div>
+      <div class="grid3">
+        <div class="stat"><b>58%</b><span>Posse de bola</span></div>
+        <div class="stat"><b>1.9</b><span>${t.ab} xG</span></div>
+        <div class="stat"><b>61%</b><span>Win Prob</span></div>
+      </div>
+      <div class="eyebrow">Narração ao vivo</div>
+      <div class="card" style="padding:4px 13px">
+        <div class="listitem"><div class="ico" style="font-size:13px">⚽</div><div class="gr"><b>${fan.player} — GOL, 61'</b><span>no ângulo · +1 momentum</span></div><div class="rt">SignalR</div></div>
+        <div class="listitem"><div class="ico" style="font-size:13px">🅰</div><div class="gr"><b>Assistência de letra</b><span>54' · rasgou a defesa</span></div><div class="rt">live</div></div>
+      </div>
+      <div class="row"><button class="btn ghost" onclick="go('stats')" style="flex:1">📊 Live stats</button><button class="btn blue" onclick="go('sixthman')" style="flex:1">🎙 Twelfth Man</button></div>
+    `);
+  },
+
+  stats(){
+    const t=TEAMS[fan.team];
+    return appShell("Live Stats", "Streaming Analytics · win probability", `
+      <div class="card">
+        <div class="tiny" style="margin-bottom:7px">WIN PROBABILITY · updates every phase of play</div>
+        <div style="height:54px;border-radius:9px;overflow:hidden;display:flex;border:1px solid var(--line)">
+          <div style="width:61%;background:linear-gradient(180deg,${t.a},${t.b});display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff">${t.ab} 61%</div>
+          <div style="flex:1;background:var(--panel);display:grid;place-items:center;font-weight:700;font-size:12px;color:var(--ink-soft)">${opp(fan.team)} 39%</div>
+        </div>
+      </div>
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Momentum alert (Azure ML):</b> ${t.ab} com 7 das últimas 9 finalizações. Model says ${sname(fan.player)} is finding space — pressure building.</div></div>
+      <div class="grid2">
+        <div class="stat"><b>2</b><span>${t.ab} gols</span></div>
+        <div class="stat"><b>1</b><span>${opp(fan.team)} gols</span></div>
+        <div class="stat"><b>58%</b><span>${t.ab} posse</span></div>
+        <div class="stat"><b>14</b><span>${t.ab} finalizações</span></div>
+      </div>
+      <div class="eyebrow">${fan.player} — live line</div>
+      <div class="grid3">
+        <div class="stat"><b>1</b><span>GOL</span></div><div class="stat"><b>1</b><span>ASSIST</span></div><div class="stat"><b>3</b><span>PASSES-CHAVE</span></div>
+      </div>
+    `);
+  },
+
+  trivia(){
+    const t=TEAMS[fan.team];
+    return appShell("Trivia", "RAG · grounded in club history", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure AI Search + OpenAI:</b> Every answer is grounded in real ${t.name} records — no hallucinations.</div></div>
+      <div class="card">
+        <div class="tiny" style="margin-bottom:8px">QUESTION 1 OF 5 · ${t.name.toUpperCase()} LORE</div>
+        <b style="font-size:15px;line-height:1.3;display:block;margin-bottom:12px">In which season did ${t.name} most recently win the Brasileirão Série A?</b>
+        <button class="btn ghost" style="margin-top:0;margin-bottom:8px">2023</button>
+        <button class="btn ghost" style="margin:0 0 8px">2024</button>
+        <button class="btn ghost" style="margin:0">2025</button>
+      </div>
+      <div class="eyebrow">Did you know</div>
+      <div class="card listitem"><div class="ico">📚</div><div class="gr"><b>${fan.player} milestone watch</b><span>2 gols from a ${t.name} season record · AI-tracked</span></div></div>
+    `);
+  },
+
+  highlights(){
+    return appShell("Highlights", "AI Video Indexer · auto-clipped", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>AI Video Indexer:</b> I tagged every ${sname(fan.player)} touch tonight and cut a 90-second reel — narrated by Azure OpenAI.</div></div>
+      ${[["Gol de fora da área","0:14","⚽"],["Caneta na linha de fundo","0:09","✨"],["Corte salvador na linha","0:11","🛡"],["Assistência de calcanhar","0:08","🎩"]].map(h=>`
+        <div class="card tap" style="padding:0;overflow:hidden">
+          <div class="povwrap" style="margin:0;border:none;border-radius:0;aspect-ratio:16/8">
+            <div style="position:absolute;inset:0;${PITCH};opacity:.85"></div><div class="ctr"><div class="play">▶</div></div>
+            <div class="badge"><span class="chip" style="background:rgba(5,10,20,.6);font-size:10px">${h[1]}</span></div>
+          </div>
+          <div style="padding:10px 12px;display:flex;align-items:center;gap:9px"><span style="font-size:17px">${h[2]}</span><b style="font-size:12.5px">${h[0]}</b><span class="rt" style="margin-left:auto">Share</span></div>
+        </div>`).join("")}
+    `);
+  },
+
+  watchguide(){
+    const t=TEAMS[fan.team];
+    return appShell("Where to Watch", "AI concierge · rights-aware", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>You asked:</b> "Onde assistir ${t.name} hoje?" Here's every legal stream, ranked by what you subscribe to.</div></div>
+      ${[["Globo","Aberta · 21:30","✓ assinante","#1A1A1A"],["Premiere","Pay-per-view","✓ assinante","#E30613"],["SporTV","Cable","Add-on","#F37021"],["CazéTV","Free · YouTube","Grátis","#FF0000"]].map(s=>`
+        <div class="card listitem"><div class="ico" style="background:${s[3]}">📡</div><div class="gr"><b>${s[0]}</b><span>${s[1]}</span></div><div class="rt">${s[2]}</div></div>`).join("")}
+    `);
+  },
+
+  merch(){
+    const t=TEAMS[fan.team];
+    return appShell("Shop", "Dynamics 365 Commerce · physical + digital", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Recommended for you (Azure ML):</b> based on your ${sname(fan.player)} fandom + last season's order.</div></div>
+      <div class="chiprow"><span class="chip on">For You</span><span class="chip">Camisas</span><span class="chip">Digital Drops</span><span class="chip">Cachecóis</span></div>
+      <div class="grid2">
+        ${[[`${sname(fan.player)} Camisa 1`,"R$349","👕","physical"],["Signed Gol Moment #061","R$199","🎴","digital · verified"],[`${t.name} '26 Cachecol`,"R$120","🧣","physical"],["Gol de Placa NFT","R$890","🏆","digital · 1 of 500"]].map(m=>`
+          <div class="card tap" style="margin:0"><div style="aspect-ratio:1;border-radius:10px;background:linear-gradient(135deg,${t.a},${t.b});display:grid;place-items:center;font-size:34px;margin-bottom:9px">${m[2]}</div>
+          <b style="font-size:12px;display:block;line-height:1.2">${m[0]}</b><div class="tiny" style="margin:3px 0">${m[3]}</div><div class="rt">${m[1]}</div></div>`).join("")}
+      </div>
+    `);
+  },
+
+  tickets(){
+    const t=TEAMS[fan.team]; const venue=state.mode==="venue";
+    return appShell(venue?"At the Stadium":"Tickets & Stadium", venue?"Azure Maps · live wayfinding":"Dynamics 365 Commerce", `
+      ${venue?`
+        <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Concierge (Azure OpenAI):</b> Shortest concession line is Setor 108 — 3 min wait. Want me to pre-order so you don't miss the kickoff?</div></div>
+        <div class="card"><div class="tiny" style="margin-bottom:8px">YOUR SEAT · SETOR 104 · ROW 12</div>
+          <div style="height:120px;border-radius:11px;background:radial-gradient(circle at 50% 120%,${t.a},#0a1020);position:relative;border:1px solid var(--line2);overflow:hidden">
+            <div style="position:absolute;inset:20% 26%;border:2px solid rgba(255,255,255,.25);border-radius:8px"></div>
+            <div style="position:absolute;left:50%;top:62%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 16px var(--gold)"></div>
+            <div style="position:absolute;left:50%;bottom:6px;transform:translateX(-50%)" class="tiny">your view</div>
+          </div></div>
+        <div class="card tap" onclick="go('celebs')" style="border-color:#c8102e;background:linear-gradient(180deg,rgba(200,16,46,.16),rgba(200,16,46,.03));display:flex;align-items:center;gap:11px">
+          <div class="ico" style="font-size:20px;background:none;border:none">⭐</div>
+          <div class="gr"><b style="color:#fff">VIP Row · ${celebsOf(fan.team).length} spotted tonight</b><span>see which stars are here &amp; where they're sitting</span></div><div class="rt">Spot →</div></div>
+        <div class="grid2">
+          <div class="card tap listitem" style="margin:0"><div class="ico">🍔</div><div class="gr"><b>Order to seat</b><span>Setor 108 · 3 min</span></div></div>
+          <div class="card tap listitem" style="margin:0"><div class="ico">⬆️</div><div class="gr"><b>Seat upgrade</b><span>Cadeira cativa +R$140</span></div></div>
+          <div class="card tap listitem" style="margin:0"><div class="ico">🚻</div><div class="gr"><b>Nearest restroom</b><span>40 ft · right</span></div></div>
+          <div class="card tap listitem" style="margin:0"><div class="ico">🛍</div><div class="gr"><b>Loja do clube</b><span>Portão C · 2 min</span></div></div>
+        </div>
+        <div class="card tap" onclick="go('routing')" style="border-color:var(--gold);background:rgba(246,195,68,.07);display:flex;align-items:center;gap:11px">
+          <div class="ico" style="font-size:20px;background:none;border:none">🧭</div><div class="gr"><b style="color:var(--gold)">Leave-Now Routing</b><span>predict the best exit time & beat traffic</span></div><div class="rt">Plan</div></div>`:`
+        <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Best seats for you (Azure ML):</b> lower tier, behind the goal ${t.name} attack — within your usual budget.</div></div>
+        <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>${t.ab} vs ${opp(fan.team)}</b><span class="tiny">Dom · 16:00</span></div>
+          <div class="muted">${arenaOf(fan.team)}</div></div>
+        ${[["Arquibancada · 104","Atrás do gol","R$80"],["Cadeira · 210","Setor coberto","R$160"],["Camarote","Vista premium","R$650"]].map(s=>`
+          <div class="card tap listitem"><div class="ico">🎫</div><div class="gr"><b>${s[0]}</b><span>${s[1]}</span></div><div class="rt">${s[2]}</div></div>`).join("")}
+        <button class="btn">Buy & add to wallet</button>`}
+    `);
+  },
+
+  betting(){
+    const t=TEAMS[fan.team];
+    return appShell("Sportsbook", "Licensed partner · responsible-gaming first", `
+      <div class="card" style="border-color:rgba(246,195,68,.4);background:rgba(246,195,68,.06)">
+        <div style="display:flex;gap:8px"><span style="font-size:16px">🛡</span><div class="muted" style="color:#f6c344;font-size:11px">Responsible-gaming guardrails (Azure ML) active. Session limit, deposit caps & jurisdiction verified via Sentinel geofencing.</div></div>
+      </div>
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Live odds (Stream Analytics):</b> in-play markets recompute every phase of play off the same match feed your stats use.</div></div>
+      ${[[`${t.ab} vencedor`,"-145","💵"],[`${sname(fan.player)} marca a qualquer momento`,"+160","⭐"],["Próximo gol: "+t.ab,"+135","⚽"],["Total da partida +2.5 gols","-110","📈"]].map(b=>`
+        <div class="card listitem"><div class="ico">${b[2]}</div><div class="gr"><b>${b[0]}</b><span>live · partner sportsbook</span></div><div class="rt">${b[1]}</div></div>`).join("")}
+      <div class="tiny" style="text-align:center;margin-top:6px">Jogue com responsabilidade · +18. Apostas podem causar dependência.</div>
+    `);
+  },
+
+  social(){
+    const t=TEAMS[fan.team];
+    return appShell("Watch Party", "SignalR live · AI-moderated", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Watch party synced:</b> 4 friends + 1,240 ${t.name} fans live. Reactions push in real time via Web PubSub / SignalR.</div></div>
+      <div class="card" style="padding:7px 13px">
+        ${[["Mike","Que gol do ${p} 🔥","2s"],["AI Card","Auto-made a sharable 'gol da virada' card","now"],["Dana","Win prob just hit 61% 📈","8s"]].map(c=>`
+          <div class="listitem"><div class="ico" style="font-size:13px">${c[0]==='AI Card'?'✦':c[0][0]}</div><div class="gr"><b>${c[0]}</b><span>${c[1].replace('${p}',sname(fan.player))}</span></div><div class="rt" style="color:var(--ink-faint)">${c[2]}</div></div>`).join("")}
+      </div>
+      <div class="grid3">
+        <div class="stat tap"><b>🔥</b><span>2.1k</span></div><div class="stat tap"><b>⚽</b><span>880</span></div><div class="stat tap"><b>😱</b><span>1.4k</span></div>
+      </div>
+      <button class="btn blue">Make a fan card with AI</button>
+    `);
+  },
+
+  events(){
+    return appShell("Near You", "Player events · Azure Maps", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>This week (Azure OpenAI):</b> here's what ${fan.player} and teammates are promoting near you.</div></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:130px;background:linear-gradient(135deg,#13325e,#0a1730);position:relative">
+          <div style="position:absolute;left:30%;top:40%;font-size:22px">📍</div>
+          <div style="position:absolute;left:62%;top:60%;font-size:22px">📍</div>
+          <div style="position:absolute;left:48%;top:25%;font-size:18px">📍</div>
+          <div class="badge" style="top:9px;left:9px"><span class="chip" style="background:rgba(5,10,20,.6);font-size:10px">Azure Maps</span></div>
+        </div>
+      </div>
+      ${[[`${fname(fan.player)}'s escolinha de futebol`,"Sáb 10h · 2.4 mi","Grátis"],["Jogo beneficente",`Qui 19h · centro`,"RSVP"],["Lançamento de chuteira","Sex 17h · 0.8 mi","Going?"]].map(e=>`
+        <div class="card tap listitem"><div class="ico">📅</div><div class="gr"><b>${e[0]}</b><span>${e[1]}</span></div><div class="rt">${e[2]}</div></div>`).join("")}
+    `);
+  },
+
+  memory(){
+    const t=TEAMS[fan.team];
+    return appShell("Memory Lane", "Fan 360 · matches you were there for", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI recap:</b> You've been to 7 ${t.name} matches. You were in the arquibancada when ${sname(fan.player)} scored a hat-trick — relive it.</div></div>
+      <div class="grid3" style="margin-bottom:12px">
+        <div class="stat"><b>7</b><span>matches</span></div><div class="stat"><b>5-2</b><span>your record</span></div><div class="stat"><b>1</b><span>hat-trick</span></div>
+      </div>
+      ${[[`The hat-trick night`,"vs "+opp(fan.team)+" · last June","V 3-1","⚽"],["Gol no último minuto","Quartas","V 2-1","⏱"],["Your first match","Estreia no Brasileirão","D 1-2","🎟"]].map(m=>`
+        <div class="card tap" style="padding:0;overflow:hidden">
+          <div style="height:96px;background:linear-gradient(135deg,${t.a},${t.b});position:relative;display:grid;place-items:center;font-size:32px">${m[3]}
+            <div class="badge" style="top:8px;left:8px"><span class="chip" style="background:rgba(5,10,20,.5);font-size:10px">▶ your highlights</span></div></div>
+          <div style="padding:11px 13px"><b style="font-size:13px;display:block">${m[0]}</b><div class="tiny" style="margin:3px 0">${m[1]}</div><span class="rt">${m[2]}</span></div></div>`).join("")}
+    `);
+  },
+
+  sixthman(){
+    const t=TEAMS[fan.team];
+    return appShell("Twelfth Man", "Azure OpenAI Realtime · talk to it", `
+      <div class="povwrap" style="aspect-ratio:16/9;background:radial-gradient(circle at 50% 40%,#13325e,#0a1020)">
+        <div class="ctr" style="flex-direction:column;gap:12px">
+          <div class="voiceorb"></div>
+          <div class="tiny" style="color:#cfe">listening · "foi impedimento?"</div>
+        </div>
+        <div class="badge"><span class="live">🎙 LIVE VOICE</span></div>
+      </div>
+      <div class="ailine"><div class="sp">🎙</div><div class="tx"><b>Twelfth Man:</b> VAR confirmou — legal por um pé, gol válido. ${sname(fan.player)} agora tem 2 no Brasileirão. ${t.ab} 2-1, faltam 28. Want me to ping you if it goes to the wire?</div></div>
+      <div class="eyebrow">Try asking</div>
+      <div class="card tap listitem" onclick="void 0"><div class="ico">💬</div><div class="gr"><b>"Por que foi cartão amarelo?"</b><span>regras · grounded by AI Search</span></div><div class="rt">Ask</div></div>
+      <div class="card tap listitem"><div class="ico">📈</div><div class="gr"><b>"Qual nosso aproveitamento jogando em casa?"</b><span>club stats</span></div><div class="rt">Ask</div></div>
+      <div class="card tap listitem"><div class="ico">🔔</div><div class="gr"><b>"Me avisa se o jogo apertar no fim."</b><span>sets a live alert</span></div><div class="rt">Ask</div></div>
+      <button class="btn blue">🎙 Hold to talk</button>
+    `);
+  },
+
+  hype(){
+    const t=TEAMS[fan.team];
+    return appShell("Your Hype Reel", "Generative pre-match · in the torcida voice", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Built just for you:</b> a 60-second hype reel of ${fan.player}'s best vs ${opp(fan.team)} — narrated in the ${t.name} torcida voice.</div></div>
+      <div class="povwrap" style="aspect-ratio:16/9;background:linear-gradient(135deg,${t.a},${t.b})">
+        <div class="ctr"><div class="play">▶</div></div>
+        <div class="badge"><span class="chip" style="background:rgba(5,10,20,.55);font-size:10px">0:60 · 4K</span></div>
+        <div class="pov"><div style="flex:1;display:flex;gap:3px;align-items:flex-end;height:26px;justify-content:center">
+          ${Array.from({length:22}).map((_,i)=>`<span class="eqbar" style="animation-delay:${i*0.06}s"></span>`).join("")}
+        </div></div>
+      </div>
+      <div class="grid3">
+        <div class="stat"><b>12</b><span>clips cut</span></div><div class="stat"><b>3</b><span>matches you saw</span></div><div class="stat"><b>0:60</b><span>runtime</span></div>
+      </div>
+      <div class="eyebrow">In this cut</div>
+      <div class="card listitem"><div class="ico">🎬</div><div class="gr"><b>${sname(fan.player)} golaço vs ${opp(fan.team)}</b><span>AI Video Indexer · tagged</span></div><div class="rt">0:08</div></div>
+      <div class="card listitem"><div class="ico">🔊</div><div class="gr"><b>Neural narration</b><span>Azure OpenAI · torcida hype voice</span></div><div class="rt">auto</div></div>
+      <button class="btn">Share my reel</button>
+    `);
+  },
+
+  haptic(){
+    const t=TEAMS[fan.team];
+    return appShell("Crowd-Sync", "Feel the torcida · Apple Watch", `
+      <div class="ailine"><div class="sp">⌚️</div><div class="tx"><b>Crowd-Sync on:</b> your Watch taps in rhythm with ${arenaOf(fan.team)} — even from your couch. Decibels → Event Hubs → your wrist, sub-second.</div></div>
+      <div class="card" style="text-align:center">
+        <div class="tiny" style="margin-bottom:10px">STADIUM ENERGY · LIVE</div>
+        <div style="display:flex;gap:4px;align-items:flex-end;height:70px;justify-content:center;margin-bottom:6px">
+          ${Array.from({length:28}).map((_,i)=>`<span class="eqbar tall" style="animation-delay:${i*0.05}s;background:${i%4===0?t.b:'var(--az)'}"></span>`).join("")}
+        </div>
+        <div style="font-family:'Barlow Condensed';font-size:28px;font-weight:700;color:${t.b}">🔊 GOOOL</div>
+      </div>
+      <div class="eyebrow">Haptic patterns</div>
+      <div class="card listitem"><div class="ico">⚽</div><div class="gr"><b>Gol</b><span>three sharp taps</span></div><div class="rt">on</div></div>
+      <div class="card listitem"><div class="ico">🧤</div><div class="gr"><b>Defesa de pênalti</b><span>rising buzz</span></div><div class="rt">on</div></div>
+      <div class="card listitem"><div class="ico">⏱</div><div class="gr"><b>Gol no último minuto</b><span>long pulse + flash</span></div><div class="rt">on</div></div>
+      <div class="tiny" style="text-align:center;margin-top:8px">Switch to the ⌚ Watch simulator to feel it live.</div>
+    `);
+  },
+
+  routing(){
+    const t=TEAMS[fan.team];
+    return appShell("Leave Now?", "Predictive egress · Azure Maps", `
+      <div class="card" style="border-color:var(--gold);background:rgba(246,195,68,.07)">
+        <div style="display:flex;gap:9px;align-items:center"><span style="font-size:22px">🧭</span>
+          <div><b style="font-size:13px;color:var(--gold)">Best time to leave: 88'</b><div class="muted" style="font-size:11px">Match's 95% decided · saves you ~18 min in traffic</div></div></div>
+      </div>
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI:</b> ${t.ab} up 2 goals deep in stoppage time — win-prob 95%. Beat the rush: exit Portão C, Lot 4. I'll route you home.</div></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:140px;background:linear-gradient(135deg,#0a1730,#13325e);position:relative">
+          <svg viewBox="0 0 300 140" style="position:absolute;inset:0;width:100%;height:100%">
+            <path d="M40 120 Q 120 90 160 70 T 270 26" fill="none" stroke="#f6c344" stroke-width="3" stroke-dasharray="6 5"/>
+          </svg>
+          <div style="position:absolute;left:30px;bottom:14px;font-size:18px">🏟</div>
+          <div style="position:absolute;right:18px;top:14px;font-size:18px">🛣</div>
+          <div class="badge" style="top:9px;left:9px"><span class="chip" style="background:rgba(5,10,20,.55);font-size:10px">Azure Maps · live traffic</span></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="stat"><b>18m</b><span>time saved</span></div>
+        <div class="stat"><b>Portão C</b><span>nearest exit</span></div>
+      </div>
+      <button class="btn blue">Start walking directions</button>
+      <button class="btn ghost" onclick="go('live')">Stay — I'll risk it 🍿</button>
+    `);
+  },
+
+  celebs(){
+    const t=TEAMS[fan.team]; const list=celebsOf(fan.team);
+    const near=list.find(c=>c.near);
+    return appShell("VIP Row", "AI Video Indexer · celebrity recognition", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Spotlight (AI Video Indexer):</b> I scanned tonight's broadcast & stadium cams and matched <b>${list.length} verified public figures</b> at ${arenaOf(fan.team)}. Tap a star to find their section.</div></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:150px;background:radial-gradient(circle at 50% 118%,${t.a},#0a1020);position:relative;border-bottom:1px solid var(--line2)">
+          <div style="position:absolute;inset:20% 24%;border:2px solid rgba(255,255,255,.22);border-radius:8px"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30px;height:30px;border:2px solid rgba(255,255,255,.18);border-radius:50%"></div>
+          ${list.map(c=>`<div title="${c.n}" style="position:absolute;left:${c.mx}%;top:${c.my}%;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,${t.a},${t.b});display:grid;place-items:center;font-size:13px;border:2px solid ${c.near?'var(--gold)':'rgba(255,255,255,.55)'};box-shadow:0 0 0 ${c.near?'3px rgba(246,195,68,.25)':'2px rgba(0,0,0,.3)'}">${c.e}</div>`).join("")}
+          <div style="position:absolute;left:50%;top:86%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 16px var(--gold)"></div>
+          <div style="position:absolute;left:50%;top:96%;transform:translateX(-50%)" class="tiny">your seat · Setor 104</div>
+          <div class="badge" style="top:9px;left:9px"><span class="chip" style="background:rgba(5,10,20,.6);font-size:10px">Azure Maps · live</span></div>
+        </div>
+        <div class="grid3" style="margin:0">
+          <div class="stat" style="border:none;border-radius:0"><b>${list.length}</b><span>spotted</span></div>
+          <div class="stat" style="border:none;border-radius:0;border-left:1px solid var(--line)"><b>${list.filter(c=>c.dist==='Pitchside').length}</b><span>pitchside</span></div>
+          <div class="stat" style="border:none;border-radius:0;border-left:1px solid var(--line)"><b>${near?near.dist:'—'}</b><span>nearest to you</span></div>
+        </div>
+      </div>
+      ${near?`<div class="ailine" style="border-color:var(--gold);background:rgba(246,195,68,.07)"><div class="sp">⭐</div><div class="tx"><b>${near.n} is near you</b> — ${near.dist.toLowerCase()}. Want walking directions to spot them at the break?</div></div>`:""}
+      <div class="eyebrow">Pitchside &amp; in the stands</div>
+      ${list.map(c=>`
+        <div class="card" style="${c.near?'border-color:var(--gold);background:rgba(246,195,68,.05)':''}">
+          <div style="display:flex;align-items:center;gap:11px">
+            <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,${t.a},${t.b});display:grid;place-items:center;font-size:20px;border:1px solid var(--line2);flex:none">${c.e}</div>
+            <div style="flex:1"><b style="font-size:13.5px">${c.n}</b><div class="tiny" style="margin-top:1px">${c.f}</div></div>
+            <span class="live" style="font-size:9px">SPOTTED ${c.since}</span>
+          </div>
+          <div class="muted" style="margin-top:9px;font-style:italic">“${c.vibe}”</div>
+          <div class="row" style="margin:9px 0 0">
+            <div class="stat" style="flex:1;margin:0"><b style="font-size:12.5px">${c.sec}</b><span>${c.seat}</span></div>
+            <div class="stat" style="flex:1;margin:0"><b style="font-size:12.5px">${c.dist}</b><span>from your seat</span></div>
+          </div>
+          <button class="btn ghost" style="margin-top:9px" onclick="event.stopPropagation()">📍 Show on stadium map</button>
+        </div>`).join("")}
+      <div class="card" style="border-color:rgba(246,195,68,.4);background:rgba(246,195,68,.06)">
+        <div style="display:flex;gap:8px"><span style="font-size:16px">🛡</span><div class="muted" style="color:#f6c344;font-size:11px">Only verified public figures who opted into <b>Fan Spotlight</b> appear here. Consent &amp; data use are governed by Microsoft Purview — private attendees are never recognized, tracked, or shown.</div></div>
+      </div>
+    `);
+  }
+};
+
+/* ============================================================
+   FORMULA 1 DATA PACK  (2026 grid · constructors · drivers)
+   name = constructor · city = base · star = lead driver
+   ============================================================ */
+const F1_TEAMS = {
+  MCL:{name:"McLaren", city:"Woking, UK", a:"#FF8000", b:"#0090D0", ab:"MCL", star:"Lando Norris"},
+  FER:{name:"Ferrari", city:"Maranello, Italy", a:"#DC0000", b:"#FFEB00", ab:"FER", star:"Lewis Hamilton"},
+  MER:{name:"Mercedes", city:"Brackley, UK", a:"#00A19B", b:"#C0C0C0", ab:"MER", star:"George Russell"},
+  RBR:{name:"Red Bull", city:"Milton Keynes, UK", a:"#0A1A4F", b:"#FFC906", ab:"RBR", star:"Max Verstappen"},
+  WIL:{name:"Williams", city:"Grove, UK", a:"#00A3E0", b:"#1A1A1A", ab:"WIL", star:"Carlos Sainz"},
+  AST:{name:"Aston Martin", city:"Silverstone, UK", a:"#006F62", b:"#CEDC00", ab:"AST", star:"Fernando Alonso"},
+  ALP:{name:"Alpine", city:"Enstone, UK", a:"#005BA9", b:"#FF87BC", ab:"ALP", star:"Pierre Gasly"},
+  HAA:{name:"Haas", city:"Kannapolis, USA", a:"#1A1A1A", b:"#E6002B", ab:"HAA", star:"Esteban Ocon"},
+  RB:{name:"Racing Bulls", city:"Faenza, Italy", a:"#1660C8", b:"#E10600", ab:"RB", star:"Liam Lawson"},
+  AUD:{name:"Audi", city:"Hinwil, Switzerland", a:"#1A1A1A", b:"#F50537", ab:"AUD", star:"Nico Hülkenberg"},
+  CAD:{name:"Cadillac", city:"USA", a:"#1A1A1A", b:"#D4AF37", ab:"CAD", star:"Sergio Pérez"}
+};
+const F1_ROSTERS = {
+  MCL:[{n:"Lando Norris",no:4,pos:"GBR",note:"Title contender"},{n:"Oscar Piastri",no:81,pos:"AUS",note:"Ice-cool racer"}],
+  FER:[{n:"Lewis Hamilton",no:44,pos:"GBR",note:"7-time champion"},{n:"Charles Leclerc",no:16,pos:"MON",note:"Qualifying ace"}],
+  MER:[{n:"George Russell",no:63,pos:"GBR",note:"Team leader"},{n:"Kimi Antonelli",no:12,pos:"ITA",note:"Rising star"}],
+  RBR:[{n:"Max Verstappen",no:1,pos:"NED",note:"4-time champion"},{n:"Isack Hadjar",no:6,pos:"FRA",note:"Sophomore charger"}],
+  WIL:[{n:"Carlos Sainz",no:55,pos:"ESP",note:"Race winner"},{n:"Alexander Albon",no:23,pos:"THA",note:"Team anchor"}],
+  AST:[{n:"Fernando Alonso",no:14,pos:"ESP",note:"2-time champion"},{n:"Lance Stroll",no:18,pos:"CAN",note:"Experienced hand"}],
+  ALP:[{n:"Pierre Gasly",no:10,pos:"FRA",note:"Team leader"},{n:"Franco Colapinto",no:43,pos:"ARG",note:"Fan favorite"}],
+  HAA:[{n:"Esteban Ocon",no:31,pos:"FRA",note:"Seasoned racer"},{n:"Oliver Bearman",no:87,pos:"GBR",note:"Young gun"}],
+  RB:[{n:"Liam Lawson",no:30,pos:"NZL",note:"Aggressive racer"},{n:"Arvid Lindblad",no:8,pos:"GBR",note:"Rookie talent"}],
+  AUD:[{n:"Nico Hülkenberg",no:27,pos:"GER",note:"Veteran leader"},{n:"Gabriel Bortoleto",no:5,pos:"BRA",note:"Rookie sensation"}],
+  CAD:[{n:"Sergio Pérez",no:11,pos:"MEX",note:"Race winner"},{n:"Valtteri Bottas",no:77,pos:"FIN",note:"Reliable veteran"}]
+};
+const F1_VENUES = {
+  MCL:"Silverstone · British GP", FER:"Monza · Italian GP", MER:"Silverstone · British GP",
+  RBR:"Red Bull Ring · Austrian GP", WIL:"Silverstone · British GP", AST:"Silverstone · British GP",
+  ALP:"Circuit de Monaco · Monaco GP", HAA:"Circuit of the Americas · US GP", RB:"Imola · Emilia-Romagna GP",
+  AUD:"Hungaroring · Hungarian GP", CAD:"Miami Autodrome · Miami GP"
+};
+const F1_OPPS = {
+  MCL:"RBR", RBR:"MCL", FER:"MER", MER:"FER", WIL:"AST", AST:"WIL",
+  ALP:"RB", RB:"ALP", HAA:"CAD", CAD:"HAA", AUD:"FER"
+};
+const F1_CELEBS = {
+  FER:[
+    {n:"Italian football legend", f:"Tifoso · World Cup winner", e:"🏆", sec:"Paddock Club", seat:"Ferrari garage", dist:"Paddock", since:"FP3", vibe:"Decked in red — leading the tifosi roar from the garage gantry.", mx:30, my:30},
+    {n:"Supercar-collector billionaire", f:"Lifelong Ferrari superfan", e:"🏎", sec:"Paddock Club", seat:"Pit wall", dist:"Paddock", since:"Quali", vibe:"Flew in by helicopter — owns half the prancing-horse back catalogue.", mx:68, my:31},
+    {n:"Global pop superstar", f:"Grid-walk regular", e:"🎤", sec:"Paddock Club", seat:"Pit lane", dist:"Paddock", since:"Race", vibe:"Did the grid walk with Martin Brundle — caused a frenzy.", mx:72, my:22},
+    {n:"Hometown racing legend", f:"Motorsport icon", e:"🏁", sec:"Grandstand T1", seat:"Row 3", dist:"1 grandstand over", since:"Race", vibe:"Closest star to you — Turn 1 grandstand to your left.", mx:38, my:70, near:true}
+  ],
+  DEFAULT:[
+    {n:"Brad Pitt", f:"Actor · F1 movie star", e:"🎬", sec:"Paddock Club", seat:"Garage row", dist:"Paddock", since:"FP3", vibe:"Spent the weekend embedded with a team for his racing film.", mx:30, my:30},
+    {n:"Global pop superstar", f:"Grid-walk regular", e:"🎤", sec:"Paddock Club", seat:"Pit lane", dist:"Paddock", since:"Quali", vibe:"Did the grid walk with Martin Brundle — caused a frenzy.", mx:68, my:31},
+    {n:"NFL champion", f:"Sports superstar", e:"🏈", sec:"Team hospitality", seat:"VIP suite", dist:"Paddock", since:"Race", vibe:"Guest of the team — first F1 race, fully hooked.", mx:72, my:22},
+    {n:"Hometown racing legend", f:"Motorsport icon", e:"🏁", sec:"Grandstand T1", seat:"Row 3", dist:"1 grandstand over", since:"Race", vibe:"Closest star to you — Turn 1 grandstand to your left.", mx:38, my:70, near:true}
+  ]
+};
+const F1_STORIES = {
+  highlights:[
+    ["vindex","AI Video Indexer auto-clips overtakes, pit stops & pole laps and tags the driver + moment."],
+    ["aoai","Azure OpenAI writes the recap captions and a spoken-style narration script."],
+    ["cdn","Clips stream instantly from Azure CDN — same edge as the live race."],
+    ["lake","Source footage archived in Data Lake for re-cuts and personalized reels."]
+  ],
+  haptic:[
+    ["eventhubs","Car telemetry — throttle, brake, g-force & DRS — ingests into Event Hubs in real time."],
+    ["stream","Stream Analytics detects the big moments — overtakes, lock-ups, safety cars — as they build."],
+    ["aml","Azure ML classifies the moment — a DRS pass vs a kerb strike gets a different haptic pattern."],
+    ["signalr","SignalR pushes the pulse to your wrist so you <b>feel</b> the car even from your couch."],
+    ["ios","Apple Watch Core Haptics renders the taps — synced sub-second to the on-track action."]
+  ]
+};
+
+/* ============================================================
+   FORMULA 1 SCREENS  (same modules · motorsport content)
+   ============================================================ */
+const F1_SCREENS = {
+  setup(){
+    if(!fan.team){
+      return appShell("Pick Your Team", "Step 1 of 2 · build your Fan 360", `
+        <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI:</b> Lights out! Choose your team and I'll personalize everything — your feed, your onboard cam, your memory lane.</div></div>
+        <div class="grid2">
+          ${Object.keys(TEAMS).map(ab=>`<div class="card tap" onclick="pickTeam('${ab}')" style="display:flex;align-items:center;gap:10px;margin:0;min-width:0;">
+            ${logo(ab)}<div style="min-width:0;overflow:hidden"><b style="font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${TEAMS[ab].name}</b><div class="tiny" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${TEAMS[ab].city}</div></div></div>`).join("")}
+        </div>`, false);
+    }
+    const t=TEAMS[fan.team]; const roster=ROSTERS[fan.team];
+    return appShell("Pick Your Driver", "Step 2 of 2 · "+t.name, `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI:</b> Great team. Who's your driver? You'll get their onboard cam, radio & paddock news.</div></div>
+      ${roster.map(p=>`<div class="card tap listitem" style="margin-bottom:9px" onclick="pickPlayer('${p.n}')">
+        ${playerAvatar(fan.team,p.n,p.no,42)}
+        <div class="gr"><b>${p.n}</b><span>${p.pos} · ${p.note}</span></div><div class="rt">Follow →</div></div>`).join("")}
+    `, false);
+  },
+
+  home(){
+    const t=TEAMS[fan.team]; const venue = state.mode==="venue";
+    return appShell("For You", `${t.name} · following ${sname(fan.player)}`, `
+      ${venue?`<div class="card" style="border-color:#c8102e;background:linear-gradient(180deg,rgba(200,16,46,.14),rgba(200,16,46,.03))">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="live">AT THE CIRCUIT</span><b style="font-size:12px">Welcome to ${arenaOf(fan.team)}</b></div>
+        <div class="muted">Grandstand T1 · Row 12. Your paddock upgrade & food order are one tap away in the Venue tab.</div></div>`:""}
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>For you, ${fname(fan.player)}-style:</b> ${fan.player} qualified P2 today — here's why this Grand Prix matters.</div></div>
+      <div class="card tap" onclick="go('hype')" style="padding:0;overflow:hidden;border-color:${t.b}">
+        <div class="povwrap" style="margin:0;border:none;border-radius:0;aspect-ratio:16/7;background:linear-gradient(120deg,${t.a},${t.b})">
+          <div class="ctr"><div class="play">▶</div></div>
+          <div class="badge"><span class="chip" style="background:rgba(5,10,20,.5);font-size:10px">🎵 AI HYPE REEL · 0:60</span></div>
+        </div>
+        <div style="padding:10px 13px;display:flex;align-items:center;gap:9px"><span style="font-size:16px">🎵</span><div style="flex:1"><b style="font-size:12.5px">Your pre-race hype reel is ready</b><div class="tiny">Generated in the ${t.name} team-radio voice · just for you</div></div><span class="rt">Play</span></div>
+      </div>
+      <div class="row" style="margin-bottom:11px">
+        <div class="card tap" onclick="go('sixthman')" style="margin:0;flex:1;text-align:center"><div style="font-size:22px">🎙</div><b style="font-size:12px;display:block;margin-top:4px">Race Engineer</b><div class="tiny">AI co-host</div></div>
+        <div class="card tap" onclick="go('haptic')" style="margin:0;flex:1;text-align:center"><div style="font-size:22px">⌚️</div><b style="font-size:12px;display:block;margin-top:4px">Cockpit-Sync</b><div class="tiny">feel the car</div></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px"><span class="live">LIVE · LAP 41/58</span><span class="tiny">${arenaOf(fan.team)}</span></div>
+        <div class="scorebar">
+          <div class="t">${logo(fan.team)}<span class="nm">${t.ab}</span></div>
+          <div class="mid"><span class="sc">P2</span><div class="tiny" style="margin-top:4px">+2.4s to P1 · 17 laps to go</div></div>
+          <div class="t">${logo(opp(fan.team))}<span class="nm">${opp(fan.team)}</span></div>
+        </div>
+        <button class="btn blue" style="margin-top:12px" onclick="go('live')">▶ Watch ${state.mode==='venue'?'Replays & Onboard':'Live · Onboard Cam'}</button>
+      </div>
+      <div class="eyebrow">Trending for you</div>
+      <div class="card tap listitem" onclick="go('highlights')"><div class="ico">🎬</div><div class="gr"><b>${fan.player}: Top 5 overtakes</b><span>Auto-clipped · AI Video Indexer</span></div><div class="rt">2m</div></div>
+      <div class="card tap listitem" onclick="go('trivia')"><div class="ico">🧠</div><div class="gr"><b>On this day: ${t.name} history</b><span>Daily trivia drop</span></div><div class="rt">Play</div></div>
+      <div class="card tap listitem" onclick="go('events')"><div class="ico">📍</div><div class="gr"><b>${fname(fan.player)} fan-zone autograph session</b><span>This weekend · near you</span></div><div class="rt">2.4mi</div></div>
+    `);
+  },
+
+  live(){
+    const t=TEAMS[fan.team];
+    const povs = [["broadcast","Broadcast"],["player","⭐ Onboard"],["rail","T-Cam"],["allcam","Heli"]];
+    return appShell("Live", `${t.ab} · Lap 41/58 · P2`, `
+      <div class="povwrap">
+        <div style="position:absolute;inset:0;background:linear-gradient(120deg,#1a1a1a,#3a3a3a)"></div>
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 22px,rgba(255,255,255,.06) 22px,rgba(255,255,255,.06) 26px)"></div>
+        <div class="badge"><span class="live">LIVE 4K</span></div>
+        <div class="ctr"><div class="play">▶</div></div>
+        <div class="pov">${povs.map(p=>`<button class="${fan.pov===p[0]?'on':''}" onclick="setPov('${p[0]}')">${p[0]==='player'?p[1]:p[1]==='Broadcast'?'📺 '+p[1]:p[1]}</button>`).join("")}</div>
+      </div>
+      <div class="ailine"><div class="sp">✦</div><div class="tx">${fan.pov==='player'?`<b>${fan.player} onboard active:</b> tracking-data + AI Video Indexer put you in his cockpit. Podium prob ${t.ab} 72%.`:`<b>Companion mode:</b> sync to your big screen. Tap a driver's onboard to ride along. Podium prob ${t.ab} 72%.`}</div></div>
+      <div class="grid3">
+        <div class="stat"><b>P2</b><span>Position</span></div>
+        <div class="stat"><b>+2.4s</b><span>Gap to P1</span></div>
+        <div class="stat"><b>SOFT</b><span>Tyre · 14 laps</span></div>
+      </div>
+      <div class="eyebrow">Live timing & radio</div>
+      <div class="card" style="padding:4px 13px">
+        <div class="listitem"><div class="ico" style="font-size:13px">🏎</div><div class="gr"><b>${sname(fan.player)} — overtake into T1</b><span>Lap 41 · P3 → P2 with DRS</span></div><div class="rt">SignalR</div></div>
+        <div class="listitem"><div class="ico" style="font-size:13px">⏱</div><div class="gr"><b>Fastest lap 1:18.412</b><span>purple sector 2</span></div><div class="rt">live</div></div>
+      </div>
+      <div class="row"><button class="btn ghost" onclick="go('stats')" style="flex:1">📊 Live timing</button><button class="btn blue" onclick="go('sixthman')" style="flex:1">🎙 Race Engineer</button></div>
+    `);
+  },
+
+  stats(){
+    const t=TEAMS[fan.team];
+    return appShell("Live Timing", "Streaming Analytics · podium probability", `
+      <div class="card">
+        <div class="tiny" style="margin-bottom:7px">PODIUM PROBABILITY · updates every sector</div>
+        <div style="height:54px;border-radius:9px;overflow:hidden;display:flex;border:1px solid var(--line)">
+          <div style="width:72%;background:linear-gradient(180deg,${t.a},${t.b});display:grid;place-items:center;font-weight:800;font-size:13px;color:#fff">${t.ab} 72%</div>
+          <div style="flex:1;background:var(--panel);display:grid;place-items:center;font-weight:700;font-size:12px;color:var(--ink-soft)">field 28%</div>
+        </div>
+      </div>
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Strategy alert (Azure ML):</b> the undercut is live — model says box ${sname(fan.player)} on lap 43 to jump P1. Tyre deg trending up.</div></div>
+      <div class="grid2">
+        <div class="stat"><b>P2</b><span>position</span></div>
+        <div class="stat"><b>+2.4s</b><span>gap to P1</span></div>
+        <div class="stat"><b>1:18.4</b><span>best lap</span></div>
+        <div class="stat"><b>1</b><span>pit stop</span></div>
+      </div>
+      <div class="eyebrow">${fan.player} — live line</div>
+      <div class="grid3">
+        <div class="stat"><b>3</b><span>OVERTAKES</span></div><div class="stat"><b>14</b><span>LAPS · SOFT</span></div><div class="stat"><b>5</b><span>LAPS LED</span></div>
+      </div>
+    `);
+  },
+
+  trivia(){
+    const t=TEAMS[fan.team];
+    return appShell("Trivia", "RAG · grounded in team history", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure AI Search + OpenAI:</b> Every answer is grounded in real ${t.name} records — no hallucinations.</div></div>
+      <div class="card">
+        <div class="tiny" style="margin-bottom:8px">QUESTION 1 OF 5 · ${t.name.toUpperCase()} LORE</div>
+        <b style="font-size:15px;line-height:1.3;display:block;margin-bottom:12px">In which decade did ${t.name} take its most recent run of race wins?</b>
+        <button class="btn ghost" style="margin-top:0;margin-bottom:8px">2000s</button>
+        <button class="btn ghost" style="margin:0 0 8px">2010s</button>
+        <button class="btn ghost" style="margin:0">2020s</button>
+      </div>
+      <div class="eyebrow">Did you know</div>
+      <div class="card listitem"><div class="ico">📚</div><div class="gr"><b>${fan.player} milestone watch</b><span>2 podiums from a personal-best season · AI-tracked</span></div></div>
+    `);
+  },
+
+  highlights(){
+    return appShell("Highlights", "AI Video Indexer · auto-clipped", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>AI Video Indexer:</b> I tagged every ${sname(fan.player)} move tonight and cut a 90-second reel — narrated by Azure OpenAI.</div></div>
+      ${[["Around-the-outside at T1","0:14","🏎"],["Box-box-box double stack","0:09","🔧"],["Pole lap, purple sectors","0:11","⏱"],["DRS dive-bomb into the hairpin","0:08","💨"]].map(h=>`
+        <div class="card tap" style="padding:0;overflow:hidden">
+          <div class="povwrap" style="margin:0;border:none;border-radius:0;aspect-ratio:16/8">
+            <div style="position:absolute;inset:0;background:linear-gradient(120deg,#1a1a1a,#3a3a3a)"></div>
+            <div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 22px,rgba(255,255,255,.06) 22px,rgba(255,255,255,.06) 26px)"></div>
+            <div class="ctr"><div class="play">▶</div></div>
+            <div class="badge"><span class="chip" style="background:rgba(5,10,20,.6);font-size:10px">${h[1]}</span></div>
+          </div>
+          <div style="padding:10px 12px;display:flex;align-items:center;gap:9px"><span style="font-size:17px">${h[2]}</span><b style="font-size:12.5px">${h[0]}</b><span class="rt" style="margin-left:auto">Share</span></div>
+        </div>`).join("")}
+    `);
+  },
+
+  watchguide(){
+    const t=TEAMS[fan.team];
+    return appShell("Where to Watch", "AI concierge · rights-aware", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>You asked:</b> "Where can I watch the Grand Prix tonight?" Here's every legal stream, ranked by what you subscribe to.</div></div>
+      ${[["F1 TV Pro","Every onboard · live timing","✓ subscribed","#E10600"],["ESPN","US broadcast","✓ subscribed","#CC0000"],["Sky Sports F1","UK broadcast","Add-on","#0072C9"],["Local broadcaster","Regional","Cable","#1A1A1A"]].map(s=>`
+        <div class="card listitem"><div class="ico" style="background:${s[3]}">📡</div><div class="gr"><b>${s[0]}</b><span>${s[1]}</span></div><div class="rt">${s[2]}</div></div>`).join("")}
+    `);
+  },
+
+  merch(){
+    const t=TEAMS[fan.team];
+    return appShell("Shop", "Dynamics 365 Commerce · physical + digital", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Recommended for you (Azure ML):</b> based on your ${sname(fan.player)} fandom + last season's order.</div></div>
+      <div class="chiprow"><span class="chip on">For You</span><span class="chip">Team Kit</span><span class="chip">Digital Drops</span><span class="chip">Caps</span></div>
+      <div class="grid2">
+        ${[[`${t.name} Team Cap`,"$45","🧢","physical"],["Signed Pole-Lap NFT","$249","🎴","digital · 1 of 500"],[`${sname(fan.player)} Replica Suit`,"$299","🏎","physical"],["1:8 Helmet Replica","$420","⛑","collector"]].map(m=>`
+          <div class="card tap" style="margin:0"><div style="aspect-ratio:1;border-radius:10px;background:linear-gradient(135deg,${t.a},${t.b});display:grid;place-items:center;font-size:34px;margin-bottom:9px">${m[2]}</div>
+          <b style="font-size:12px;display:block;line-height:1.2">${m[0]}</b><div class="tiny" style="margin:3px 0">${m[3]}</div><div class="rt">${m[1]}</div></div>`).join("")}
+      </div>
+    `);
+  },
+
+  tickets(){
+    const t=TEAMS[fan.team]; const venue=state.mode==="venue";
+    return appShell(venue?"At the Circuit":"Tickets & Circuit", venue?"Azure Maps · live wayfinding":"Dynamics 365 Commerce", `
+      ${venue?`
+        <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Concierge (Azure OpenAI):</b> Shortest food line is Village Stand 108 — 3 min wait. Want me to pre-order before the formation lap?</div></div>
+        <div class="card"><div class="tiny" style="margin-bottom:8px">YOUR SEAT · GRANDSTAND T1 · ROW 12</div>
+          <div style="height:120px;border-radius:11px;background:radial-gradient(circle at 50% 120%,${t.a},#0a1020);position:relative;border:1px solid var(--line2);overflow:hidden">
+            <svg viewBox="0 0 200 120" style="position:absolute;inset:0;width:100%;height:100%"><path d="M30 90 Q 60 40 110 50 T 175 35" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="6"/></svg>
+            <div style="position:absolute;left:34%;top:60%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 16px var(--gold)"></div>
+            <div style="position:absolute;left:50%;bottom:6px;transform:translateX(-50%)" class="tiny">your view · Turn 1</div>
+          </div></div>
+        <div class="card tap" onclick="go('celebs')" style="border-color:#c8102e;background:linear-gradient(180deg,rgba(200,16,46,.16),rgba(200,16,46,.03));display:flex;align-items:center;gap:11px">
+          <div class="ico" style="font-size:20px;background:none;border:none">⭐</div>
+          <div class="gr"><b style="color:#fff">Paddock VIPs · ${celebsOf(fan.team).length} spotted today</b><span>see which stars are in the paddock &amp; where</span></div><div class="rt">Spot →</div></div>
+        <div class="grid2">
+          <div class="card tap listitem" style="margin:0"><div class="ico">🍔</div><div class="gr"><b>Order to seat</b><span>Village 108 · 3 min</span></div></div>
+          <div class="card tap listitem" style="margin:0"><div class="ico">⬆️</div><div class="gr"><b>Upgrade</b><span>Paddock Club +$340</span></div></div>
+          <div class="card tap listitem" style="margin:0"><div class="ico">🎧</div><div class="gr"><b>Live team radio</b><span>tune your driver</span></div></div>
+          <div class="card tap listitem" style="margin:0"><div class="ico">🛍</div><div class="gr"><b>Fan zone</b><span>Gate C · 2 min</span></div></div>
+        </div>
+        <div class="card tap" onclick="go('routing')" style="border-color:var(--gold);background:rgba(246,195,68,.07);display:flex;align-items:center;gap:11px">
+          <div class="ico" style="font-size:20px;background:none;border:none">🧭</div><div class="gr"><b style="color:var(--gold)">Leave-Now Routing</b><span>predict the best exit time & beat the car-park crush</span></div><div class="rt">Plan</div></div>`:`
+        <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Best seats for you (Azure ML):</b> Turn 1 grandstand — overtaking zone, big-screen view, within your usual budget.</div></div>
+        <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>${t.name} · ${arenaOf(fan.team).split(' · ')[1]||'Grand Prix'}</b><span class="tiny">Sun · race day</span></div>
+          <div class="muted">${arenaOf(fan.team)}</div></div>
+        ${[["Grandstand · Turn 1","Overtaking zone","$320"],["Main Straight","Pit-lane & podium view","$480"],["Paddock Club","Garage tour + hospitality","$2,400"]].map(s=>`
+          <div class="card tap listitem"><div class="ico">🎫</div><div class="gr"><b>${s[0]}</b><span>${s[1]}</span></div><div class="rt">${s[2]}</div></div>`).join("")}
+        <button class="btn">Buy 3-day pass & add to wallet</button>`}
+    `);
+  },
+
+  betting(){
+    const t=TEAMS[fan.team];
+    return appShell("Sportsbook", "Licensed partner · responsible-gaming first", `
+      <div class="card" style="border-color:rgba(246,195,68,.4);background:rgba(246,195,68,.06)">
+        <div style="display:flex;gap:8px"><span style="font-size:16px">🛡</span><div class="muted" style="color:#f6c344;font-size:11px">Responsible-gaming guardrails (Azure ML) active. Session limit, deposit caps & jurisdiction verified via Sentinel geofencing.</div></div>
+      </div>
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Live odds (Stream Analytics):</b> in-play markets recompute every sector off the same timing feed your stats use.</div></div>
+      ${[[`${sname(fan.player)} race winner`,"+260","💵"],[`${sname(fan.player)} podium finish`,"-120","⭐"],["Fastest lap: "+t.ab,"+180","⏱"],["Safety car this race","-105","🚨"]].map(b=>`
+        <div class="card listitem"><div class="ico">${b[2]}</div><div class="gr"><b>${b[0]}</b><span>live · partner sportsbook</span></div><div class="rt">${b[1]}</div></div>`).join("")}
+      <div class="tiny" style="text-align:center;margin-top:6px">Must be 21+. If you or someone you know has a gambling problem, call 1-800-GAMBLER.</div>
+    `);
+  },
+
+  social(){
+    const t=TEAMS[fan.team];
+    return appShell("Watch Party", "SignalR live · AI-moderated", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Watch party synced:</b> 4 friends + 1,240 ${t.name} fans live. Reactions push in real time via Web PubSub / SignalR.</div></div>
+      <div class="card" style="padding:7px 13px">
+        ${[["Mike","That ${p} overtake 🔥","2s"],["AI Card","Auto-made a sharable 'P3 → P2' card","now"],["Dana","Podium prob just hit 72% 📈","8s"]].map(c=>`
+          <div class="listitem"><div class="ico" style="font-size:13px">${c[0]==='AI Card'?'✦':c[0][0]}</div><div class="gr"><b>${c[0]}</b><span>${c[1].replace('${p}',sname(fan.player))}</span></div><div class="rt" style="color:var(--ink-faint)">${c[2]}</div></div>`).join("")}
+      </div>
+      <div class="grid3">
+        <div class="stat tap"><b>🔥</b><span>2.1k</span></div><div class="stat tap"><b>🏎</b><span>880</span></div><div class="stat tap"><b>😱</b><span>1.4k</span></div>
+      </div>
+      <button class="btn blue">Make a fan card with AI</button>
+    `);
+  },
+
+  events(){
+    return appShell("Near You", "Driver events · Azure Maps", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>This week (Azure OpenAI):</b> here's what ${fan.player} and the team are promoting near you.</div></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:130px;background:linear-gradient(135deg,#13325e,#0a1730);position:relative">
+          <div style="position:absolute;left:30%;top:40%;font-size:22px">📍</div>
+          <div style="position:absolute;left:62%;top:60%;font-size:22px">📍</div>
+          <div style="position:absolute;left:48%;top:25%;font-size:18px">📍</div>
+          <div class="badge" style="top:9px;left:9px"><span class="chip" style="background:rgba(5,10,20,.6);font-size:10px">Azure Maps</span></div>
+        </div>
+      </div>
+      ${[[`${fname(fan.player)} autograph session`,"Sat 10 AM · 2.4 mi","Free"],["Team fan zone & sim challenge","Fri 5 PM · downtown","RSVP"],["Show-car city run","Thu 6 PM · 0.8 mi","Going?"]].map(e=>`
+        <div class="card tap listitem"><div class="ico">📅</div><div class="gr"><b>${e[0]}</b><span>${e[1]}</span></div><div class="rt">${e[2]}</div></div>`).join("")}
+    `);
+  },
+
+  memory(){
+    const t=TEAMS[fan.team];
+    return appShell("Memory Lane", "Fan 360 · races you were there for", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI recap:</b> You've been to 7 ${t.name} races. You were trackside when ${sname(fan.player)} won from P5 in the wet — relive it.</div></div>
+      <div class="grid3" style="margin-bottom:12px">
+        <div class="stat"><b>7</b><span>races</span></div><div class="stat"><b>3</b><span>podiums seen</span></div><div class="stat"><b>1</b><span>win live</span></div>
+      </div>
+      ${[[`The wet-weather masterclass`,"vs the field · last June","P1 · won","🏆"],["Last-lap overtake","Street circuit","P2 · podium","⏱"],["Your first race","Season opener","P4","🎟"]].map(m=>`
+        <div class="card tap" style="padding:0;overflow:hidden">
+          <div style="height:96px;background:linear-gradient(135deg,${t.a},${t.b});position:relative;display:grid;place-items:center;font-size:32px">${m[3]}
+            <div class="badge" style="top:8px;left:8px"><span class="chip" style="background:rgba(5,10,20,.5);font-size:10px">▶ your highlights</span></div></div>
+          <div style="padding:11px 13px"><b style="font-size:13px;display:block">${m[0]}</b><div class="tiny" style="margin:3px 0">${m[1]}</div><span class="rt">${m[2]}</span></div></div>`).join("")}
+    `);
+  },
+
+  sixthman(){
+    const t=TEAMS[fan.team];
+    return appShell("Race Engineer", "Azure OpenAI Realtime · talk to it", `
+      <div class="povwrap" style="aspect-ratio:16/9;background:radial-gradient(circle at 50% 40%,#13325e,#0a1020)">
+        <div class="ctr" style="flex-direction:column;gap:12px">
+          <div class="voiceorb"></div>
+          <div class="tiny" style="color:#cfe">listening · "what's the gap to P1?"</div>
+        </div>
+        <div class="badge"><span class="live">🎙 LIVE VOICE</span></div>
+      </div>
+      <div class="ailine"><div class="sp">🎙</div><div class="tx"><b>Race Engineer:</b> Gap to P1 is 2.4 and closing — ${sname(fan.player)}'s softs have 3 laps of life left. Recommend box this lap for the undercut. Want me to alert you the instant DRS is enabled?</div></div>
+      <div class="eyebrow">Try asking</div>
+      <div class="card tap listitem" onclick="void 0"><div class="ico">💬</div><div class="gr"><b>"Should we box now or stay out?"</b><span>strategy · grounded by AI Search</span></div><div class="rt">Ask</div></div>
+      <div class="card tap listitem"><div class="ico">📈</div><div class="gr"><b>"What's our record at this circuit?"</b><span>team stats</span></div><div class="rt">Ask</div></div>
+      <div class="card tap listitem"><div class="ico">🔔</div><div class="gr"><b>"Tell me if a safety car comes out."</b><span>sets a live alert</span></div><div class="rt">Ask</div></div>
+      <button class="btn blue">🎙 Hold to talk</button>
+    `);
+  },
+
+  hype(){
+    const t=TEAMS[fan.team];
+    return appShell("Your Hype Reel", "Generative pre-race · in the team-radio voice", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Built just for you:</b> a 60-second hype reel of ${fan.player}'s best vs ${opp(fan.team)} — narrated in the ${t.name} team-radio voice.</div></div>
+      <div class="povwrap" style="aspect-ratio:16/9;background:linear-gradient(135deg,${t.a},${t.b})">
+        <div class="ctr"><div class="play">▶</div></div>
+        <div class="badge"><span class="chip" style="background:rgba(5,10,20,.55);font-size:10px">0:60 · 4K</span></div>
+        <div class="pov"><div style="flex:1;display:flex;gap:3px;align-items:flex-end;height:26px;justify-content:center">
+          ${Array.from({length:22}).map((_,i)=>`<span class="eqbar" style="animation-delay:${i*0.06}s"></span>`).join("")}
+        </div></div>
+      </div>
+      <div class="grid3">
+        <div class="stat"><b>12</b><span>clips cut</span></div><div class="stat"><b>3</b><span>races you saw</span></div><div class="stat"><b>0:60</b><span>runtime</span></div>
+      </div>
+      <div class="eyebrow">In this cut</div>
+      <div class="card listitem"><div class="ico">🎬</div><div class="gr"><b>${sname(fan.player)} last-lap pass vs ${opp(fan.team)}</b><span>AI Video Indexer · tagged</span></div><div class="rt">0:08</div></div>
+      <div class="card listitem"><div class="ico">🔊</div><div class="gr"><b>Neural narration</b><span>Azure OpenAI · team-radio voice</span></div><div class="rt">auto</div></div>
+      <button class="btn">Share my reel</button>
+    `);
+  },
+
+  haptic(){
+    const t=TEAMS[fan.team];
+    return appShell("Cockpit-Sync", "Feel the car · Apple Watch", `
+      <div class="ailine"><div class="sp">⌚️</div><div class="tx"><b>Cockpit-Sync on:</b> your Watch pulses with ${sname(fan.player)}'s car at ${arenaOf(fan.team)} — gear shifts, kerbs & g-force. Telemetry → Event Hubs → your wrist, sub-second.</div></div>
+      <div class="card" style="text-align:center">
+        <div class="tiny" style="margin-bottom:10px">ENGINE & G-FORCE · LIVE</div>
+        <div style="display:flex;gap:4px;align-items:flex-end;height:70px;justify-content:center;margin-bottom:6px">
+          ${Array.from({length:28}).map((_,i)=>`<span class="eqbar tall" style="animation-delay:${i*0.05}s;background:${i%4===0?t.b:'var(--az)'}"></span>`).join("")}
+        </div>
+        <div style="font-family:'Barlow Condensed';font-size:28px;font-weight:700;color:${t.b}">🔊 ON THE LIMIT</div>
+      </div>
+      <div class="eyebrow">Haptic patterns</div>
+      <div class="card listitem"><div class="ico">💨</div><div class="gr"><b>DRS overtake</b><span>three sharp taps</span></div><div class="rt">on</div></div>
+      <div class="card listitem"><div class="ico">⚙️</div><div class="gr"><b>Gear shift</b><span>rapid rising buzz</span></div><div class="rt">on</div></div>
+      <div class="card listitem"><div class="ico">🚨</div><div class="gr"><b>Lock-up / incident</b><span>long pulse + flash</span></div><div class="rt">on</div></div>
+      <div class="tiny" style="text-align:center;margin-top:8px">Switch to the ⌚ Watch simulator to feel it live.</div>
+    `);
+  },
+
+  routing(){
+    const t=TEAMS[fan.team];
+    return appShell("Leave Now?", "Predictive egress · Azure Maps", `
+      <div class="card" style="border-color:var(--gold);background:rgba(246,195,68,.07)">
+        <div style="display:flex;gap:9px;align-items:center"><span style="font-size:22px">🧭</span>
+          <div><b style="font-size:13px;color:var(--gold)">Best time to leave: lap 56 of 58</b><div class="muted" style="font-size:11px">Result's 95% locked · saves you ~40 min in car-park traffic</div></div></div>
+      </div>
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI:</b> ${sname(fan.player)} P2 with a 9s gap — podium 95% safe. Beat the rush: exit Gate C to Lot 4. I'll route you to the motorway.</div></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:140px;background:linear-gradient(135deg,#0a1730,#13325e);position:relative">
+          <svg viewBox="0 0 300 140" style="position:absolute;inset:0;width:100%;height:100%">
+            <path d="M40 120 Q 120 90 160 70 T 270 26" fill="none" stroke="#f6c344" stroke-width="3" stroke-dasharray="6 5"/>
+          </svg>
+          <div style="position:absolute;left:30px;bottom:14px;font-size:18px">🏁</div>
+          <div style="position:absolute;right:18px;top:14px;font-size:18px">🛣</div>
+          <div class="badge" style="top:9px;left:9px"><span class="chip" style="background:rgba(5,10,20,.55);font-size:10px">Azure Maps · live traffic</span></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="stat"><b>40m</b><span>time saved</span></div>
+        <div class="stat"><b>Gate C</b><span>nearest exit</span></div>
+      </div>
+      <button class="btn blue">Start walking directions</button>
+      <button class="btn ghost" onclick="go('live')">Stay for the podium 🏆</button>
+    `);
+  },
+
+  celebs(){
+    const t=TEAMS[fan.team]; const list=celebsOf(fan.team);
+    const near=list.find(c=>c.near);
+    return appShell("Paddock VIPs", "AI Video Indexer · celebrity recognition", `
+      <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Spotlight (AI Video Indexer):</b> I scanned the paddock & broadcast cams and matched <b>${list.length} verified public figures</b> at ${arenaOf(fan.team)}. Tap a star to find where they are.</div></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:150px;background:radial-gradient(circle at 50% 118%,${t.a},#0a1020);position:relative;border-bottom:1px solid var(--line2)">
+          <svg viewBox="0 0 300 150" style="position:absolute;inset:0;width:100%;height:100%"><path d="M40 110 Q 90 50 160 60 T 270 40" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="10"/></svg>
+          ${list.map(c=>`<div title="${c.n}" style="position:absolute;left:${c.mx}%;top:${c.my}%;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,${t.a},${t.b});display:grid;place-items:center;font-size:13px;border:2px solid ${c.near?'var(--gold)':'rgba(255,255,255,.55)'};box-shadow:0 0 0 ${c.near?'3px rgba(246,195,68,.25)':'2px rgba(0,0,0,.3)'}">${c.e}</div>`).join("")}
+          <div style="position:absolute;left:50%;top:86%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 16px var(--gold)"></div>
+          <div style="position:absolute;left:50%;top:96%;transform:translateX(-50%)" class="tiny">your seat · Grandstand T1</div>
+          <div class="badge" style="top:9px;left:9px"><span class="chip" style="background:rgba(5,10,20,.6);font-size:10px">Azure Maps · live</span></div>
+        </div>
+        <div class="grid3" style="margin:0">
+          <div class="stat" style="border:none;border-radius:0"><b>${list.length}</b><span>spotted</span></div>
+          <div class="stat" style="border:none;border-radius:0;border-left:1px solid var(--line)"><b>${list.filter(c=>c.dist==='Paddock').length}</b><span>in paddock</span></div>
+          <div class="stat" style="border:none;border-radius:0;border-left:1px solid var(--line)"><b>${near?near.dist:'—'}</b><span>nearest to you</span></div>
+        </div>
+      </div>
+      ${near?`<div class="ailine" style="border-color:var(--gold);background:rgba(246,195,68,.07)"><div class="sp">⭐</div><div class="tx"><b>${near.n} is near you</b> — ${near.dist.toLowerCase()}. Want walking directions to spot them between sessions?</div></div>`:""}
+      <div class="eyebrow">Paddock &amp; grandstands</div>
+      ${list.map(c=>`
+        <div class="card" style="${c.near?'border-color:var(--gold);background:rgba(246,195,68,.05)':''}">
+          <div style="display:flex;align-items:center;gap:11px">
+            <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,${t.a},${t.b});display:grid;place-items:center;font-size:20px;border:1px solid var(--line2);flex:none">${c.e}</div>
+            <div style="flex:1"><b style="font-size:13.5px">${c.n}</b><div class="tiny" style="margin-top:1px">${c.f}</div></div>
+            <span class="live" style="font-size:9px">SPOTTED ${c.since}</span>
+          </div>
+          <div class="muted" style="margin-top:9px;font-style:italic">“${c.vibe}”</div>
+          <div class="row" style="margin:9px 0 0">
+            <div class="stat" style="flex:1;margin:0"><b style="font-size:12.5px">${c.sec}</b><span>${c.seat}</span></div>
+            <div class="stat" style="flex:1;margin:0"><b style="font-size:12.5px">${c.dist}</b><span>from your seat</span></div>
+          </div>
+          <button class="btn ghost" style="margin-top:9px" onclick="event.stopPropagation()">📍 Show on circuit map</button>
+        </div>`).join("")}
+      <div class="card" style="border-color:rgba(246,195,68,.4);background:rgba(246,195,68,.06)">
+        <div style="display:flex;gap:8px"><span style="font-size:16px">🛡</span><div class="muted" style="color:#f6c344;font-size:11px">Only verified public figures who opted into <b>Fan Spotlight</b> appear here. Consent &amp; data use are governed by Microsoft Purview — private attendees are never recognized, tracked, or shown.</div></div>
+      </div>
+    `);
+  }
+};
+
+/* ============================================================
    APP SHELL  (wraps a screen with status bar, header, tab bar)
    ============================================================ */
 function appShell(title, sub, body, withTabs=true){
@@ -2005,7 +2918,7 @@ function appShell(title, sub, body, withTabs=true){
   </div>`;
 }
 function tabBar(){
-  return `<div class="tabbar">${TABS.map(t=>{const ic=(state.league==="fifa"&&t.id==="home")?"⚽":t.icon;return `<button class="${state.module===t.id||groupActive(t.id)?'on':''}" onclick="go('${t.id}')"><span class="ic">${ic}</span>${t.label}</button>`;}).join("")}</div>`;
+  return `<div class="tabbar">${TABS.map(t=>{let ic=t.icon; if(t.id==="home"){ ic = state.league==="f1"?"🏎" : isSoccer()?"⚽" : t.icon; } return `<button class="${state.module===t.id||groupActive(t.id)?'on':''}" onclick="go('${t.id}')"><span class="ic">${ic}</span>${t.label}</button>`;}).join("")}</div>`;
 }
 function groupActive(tabId){
   const map={home:["home","trivia","highlights","watchguide","social","events","hype"],live:["live","stats","sixthman","haptic"],tickets:["tickets","betting","routing","celebs"],merch:["merch"],memory:["memory"]};
@@ -2016,25 +2929,36 @@ function groupActive(tabId){
    WATCH-specific compact renderer
    ============================================================ */
 function watchScreen(){
-  const F=state.league==="fifa";
+  const SOC=isSoccer(); const F1L=state.league==="f1"; const F=SOC;
   const t=fan.team?TEAMS[fan.team]:null;
-  const last=fan.player?(F?sname(fan.player):fan.player.split(" ")[1]):"";
+  const last=fan.player?((SOC||F1L)?sname(fan.player):fan.player.split(" ")[1]):"";
   if(!fan.onboarded){
     return `<div class="watchapp"><div class="wtime">9:41</div><div class="wmid" style="text-align:center">
-      <div style="font-size:30px">${F?"⚽":"🏀"}</div><b style="font-family:'Barlow Condensed';font-size:20px;text-transform:uppercase">Set up on iPhone</b>
-      <div class="tiny">Pick your ${F?"nation":"team"} to continue</div></div></div>`;
+      <div style="font-size:30px">${F1L?"🏎":SOC?"⚽":"🏀"}</div><b style="font-family:'Barlow Condensed';font-size:20px;text-transform:uppercase">Set up on iPhone</b>
+      <div class="tiny">Pick your ${SOC?"nation/club":"team"} to continue</div></div></div>`;
   }
   const m=state.module;
   let body="";
   if(m==="live"||m==="stats"||m==="home"){
-    body=`<div style="text-align:center"><span class="live" style="font-size:9px">${F?"LIVE 2ND":"LIVE Q3"}</span>
-      <div style="display:flex;justify-content:center;gap:14px;align-items:center;margin:10px 0">
-        <div style="text-align:center"><div style="font-family:'Barlow Condensed';font-size:30px;font-weight:700;color:${t.b}">${F?2:78}</div><div class="tiny">${t.ab}</div></div>
-        <div class="tiny">${F?"62'":"7:42"}</div>
-        <div style="text-align:center"><div style="font-family:'Barlow Condensed';font-size:30px;font-weight:700">${F?1:74}</div><div class="tiny">${opp(fan.team)}</div></div>
-      </div>
-      <div style="font-size:10px;color:var(--gold)">⭐ ${last}: ${F?"1 G · 1 A":"27 PTS"}</div>
-      <div class="tiny" style="margin-top:4px">Win prob ${t.ab} ${F?"61%":"64%"}</div></div>`;
+    if(F1L){
+      body=`<div style="text-align:center"><span class="live" style="font-size:9px">LIVE · LAP 41</span>
+        <div style="display:flex;justify-content:center;gap:10px;align-items:center;margin:10px 0">
+          <div style="text-align:center"><div style="font-family:'Barlow Condensed';font-size:32px;font-weight:700;color:${t.b}">P2</div><div class="tiny">${last}</div></div>
+          <div class="tiny">+2.4s</div>
+          <div style="text-align:center"><div style="font-family:'Barlow Condensed';font-size:20px;font-weight:700">${t.ab}</div><div class="tiny">${t.name}</div></div>
+        </div>
+        <div style="font-size:10px;color:var(--gold)">⭐ ${last} · Soft tyre · Lap 41/58</div>
+        <div class="tiny" style="margin-top:4px">Podium prob ${t.ab} 72%</div></div>`;
+    } else {
+      body=`<div style="text-align:center"><span class="live" style="font-size:9px">${SOC?"LIVE 2ND":"LIVE Q3"}</span>
+        <div style="display:flex;justify-content:center;gap:14px;align-items:center;margin:10px 0">
+          <div style="text-align:center"><div style="font-family:'Barlow Condensed';font-size:30px;font-weight:700;color:${t.b}">${SOC?2:78}</div><div class="tiny">${t.ab}</div></div>
+          <div class="tiny">${SOC?"62'":"7:42"}</div>
+          <div style="text-align:center"><div style="font-family:'Barlow Condensed';font-size:30px;font-weight:700">${SOC?1:74}</div><div class="tiny">${opp(fan.team)}</div></div>
+        </div>
+        <div style="font-size:10px;color:var(--gold)">⭐ ${last}: ${SOC?"1 G · 1 A":"27 PTS"}</div>
+        <div class="tiny" style="margin-top:4px">Win prob ${t.ab} ${SOC?"61%":"64%"}</div></div>`;
+    }
   } else if(m==="haptic"){
     body=`<div style="text-align:center">
       <div class="voiceorb" style="width:60px;height:60px;margin:0 auto 8px;background:radial-gradient(circle at 40% 35%,${t.b},${t.a})"></div>
@@ -2042,7 +2966,7 @@ function watchScreen(){
       <div style="display:flex;gap:3px;align-items:flex-end;height:26px;justify-content:center;margin:8px 0">
         ${Array.from({length:16}).map((_,i)=>`<span class="eqbar tall" style="animation-delay:${i*0.05}s;background:${i%4===0?t.b:'var(--az)'}"></span>`).join("")}
       </div>
-      <div class="tiny" style="color:${t.b}">🔊 feeling the arena · live</div></div>`;
+      <div class="tiny" style="color:${t.b}">🔊 feeling the ${F1L?'cockpit':SOC?'stadium':'arena'} · live</div></div>`;
   } else if(m==="celebs"){
     const list=celebsOf(fan.team); const near=list.find(c=>c.near)||list[0];
     body=`<div style="text-align:center">
@@ -2051,7 +2975,7 @@ function watchScreen(){
       <div class="tiny" style="margin-top:4px;color:var(--gold)">nearest: ${near.e} ${near.n.split(" ")[0]}</div>
       <div class="tiny" style="margin-top:2px">${near.dist} · ${near.sec}</div></div>`;
   } else if(m==="memory"){
-    body=`<div style="text-align:center"><div style="font-size:24px">📸</div><b style="font-family:'Barlow Condensed';font-size:18px">7 ${F?"matches":"games"}</b><div class="tiny">your memory lane</div></div>`;
+    body=`<div style="text-align:center"><div style="font-size:24px">📸</div><b style="font-family:'Barlow Condensed';font-size:18px">7 ${F1L?"races":SOC?"matches":"games"}</b><div class="tiny">your memory lane</div></div>`;
   } else {
     body=`<div style="text-align:center"><div style="font-size:24px">${MODULES[m]?MODULES[m].icon:'🏀'}</div><b style="font-family:'Barlow Condensed';font-size:16px;text-transform:uppercase">${MODULES[m]?MODULES[m].title:'NBA'}</b><div class="tiny">glance on iPhone for more</div></div>`;
   }
@@ -2073,24 +2997,26 @@ const state = { device:"iphone", mode:"home", module:"setup", league:null };
 function landingScreen(){
   const cards=[
     {id:"nba", emoji:"🏀", k:"NBA · Basketball", t:"The NBA", s:"30 franchises · live games, POV cams & arena nights", a:"#1D428A", b:"#C8102E", tag:"Major League Sports"},
-    {id:"fifa", emoji:"⚽", k:"FIFA World Cup 2026", t:"World Cup 2026", s:"48 nations · USA · Canada · Mexico · the global stage", a:"#0b6e4f", b:"#7c3aed", tag:"International · 16 host cities"}
+    {id:"fifa", emoji:"⚽", k:"FIFA World Cup 2026", t:"World Cup 2026", s:"48 nations · USA · Canada · Mexico · the global stage", a:"#0b6e4f", b:"#7c3aed", tag:"International · 16 host cities"},
+    {id:"brasa", emoji:"⚽", k:"FIFA Brasileirão Série A", t:"Brasileirão", s:"20 clubs · Flamengo, Palmeiras, Santos & the torcida", a:"#009739", b:"#FFDF00", tag:"Brasil · Série A 2026"},
+    {id:"f1", emoji:"🏎", k:"Formula 1", t:"Formula 1", s:"11 teams · 22 drivers · lights out around the world", a:"#E10600", b:"#1A1A1A", tag:"Grand Prix · 2026 grid"}
   ];
   return `<div class="app"><div class="statusbar"><span>9:41</span><div class="r"><span>📶</span><span>🔋</span></div></div>
-    <div class="app-body" style="display:flex;flex-direction:column;justify-content:center;gap:14px">
-      <div style="text-align:center;margin-bottom:4px">
-        <div style="font-size:32px;line-height:1">🏆</div>
-        <h2 style="font-family:'Barlow Condensed';font-size:25px;text-transform:uppercase;letter-spacing:.01em;margin-top:7px">Choose your league</h2>
+    <div class="app-body" style="display:flex;flex-direction:column;gap:12px">
+      <div style="text-align:center;margin:2px 0 2px">
+        <div style="font-size:30px;line-height:1">🏆</div>
+        <h2 style="font-family:'Barlow Condensed';font-size:23px;text-transform:uppercase;letter-spacing:.01em;margin-top:5px">Choose your league</h2>
       </div>
       ${cards.map(c=>`<div class="card tap" onclick="chooseLeague('${c.id}')" style="padding:0;overflow:hidden;border-color:${c.b}">
-        <div style="height:118px;background:linear-gradient(125deg,${c.a},${c.b});position:relative;display:grid;place-items:center">
-          <div style="font-size:52px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))">${c.emoji}</div>
-          <div class="badge" style="top:8px;left:8px"><span class="chip" style="background:rgba(5,10,20,.5);font-size:9.5px">${c.tag}</span></div>
+        <div style="height:74px;background:linear-gradient(125deg,${c.a},${c.b});position:relative;display:grid;place-items:center">
+          <div style="font-size:38px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))">${c.emoji}</div>
+          <div class="badge" style="top:7px;left:7px"><span class="chip" style="background:rgba(5,10,20,.5);font-size:9px">${c.tag}</span></div>
         </div>
-        <div style="padding:13px 15px"><div class="tiny" style="letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)">${c.k}</div>
-          <b style="font-size:17px;display:block;margin:3px 0 3px">${c.t}</b>
-          <div class="muted" style="font-size:11.5px">${c.s}</div></div>
+        <div style="padding:11px 14px"><div class="tiny" style="letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)">${c.k}</div>
+          <b style="font-size:16px;display:block;margin:2px 0 2px">${c.t}</b>
+          <div class="muted" style="font-size:11px">${c.s}</div></div>
       </div>`).join("")}
-      <div class="tiny" style="text-align:center;color:var(--ink-faint);margin-top:4px">Same features · same Azure brain · different game</div>
+      <div class="tiny" style="text-align:center;color:var(--ink-faint);margin:2px 0 4px">Same features · same Azure brain · different game</div>
     </div></div>`;
 }
 function chooseLeague(id){
@@ -2193,7 +3119,9 @@ function updatePanel(mod){
     document.getElementById("btTitle").textContent="Architecture";
     document.getElementById("btMeta").textContent="idle · tap to inspect";
     trig.classList.remove("live"); return; }
-  const story=(state.league==="fifa" && typeof FIFA_STORIES!=="undefined" && FIFA_STORIES[mod]) ? FIFA_STORIES[mod] : m.story;
+  let story=m.story;
+  if(isSoccer() && typeof FIFA_STORIES!=="undefined" && FIFA_STORIES[mod]) story=FIFA_STORIES[mod];
+  else if(state.league==="f1" && typeof F1_STORIES!=="undefined" && F1_STORIES[mod]) story=F1_STORIES[mod];
   body.innerHTML=story.map(s=>{
     const meta=NODE_META[s[0]]||{n:s[0],c:"#2899f5"};
     return `<div class="svc" data-dd="${s[0]}"><div class="dot" style="--sc:${meta.c}"></div><div class="sg"><b>${meta.n}</b><span>${s[1]}</span></div></div>`;

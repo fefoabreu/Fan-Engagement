@@ -461,12 +461,18 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .app[dir="rtl"] .app-head,.app[dir="rtl"] .listitem,.app[dir="rtl"] .scorebar{direction:rtl;}
 .app[dir="rtl"] .eyebrow{flex-direction:row-reverse;}
 
+/* the seven locale flags must stay on one row — a second row grows the panel
+   enough to push the whole left rail past the bottom of the stage */
 @media (max-width:1320px){
   .rail-r .cluster{width:196px;} .cl-g48{width:212px;}
+  .g48-switch button{width:21px;height:21px;font-size:11px;}
+  .g48-switch .fl{gap:4px;}
 }
 @media (max-width:1180px){
   .cluster{width:170px;} .rail-l{left:12px;} .rail-r{right:12px;}
   .rail-r .cluster{width:176px;} .cl-g48{width:190px;}
+  .g48-switch button{width:19px;height:19px;font-size:10px;}
+  .g48-switch .fl{gap:3px;}
 }
 /* the left rail's generous spacing is a tall-screen luxury — reclaim it below that */
 @media (max-height:960px){
@@ -572,12 +578,12 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
         </div>
       </div>
       <div class="nodes" style="display:flex;flex-direction:column;gap:6px;">
-        <div class="node" data-node="locale" style="--nc:var(--g48)"><div class="az"></div><div class="nm">Locale Resolver</div><div class="ty">i18n · ICU · CLDR</div></div>
-        <div class="node" data-node="mt" style="--nc:var(--g48)"><div class="az"></div><div class="nm">Neural MT Serving</div><div class="ty">t9n · quantized · distilled</div></div>
-        <div class="node" data-node="tmglos" style="--nc:var(--g48)"><div class="az"></div><div class="nm">TM + Glossary RAG</div><div class="ty">l10n · XLIFF · vector</div></div>
-        <div class="node" data-node="lqa" style="--nc:var(--g48)"><div class="az"></div><div class="nm">LQA Agent · ReAct</div><div class="ty">tool-use · self-correct</div></div>
-        <div class="node" data-node="comet" style="--nc:var(--g48)"><div class="az"></div><div class="nm">COMET / BLEU Eval</div><div class="ty">quality gate · MLOps</div></div>
-        <div class="node" data-node="locops" style="--nc:var(--g48)"><div class="az"></div><div class="nm">Continuous Loc Pipeline</div><div class="ty">g11n · CI/CD · 50+ locales</div></div>
+        <div class="node" data-node="locale" style="--nc:var(--g48)"><div class="az"></div><div class="nm">Locale Resolver</div><div class="ty">i18n · PyICU · CLDR</div></div>
+        <div class="node" data-node="mt" style="--nc:var(--g48)"><div class="az"></div><div class="nm">Neural MT Serving</div><div class="ty">t9n · PyTorch · INT8</div></div>
+        <div class="node" data-node="tmglos" style="--nc:var(--g48)"><div class="az"></div><div class="nm">TM + Glossary RAG</div><div class="ty">l10n · LangChain · XLIFF</div></div>
+        <div class="node" data-node="lqa" style="--nc:var(--g48)"><div class="az"></div><div class="nm">LQA Agent · ReAct</div><div class="ty">LangGraph · tool-use</div></div>
+        <div class="node" data-node="comet" style="--nc:var(--g48)"><div class="az"></div><div class="nm">COMET / BLEU Eval</div><div class="ty">eval gate · LangSmith</div></div>
+        <div class="node" data-node="locops" style="--nc:var(--g48)"><div class="az"></div><div class="nm">Continuous Loc Pipeline</div><div class="ty">g11n · Python · CI/CD</div></div>
       </div>
     </div>
   </div>

@@ -122,8 +122,14 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .cl-gov{bottom:16px;left:50%;transform:translateX(-50%);width:660px;}
 
 /* ---- vertical rails: clusters stack instead of floating to corners ---- */
-.rail{position:absolute;top:96px;z-index:8;display:flex;flex-direction:column;gap:15px;}
-.rail-l{left:24px;} .rail-r{right:24px;}
+.rail{position:absolute;top:96px;z-index:8;display:flex;flex-direction:column;gap:18px;}
+/* the left rail carries only two tiers, so it can afford to breathe */
+.rail-l{left:24px;gap:34px;}
+.rail-r{right:24px;}
+.rail .cluster .clabel{margin-bottom:5px;}
+.rail-l .cluster .clabel{margin-bottom:9px;}
+.rail-l .cluster .nodes{gap:9px !important;}
+.rail-l .cluster.dense .node{padding:7px 11px;}
 .rail .cluster{position:relative;top:auto;left:auto;right:auto;bottom:auto;transform:none;}
 .rail-r .cluster{width:214px;}
 /* second group inside a merged cluster */
@@ -375,8 +381,9 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
    ============================================================ */
 .cl-g48{width:236px;}
 .g48-head{background:linear-gradient(180deg,rgba(34,211,238,.14),rgba(34,211,238,.035));
-  border:1px solid rgba(34,211,238,.34);border-radius:11px;padding:9px 11px 8px;margin-bottom:9px;
-  position:relative;overflow:hidden;transition:box-shadow .3s,border-color .3s;}
+  border:1px solid rgba(34,211,238,.34);border-radius:11px;padding:10px 11px 9px;margin-bottom:13px;
+  position:relative;overflow:hidden;transition:box-shadow .3s,border-color .3s;cursor:pointer;}
+.g48-head:hover{border-color:rgba(34,211,238,.6);}
 .g48-head.hot{border-color:rgba(34,211,238,.8);box-shadow:0 0 0 1px rgba(34,211,238,.4),0 8px 26px rgba(34,211,238,.22);}
 /* scanning sweep while the pipeline runs */
 .g48-head::after{content:"";position:absolute;top:0;bottom:0;width:44%;left:-50%;
@@ -386,8 +393,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .g48-loc{display:flex;align-items:baseline;gap:7px;line-height:1;}
 .g48-flag{font-size:15px;line-height:1;}
 .g48-tag{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#fff;letter-spacing:.01em;}
-.g48-dir{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--g48);
-  border:1px solid rgba(34,211,238,.45);border-radius:4px;padding:1px 4px;margin-left:auto;}
 .g48-native{font-size:11.5px;color:var(--ink-soft);margin-top:3px;line-height:1.2;}
 .g48-native b{color:#fff;font-weight:600;}
 /* the numeronym strip — the signature */
@@ -395,9 +400,10 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .nn{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-faint);transition:color .3s,text-shadow .3s;}
 .nn b{font-weight:700;}
 .nn.lit{color:var(--g48);text-shadow:0 0 9px rgba(34,211,238,.75);}
-.nn-sum{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
-  color:var(--ink-faint);letter-spacing:.02em;transition:color .35s,text-shadow .35s,transform .35s;}
-.nn-sum.lit{color:var(--gold);text-shadow:0 0 14px rgba(246,195,68,.65);transform:scale(1.12);}
+/* the four numeronyms collapse into the engine's name */
+.nn-sum{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;
+  color:var(--ink-faint);letter-spacing:.04em;transition:color .35s,text-shadow .35s,transform .35s;}
+.nn-sum.lit{color:var(--gold);text-shadow:0 0 13px rgba(246,195,68,.6);transform:scale(1.1);}
 /* coverage meter — TM hit vs MT fill, the real localization-ops number */
 .g48-cov{display:flex;align-items:center;gap:6px;margin-top:7px;}
 .g48-bar{flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,.09);overflow:hidden;display:flex;}
@@ -436,15 +442,16 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .g48row .tag.tm{color:var(--g48);border:1px solid rgba(34,211,238,.4);}
 .g48row .tag.mt{color:var(--gold);border:1px solid rgba(246,195,68,.4);}
 
-/* locale chip in the top bar */
-.localeChip{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);
-  border-radius:11px;padding:6px 11px;transition:.2s;}
-.localeChip:hover{border-color:rgba(34,211,238,.5);}
-.localeChip.engaged{border-color:rgba(34,211,238,.55);box-shadow:0 0 0 1px rgba(34,211,238,.28);}
-.localeChip .lc-fl{font-size:14px;line-height:1;}
-.localeChip .lc-tx{display:flex;flex-direction:column;line-height:1.1;text-align:left;}
-.localeChip .lc-tx b{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;color:#fff;}
-.localeChip .lc-tx span{font-size:8.5px;color:var(--ink-faint);letter-spacing:.1em;text-transform:uppercase;}
+/* locale switcher — lives in the Tier 6 panel, the one place locale is spoken about */
+.g48-switch{margin-top:9px;padding-top:8px;border-top:1px solid rgba(34,211,238,.2);}
+.g48-switch .sl{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;}
+.g48-switch .fl{display:flex;gap:5px;flex-wrap:wrap;}
+.g48-switch button{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:13px;
+  line-height:1;border:1px solid transparent;background:rgba(255,255,255,.055);transition:.18s;}
+.g48-switch button:hover{background:rgba(34,211,238,.18);transform:translateY(-1px);}
+.g48-switch button.on{border-color:var(--g48);background:rgba(34,211,238,.15);box-shadow:0 0 0 1px rgba(34,211,238,.35);}
+.g48-switch button:focus-visible{outline:2px solid var(--g48);outline-offset:2px;}
 
 /* right-to-left app rendering */
 .app[dir="rtl"] .app-head,.app[dir="rtl"] .listitem,.app[dir="rtl"] .scorebar{direction:rtl;}
@@ -456,6 +463,13 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 @media (max-width:1180px){
   .cluster{width:170px;} .rail-l{left:12px;} .rail-r{right:12px;}
   .rail-r .cluster{width:176px;} .cl-g48{width:190px;}
+}
+/* the left rail's generous spacing is a tall-screen luxury — reclaim it below that */
+@media (max-height:960px){
+  .rail-l{gap:22px;}
+  .rail-l .cluster .clabel{margin-bottom:6px;}
+  .rail-l .cluster .nodes{gap:7px !important;}
+  .g48-head{margin-bottom:10px;}
 }
 /* the device frame is a fixed height — scale the dock so it never collides with
    the Tier 0 clients row above or the governance rail below on laptop screens */
@@ -498,11 +512,6 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
     </div>
   </div>
 
-  <button class="localeChip" id="localeChip" onclick="go('g48t')" title="Tier 6 · g48t engine — inspect the active locale">
-    <span class="lc-fl" id="lcFlag">🌐</span>
-    <span class="lc-tx"><b id="lcTag">en-US</b><span id="lcName">locale</span></span>
-  </button>
-
   <button class="brainTrigger" id="brainTrigger" onclick="toggleBrain()">
     <span class="bt-ic" id="btIcon">🏀</span>
     <span class="bt-tx"><b id="btTitle">Architecture</b><span id="btMeta">idle · tap to inspect</span></span>
@@ -539,19 +548,23 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
     <div class="cluster cl-g48 dense" style="--tc:var(--g48)">
       <div class="clabel">Tier 6 · <span class="lc">g48t</span> Engine</div>
       <!-- live locale readout: the numeronyms g11n+i18n+l10n+t9n = 48 -->
-      <div class="g48-head" id="g48Head" title="g11n + i18n + l10n + t9n — the four GILT numeronyms sum to 48, the number of nations at World Cup 2026">
-        <div class="g48-loc"><span class="g48-flag" id="g48Flag">🌐</span><span class="g48-tag" id="g48Tag">en-US</span><span class="g48-dir" id="g48Dir">LTR</span></div>
+      <div class="g48-head" id="g48Head" onclick="go('g48t')" title="Open the locale engine — g11n + i18n + l10n + t9n collapse into g48t">
+        <div class="g48-loc"><span class="g48-flag" id="g48Flag">🌐</span><span class="g48-tag" id="g48Tag">en-US</span></div>
         <div class="g48-native" id="g48Native"><b>English</b> · United States</div>
         <div class="g48-nums" id="g48Nums">
           <span class="nn" data-nn="0">g<b>11</b>n</span>
           <span class="nn" data-nn="1">i<b>18</b>n</span>
           <span class="nn" data-nn="2">l<b>10</b>n</span>
           <span class="nn" data-nn="3">t<b>9</b>n</span>
-          <b class="nn-sum" id="g48Sum">Σ48</b>
+          <b class="nn-sum" id="g48Sum">g48t</b>
         </div>
         <div class="g48-cov">
           <div class="g48-bar"><i class="tm" id="g48Tm" style="width:100%"></i><i class="mt" id="g48Mt" style="width:0%"></i></div>
           <span id="g48Cov">TM 100% · MT 0%</span>
+        </div>
+        <div class="g48-switch" id="g48Switch" onclick="event.stopPropagation()">
+          <div class="sl">Switch locale</div>
+          <div class="fl"></div>
         </div>
       </div>
       <div class="nodes" style="display:flex;flex-direction:column;gap:6px;">
@@ -3416,20 +3429,26 @@ function runG48(tag, done){
   }, steps.length*STEP + 1250));
 }
 
-/* keep the masthead + top-bar chip in sync with the active locale */
+/* locales worth one tap during a demo — English first so you can always get back */
+const MARQUEE = ["en-US","nb-NO","fr-FR","ja-JP","ar-MA","pt-BR","de-DE"];
+
+/* keep the Tier 6 masthead in sync with the active locale */
 function updateG48Readout(){
   const L = locMeta(), tag = state.locale;
   const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
-  set("g48Flag", L.flag); set("g48Tag", tag); set("g48Dir", L.dir.toUpperCase());
+  set("g48Flag", L.flag); set("g48Tag", tag);
   const nat=document.getElementById("g48Native");
   if(nat) nat.innerHTML = `<b>${L.lang}</b> · ${L.reg}`;
   const tmEl=document.getElementById("g48Tm"), mtEl=document.getElementById("g48Mt");
   if(tmEl) tmEl.style.width = L.tm+"%";
   if(mtEl) mtEl.style.width = (100-L.tm)+"%";
   set("g48Cov", `TM ${L.tm}% · MT ${100-L.tm}% · COMET ${L.comet.toFixed(2)}`);
-  set("lcFlag", L.flag); set("lcTag", tag); set("lcName", L.en);
-  const chip=document.getElementById("localeChip");
-  if(chip) chip.classList.toggle("engaged", tag!=="en-US");
+  const fl=document.querySelector("#g48Switch .fl");
+  if(fl) fl.innerHTML = MARQUEE.map(lt=>{
+    const m=LOC[lt];
+    return `<button class="${lt===tag?'on':''}" onclick="demoLocale('${lt}')"
+      title="${m.lang} · ${m.reg} (${lt})" aria-label="Switch to ${m.en}">${m.flag}</button>`;
+  }).join("");
 }
 
 /* ---- the g48t control screen (reachable from the top-bar locale chip) ---- */
@@ -3437,7 +3456,6 @@ function g48tScreen(){
   const L = locMeta(), tag = state.locale;
   const p = pack(tag);
   const kick = new Date(2026,5,13,20,0);
-  const marquee = [["NOR","nb-NO"],["FRA","fr-FR"],["JPN","ja-JP"],["MAR","ar-MA"],["BRA","pt-BR"],["GER","de-DE"]];
   /* this is an inspector surface: its copy is English commentary, not product strings,
      so each English run is marked LTR rather than inheriting an RTL locale's direction */
   return appShell(`<span style="text-transform:none">g48t</span>`, `${L.lang} · ${tag}`, `
@@ -3474,10 +3492,6 @@ function g48tScreen(){
         : `No approved catalog for ${L.en} yet — this locale is served by machine translation under LQA review, which is why coverage reads low. It ships, and it is honestly labelled.`}</div>
     </div>
 
-    <div class="eyebrow">Switch locale</div>
-    <div class="chiprow">${marquee.map(([ab,lt])=>`<button class="chip ${lt===tag?'on':''}" onclick="demoLocale('${lt}')">${LOC[lt].flag} ${LOC[lt].lang}</button>`).join("")}</div>
-    <div class="tiny" style="margin:-4px 2px 10px" dir="ltr">Jump straight to a locale to watch the pipeline run again.</div>
-
     <div class="eyebrow">Pipeline · last run</div>
     ${g48Steps(tag).map(s=>`<div class="card listitem" style="margin-bottom:8px;padding:9px 12px" dir="ltr">
       <div class="ico" style="font-size:14px;border-color:rgba(34,211,238,.35)">${DEEPDIVE[s.n].icon}</div>
@@ -3485,9 +3499,10 @@ function g48tScreen(){
       <div class="rt" style="color:#22d3ee">${s.ms}</div></div>`).join("")}
   `);
 }
+/* switch language in place — you stay on whatever screen you were reading,
+   which is the point: you watch that screen change language */
 function demoLocale(tag){
-  if(tag===state.locale){ return; }
-  state.module="g48t";
+  if(tag===state.locale || !state.league){ return; }
   runG48(tag);
 }
 

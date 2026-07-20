@@ -370,6 +370,10 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .mc-cell{background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:10px 12px;}
 .mc-cell .lbl{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:4px;display:flex;gap:5px;align-items:center;}
 .mc-cell b{font-size:12px;line-height:1.35;display:block;color:var(--ink);font-weight:600;}
+/* the Python/ML stack that runs inside the Azure service — a layer below the box */
+.mc-stack{display:flex;flex-wrap:wrap;gap:6px;}
+.mc-stack span{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--g48);
+  border:1px solid rgba(34,211,238,.34);background:rgba(34,211,238,.07);border-radius:6px;padding:3px 7px;}
 .mc-foot{font-size:11.5px;color:var(--gold);background:rgba(246,195,68,.07);border:1px solid rgba(246,195,68,.3);border-radius:11px;padding:10px 12px;line-height:1.5;display:flex;gap:8px;}
 .mc-foot .k{flex:0 0 auto;}
 
@@ -824,6 +828,7 @@ const DEEPDIVE = {
   locale:{tier:"Tier 6 · Internationalization", icon:"🧭",
     role:"Negotiates the fan's locale the moment they pick a nation — BCP-47 tag, script, text direction, plural category, and every ICU/CLDR format the UI needs (dates, numbers, currency, name order).",
     why:"i18n is the part you cannot bolt on later. Resolving locale once, at the edge of the request, means no screen ever hardcodes a format — the same component renders 1.234,56 kr and ١٬٢٣٤٫٥٦ ر.س without a branch.",
+    built:["Python · Babel","PyICU / ICU4C","Unicode CLDR","Pydantic"],
     sla:"In-process resolution (<1 ms); CLDR data versioned with the build",
     scale:"50+ languages · 150+ markets · every client platform from one catalog",
     cost:"Negligible compute; cost is in the CLDR/ICU data footprint shipped to clients",
@@ -831,6 +836,7 @@ const DEEPDIVE = {
   mt:{tier:"Tier 6 · Machine Translation", icon:"🔤",
     role:"Serves the neural MT models that fill any string the translation memory can't answer — domain-adapted on football/basketball corpora so 'pitch', 'draw' and 'half' translate as sport, not as music or furniture.",
     why:"A generic MT endpoint mistranslates domain terms and blows the latency budget. Fine-tuning plus distillation and INT8 quantization is what makes on-demand translation viable inside a screen render.",
+    built:["PyTorch","Hugging Face Transformers","NLLB / Marian fine-tunes","ONNX Runtime","bitsandbytes · INT8","vLLM · Triton serving","TensorFlow Lite · on-device drafts"],
     sla:"p95 under 90 ms per segment batch; regional endpoints with failover",
     scale:"Distilled + INT8-quantized checkpoints; batched inference, autoscaled per locale demand",
     cost:"Per-character MT + GPU inference hours for the fine-tuned checkpoints",
@@ -838,6 +844,7 @@ const DEEPDIVE = {
   tmglos:{tier:"Tier 6 · Localization Memory", icon:"📚",
     role:"Retrieval layer over approved translation memory and termbase — vector + exact match on XLIFF/TMX/TBX so previously-approved wording is reused verbatim instead of re-translated.",
     why:"This is RAG applied to localization. A TM hit is free, instant, and already human-approved; only the misses cost an MT call. Retrieval-first is both the quality strategy and the cost strategy.",
+    built:["LangChain retrievers","sentence-transformers","Azure AI Search · vector","XLIFF / TMX / TBX"],
     sla:"Hybrid vector + keyword retrieval, single-digit-ms lookups",
     scale:"Millions of approved segments; per-locale indexes with fuzzy-match thresholds",
     cost:"Vector index storage + query volume; dwarfed by the MT spend it prevents",
@@ -845,6 +852,7 @@ const DEEPDIVE = {
   lqa:{tier:"Tier 6 · Agentic QA", icon:"🕵️",
     role:"A ReAct-pattern agent that reviews every generated string: reasons about the segment, calls tools (glossary lookup, placeholder validator, length/overflow check, back-translation), then either accepts or revises and re-checks.",
     why:"Tool-use closes the loop that a single LLM pass leaves open. The agent catches the failures that actually ship bugs — a dropped %@ placeholder, a broken plural, a string that overflows a Watch button — none of which a fluency score would flag.",
+    built:["LangGraph · ReAct loop","LangChain tool calling","Azure OpenAI","Pydantic · structured output"],
     sla:"Async review queue; blocking gate only on high-visibility surfaces",
     scale:"Runs per-segment in parallel; escalates low-confidence items to human reviewers",
     cost:"LLM tokens per review cycle + tool calls; self-correction loops capped per segment",
@@ -852,6 +860,7 @@ const DEEPDIVE = {
   comet:{tier:"Tier 6 · Quality Gate", icon:"📐",
     role:"Scores candidate translations with learned metrics (COMET) alongside lexical ones (BLEU/chrF), tracks them per locale over time, and blocks a release when a locale regresses past threshold.",
     why:"You cannot ship 50 languages on vibes. Automated scoring is the only way to know a model update improved Norwegian without quietly breaking Arabic — and COMET correlates with human judgement far better than BLEU alone.",
+    built:["Unbabel COMET · PyTorch","sacreBLEU · chrF","LangSmith · tracing + eval","MLflow"],
     sla:"Scored in CI on every model or catalog change",
     scale:"Full regression suite per locale per build; sampled human eval on the deltas",
     cost:"Evaluation compute + the human-eval budget the sampling protects",
@@ -859,6 +868,7 @@ const DEEPDIVE = {
   locops:{tier:"Tier 6 · Continuous Localization", icon:"🔁",
     role:"The pipeline itself: extracts strings from the build, pushes to MT + TM, runs the LQA agent and quality gate, and merges approved catalogs back — no manual handoff, no string freeze.",
     why:"Localization stops being a release blocker when it's a pipeline. A new screen merged on Monday is live in every locale by Tuesday, with the same review rigor a manual handoff gave you.",
+    built:["Python","Azure ML Pipelines","MLflow registry","GitHub Actions","pytest · pseudo-localization"],
     sla:"Runs on every merge; catalogs versioned and rollback-able per locale",
     scale:"Every string across every platform surface, 50+ locales, continuously",
     cost:"CI compute + the MT/LLM spend it orchestrates",
@@ -3492,6 +3502,12 @@ function g48tScreen(){
         : `No approved catalog for ${L.en} yet — this locale is served by machine translation under LQA review, which is why coverage reads low. It ships, and it is honestly labelled.`}</div>
     </div>
 
+    <div class="eyebrow">Implementation stack</div>
+    <div class="card" dir="ltr">
+      <div class="mc-stack">${[...new Set(G48_NODES.flatMap(n=>DEEPDIVE[n].built||[]))].map(x=>`<span>${x}</span>`).join("")}</div>
+      <div class="tiny" style="margin-top:9px">The boxes on the canvas are Azure services. This is the Python and ML stack running inside them — open any Tier 6 service for the per-service breakdown.</div>
+    </div>
+
     <div class="eyebrow">Pipeline · last run</div>
     ${g48Steps(tag).map(s=>`<div class="card listitem" style="margin-bottom:8px;padding:9px 12px" dir="ltr">
       <div class="ico" style="font-size:14px;border-color:rgba(34,211,238,.35)">${DEEPDIVE[s.n].icon}</div>
@@ -3804,6 +3820,7 @@ function openDeepDive(id){
     <div class="mc-body">
       <div class="mc-row"><div class="lbl">⚙ Role in this platform</div><p>${d.role}</p></div>
       <div class="mc-row"><div class="lbl">★ Why this service</div><p>${d.why}</p></div>
+      ${d.built?`<div class="mc-row"><div class="lbl">⌗ Built with</div><div class="mc-stack">${d.built.map(x=>`<span>${x}</span>`).join("")}</div></div>`:""}
       <div class="mc-grid">
         <div class="mc-cell"><div class="lbl">⏱ SLA</div><b>${d.sla}</b></div>
         <div class="mc-cell"><div class="lbl">📈 Scale</div><b>${d.scale}</b></div>

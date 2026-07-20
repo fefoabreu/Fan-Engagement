@@ -36,6 +36,7 @@
   --az:#2899f5; --az-deep:#0a6ed1; --az-bg:#0e2236;
   --nba-red:#c8102e; --nba-blue:#1d428a;
   --edge:#8b7bff; --app:#ff7a45; --ai:#2899f5; --data:#2bb673; --gov:#ff5d8f;
+  --g48:#22d3ee; --g48-deep:#0891a8;
   --gold:#f6c344;
   --shadow:0 18px 50px rgba(0,0,0,.5);
 }
@@ -88,7 +89,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .brainTrigger{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);
   border-radius:11px;padding:5px 11px 5px 12px;transition:.2s;min-width:178px;}
 .brainTrigger:hover{border-color:var(--line2);}
-.brainTrigger.live{border-color:rgba(40,153,245,.6);box-shadow:0 0 0 1px rgba(40,153,245,.35),0 6px 18px rgba(40,153,245,.18);}
+.brainTrigger.engaged{border-color:rgba(40,153,245,.6);box-shadow:0 0 0 1px rgba(40,153,245,.35),0 6px 18px rgba(40,153,245,.18);}
 .brainTrigger .bt-ic{font-size:16px;line-height:1;display:inline-block;}
 .brainTrigger.pulse .bt-ic{animation:ballspin .85s cubic-bezier(.25,.7,.3,1);}
 @keyframes ballspin{from{transform:rotate(0);}to{transform:rotate(360deg);}}
@@ -118,11 +119,22 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .cluster .clabel::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--tc,var(--ink-faint));box-shadow:0 0 8px var(--tc);}
 .cl-clients{top:18px;left:50%;transform:translateX(-50%);width:560px;}
 .cl-clients .nodes{flex-direction:row;display:flex;gap:8px;justify-content:center;}
-.cl-edge{top:96px;left:24px;}
-.cl-ai{bottom:150px;left:24px;}
-.cl-exp{top:96px;right:24px;}
-.cl-data{bottom:150px;right:24px;}
 .cl-gov{bottom:16px;left:50%;transform:translateX(-50%);width:660px;}
+
+/* ---- vertical rails: clusters stack instead of floating to corners ---- */
+.rail{position:absolute;top:96px;z-index:8;display:flex;flex-direction:column;gap:15px;}
+.rail-l{left:24px;} .rail-r{right:24px;}
+.rail .cluster{position:relative;top:auto;left:auto;right:auto;bottom:auto;transform:none;}
+.rail-r .cluster{width:214px;}
+/* second group inside a merged cluster */
+.cluster .clabel.sub{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);}
+/* g48t is a numeronym like i18n — it stays lowercase even in an uppercased label */
+.clabel .lc{text-transform:none;font-weight:600;color:var(--g48);letter-spacing:.04em;}
+/* dense variant so the merged rail fits without scrolling */
+.cluster.dense .node{padding:6px 10px;}
+.cluster.dense .node .nm{font-size:11.5px;}
+.cluster.dense .node .ty{font-size:8px;margin-top:2px;}
+.cluster.dense .nodes{gap:6px !important;}
 .cl-gov .nodes{flex-direction:row;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
 
 .node{position:relative;background:linear-gradient(180deg,var(--panel2),var(--panel));
@@ -225,6 +237,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .btn.ghost{background:var(--panel2);border:1px solid var(--line2);color:var(--ink);box-shadow:none;}
 .live{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;color:#fff;
   background:var(--nba-red);padding:3px 8px;border-radius:6px;letter-spacing:.08em;}
+.live{white-space:nowrap;}
 .live::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:blink 1s steps(2) infinite;}
 @keyframes blink{50%{opacity:.25;}}
 .muted{color:var(--ink-soft);font-size:12px;line-height:1.5;}
@@ -354,10 +367,107 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .mc-foot{font-size:11.5px;color:var(--gold);background:rgba(246,195,68,.07);border:1px solid rgba(246,195,68,.3);border-radius:11px;padding:10px 12px;line-height:1.5;display:flex;gap:8px;}
 .mc-foot .k{flex:0 0 auto;}
 
+/* ============================================================
+   TIER 6 · g48t ENGINE
+   The GILT numeronyms — g11n · i18n · l10n · t9n — sum to 48,
+   which is also the number of nations at World Cup 2026.
+   That coincidence is the masthead.
+   ============================================================ */
+.cl-g48{width:236px;}
+.g48-head{background:linear-gradient(180deg,rgba(34,211,238,.14),rgba(34,211,238,.035));
+  border:1px solid rgba(34,211,238,.34);border-radius:11px;padding:9px 11px 8px;margin-bottom:9px;
+  position:relative;overflow:hidden;transition:box-shadow .3s,border-color .3s;}
+.g48-head.hot{border-color:rgba(34,211,238,.8);box-shadow:0 0 0 1px rgba(34,211,238,.4),0 8px 26px rgba(34,211,238,.22);}
+/* scanning sweep while the pipeline runs */
+.g48-head::after{content:"";position:absolute;top:0;bottom:0;width:44%;left:-50%;
+  background:linear-gradient(90deg,transparent,rgba(34,211,238,.16),transparent);opacity:0;}
+.g48-head.hot::after{opacity:1;animation:g48sweep 1.15s linear infinite;}
+@keyframes g48sweep{to{left:110%;}}
+.g48-loc{display:flex;align-items:baseline;gap:7px;line-height:1;}
+.g48-flag{font-size:15px;line-height:1;}
+.g48-tag{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:#fff;letter-spacing:.01em;}
+.g48-dir{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--g48);
+  border:1px solid rgba(34,211,238,.45);border-radius:4px;padding:1px 4px;margin-left:auto;}
+.g48-native{font-size:11.5px;color:var(--ink-soft);margin-top:3px;line-height:1.2;}
+.g48-native b{color:#fff;font-weight:600;}
+/* the numeronym strip — the signature */
+.g48-nums{display:flex;align-items:center;gap:7px;margin-top:8px;padding-top:7px;border-top:1px solid rgba(34,211,238,.2);}
+.nn{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-faint);transition:color .3s,text-shadow .3s;}
+.nn b{font-weight:700;}
+.nn.lit{color:var(--g48);text-shadow:0 0 9px rgba(34,211,238,.75);}
+.nn-sum{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
+  color:var(--ink-faint);letter-spacing:.02em;transition:color .35s,text-shadow .35s,transform .35s;}
+.nn-sum.lit{color:var(--gold);text-shadow:0 0 14px rgba(246,195,68,.65);transform:scale(1.12);}
+/* coverage meter — TM hit vs MT fill, the real localization-ops number */
+.g48-cov{display:flex;align-items:center;gap:6px;margin-top:7px;}
+.g48-bar{flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,.09);overflow:hidden;display:flex;}
+.g48-bar i{display:block;height:100%;transition:width .6s cubic-bezier(.2,.7,.3,1);}
+.g48-bar .tm{background:var(--g48);} .g48-bar .mt{background:var(--gold);opacity:.75;}
+.g48-cov span{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--ink-faint);letter-spacing:.05em;white-space:nowrap;}
+
+/* ===== locale-switch takeover (renders inside the device screen) ===== */
+.g48screen{height:100%;display:flex;flex-direction:column;padding:56px 20px 20px;
+  background:radial-gradient(130% 70% at 50% -8%,rgba(34,211,238,.24),transparent 62%),#04070e;color:var(--ink);}
+.g48screen .eb{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--g48);}
+.g48screen .hop{display:flex;align-items:center;gap:9px;margin:9px 0 3px;}
+.g48screen .hop .from{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-faint);}
+.g48screen .hop .arw{color:var(--g48);font-size:12px;}
+.g48screen .hop .to{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1;color:#fff;letter-spacing:.01em;}
+.g48screen .lang{font-size:12.5px;color:var(--ink-soft);margin-bottom:15px;}
+.g48screen .lang b{color:var(--g48);}
+/* pipeline steps */
+.g48step{display:flex;gap:9px;align-items:flex-start;padding:6px 0;opacity:0;transform:translateX(-8px);
+  animation:g48in .34s cubic-bezier(.2,.7,.3,1) forwards;}
+@keyframes g48in{to{opacity:1;transform:none;}}
+.g48step .pip{width:7px;height:7px;border-radius:2px;background:var(--g48);flex:0 0 auto;margin-top:5px;
+  box-shadow:0 0 9px var(--g48);}
+.g48step .tx{flex:1;min-width:0;}
+.g48step .tx b{font-size:11.5px;display:block;color:#fff;font-weight:600;line-height:1.25;}
+.g48step .tx span{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-faint);display:block;margin-top:2px;line-height:1.35;}
+.g48step .ms{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--g48);flex:0 0 auto;margin-top:3px;}
+/* the string morph — real UI strings changing language */
+.g48morph{margin-top:auto;border-top:1px solid rgba(34,211,238,.24);padding-top:11px;}
+.g48morph .mh{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:7px;}
+.g48row{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11.5px;opacity:0;animation:g48in .3s ease forwards;}
+.g48row .src{color:var(--ink-faint);text-decoration:line-through;text-decoration-color:rgba(255,255,255,.25);white-space:nowrap;}
+.g48row .arw{color:var(--g48);font-size:10px;}
+.g48row .dst{color:#fff;font-weight:600;}
+.g48row .tag{font-family:'IBM Plex Mono',monospace;font-size:7.5px;letter-spacing:.06em;padding:1px 4px;border-radius:3px;margin-left:auto;flex:0 0 auto;}
+.g48row .tag.tm{color:var(--g48);border:1px solid rgba(34,211,238,.4);}
+.g48row .tag.mt{color:var(--gold);border:1px solid rgba(246,195,68,.4);}
+
+/* locale chip in the top bar */
+.localeChip{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);
+  border-radius:11px;padding:6px 11px;transition:.2s;}
+.localeChip:hover{border-color:rgba(34,211,238,.5);}
+.localeChip.engaged{border-color:rgba(34,211,238,.55);box-shadow:0 0 0 1px rgba(34,211,238,.28);}
+.localeChip .lc-fl{font-size:14px;line-height:1;}
+.localeChip .lc-tx{display:flex;flex-direction:column;line-height:1.1;text-align:left;}
+.localeChip .lc-tx b{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;color:#fff;}
+.localeChip .lc-tx span{font-size:8.5px;color:var(--ink-faint);letter-spacing:.1em;text-transform:uppercase;}
+
+/* right-to-left app rendering */
+.app[dir="rtl"] .app-head,.app[dir="rtl"] .listitem,.app[dir="rtl"] .scorebar{direction:rtl;}
+.app[dir="rtl"] .eyebrow{flex-direction:row-reverse;}
+
+@media (max-width:1320px){
+  .rail-r .cluster{width:196px;} .cl-g48{width:212px;}
+}
 @media (max-width:1180px){
-  .cluster{width:170px;} .cl-edge,.cl-ai{left:12px;} .cl-exp,.cl-data{right:12px;}
+  .cluster{width:170px;} .rail-l{left:12px;} .rail-r{right:12px;}
+  .rail-r .cluster{width:176px;} .cl-g48{width:190px;}
+}
+/* the device frame is a fixed height — scale the dock so it never collides with
+   the Tier 0 clients row above or the governance rail below on laptop screens */
+@media (max-height:940px){ .dock{transform:translate(-50%,-50%) scale(.90);} }
+@media (max-height:880px){ .dock{transform:translate(-50%,-50%) scale(.84);} }
+@media (max-height:800px){ .dock{transform:translate(-50%,-50%) scale(.78);} }
+@media (max-height:860px){
+  .rail{gap:10px;} .cluster.dense .node .ty{display:none;}
+  .cluster.dense .node{padding:5px 10px;}
 }
 @media (max-width:920px){
+  .rail{display:none;}
   .cluster:not(.cl-clients):not(.cl-gov){display:none;}
   .brainpanel{right:10px;width:min(344px,94vw);}
 }
@@ -388,6 +498,11 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
     </div>
   </div>
 
+  <button class="localeChip" id="localeChip" onclick="go('g48t')" title="Tier 6 · g48t engine — inspect the active locale">
+    <span class="lc-fl" id="lcFlag">🌐</span>
+    <span class="lc-tx"><b id="lcTag">en-US</b><span id="lcName">locale</span></span>
+  </button>
+
   <button class="brainTrigger" id="brainTrigger" onclick="toggleBrain()">
     <span class="bt-ic" id="btIcon">🏀</span>
     <span class="bt-tx"><b id="btTitle">Architecture</b><span id="btMeta">idle · tap to inspect</span></span>
@@ -409,45 +524,76 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
     </div>
   </div>
 
-  <div class="cluster cl-edge" style="--tc:var(--edge)">
-    <div class="clabel">Tier 1 · Edge &amp; Identity</div>
-    <div class="nodes" style="display:flex;flex-direction:column;gap:8px;">
-      <div class="node" data-node="frontdoor" style="--nc:var(--edge)"><div class="az"></div><div class="nm">Front Door + WAF</div><div class="ty">global edge · L7</div></div>
-      <div class="node" data-node="ddos" style="--nc:var(--edge)"><div class="az"></div><div class="nm">DDoS Protection</div><div class="ty">network</div></div>
-      <div class="node" data-node="entra" style="--nc:var(--edge)"><div class="az"></div><div class="nm">Entra External ID</div><div class="ty">fan identity</div></div>
-      <div class="node" data-node="apim" style="--nc:var(--edge)"><div class="az"></div><div class="nm">API Management</div><div class="ty">api gateway</div></div>
+  <!-- LEFT RAIL · Tier 1 edge, then the Tier 6 g48t engine -->
+  <div class="rail rail-l">
+    <div class="cluster cl-edge" style="--tc:var(--edge)">
+      <div class="clabel">Tier 1 · Edge &amp; Identity</div>
+      <div class="nodes" style="display:flex;flex-direction:column;gap:8px;">
+        <div class="node" data-node="frontdoor" style="--nc:var(--edge)"><div class="az"></div><div class="nm">Front Door + WAF</div><div class="ty">global edge · L7</div></div>
+        <div class="node" data-node="ddos" style="--nc:var(--edge)"><div class="az"></div><div class="nm">DDoS Protection</div><div class="ty">network</div></div>
+        <div class="node" data-node="entra" style="--nc:var(--edge)"><div class="az"></div><div class="nm">Entra External ID</div><div class="ty">fan identity</div></div>
+        <div class="node" data-node="apim" style="--nc:var(--edge)"><div class="az"></div><div class="nm">API Management</div><div class="ty">api gateway</div></div>
+      </div>
+    </div>
+
+    <div class="cluster cl-g48 dense" style="--tc:var(--g48)">
+      <div class="clabel">Tier 6 · <span class="lc">g48t</span> Engine</div>
+      <!-- live locale readout: the numeronyms g11n+i18n+l10n+t9n = 48 -->
+      <div class="g48-head" id="g48Head" title="g11n + i18n + l10n + t9n — the four GILT numeronyms sum to 48, the number of nations at World Cup 2026">
+        <div class="g48-loc"><span class="g48-flag" id="g48Flag">🌐</span><span class="g48-tag" id="g48Tag">en-US</span><span class="g48-dir" id="g48Dir">LTR</span></div>
+        <div class="g48-native" id="g48Native"><b>English</b> · United States</div>
+        <div class="g48-nums" id="g48Nums">
+          <span class="nn" data-nn="0">g<b>11</b>n</span>
+          <span class="nn" data-nn="1">i<b>18</b>n</span>
+          <span class="nn" data-nn="2">l<b>10</b>n</span>
+          <span class="nn" data-nn="3">t<b>9</b>n</span>
+          <b class="nn-sum" id="g48Sum">Σ48</b>
+        </div>
+        <div class="g48-cov">
+          <div class="g48-bar"><i class="tm" id="g48Tm" style="width:100%"></i><i class="mt" id="g48Mt" style="width:0%"></i></div>
+          <span id="g48Cov">TM 100% · MT 0%</span>
+        </div>
+      </div>
+      <div class="nodes" style="display:flex;flex-direction:column;gap:6px;">
+        <div class="node" data-node="locale" style="--nc:var(--g48)"><div class="az"></div><div class="nm">Locale Resolver</div><div class="ty">i18n · ICU · CLDR</div></div>
+        <div class="node" data-node="mt" style="--nc:var(--g48)"><div class="az"></div><div class="nm">Neural MT Serving</div><div class="ty">t9n · quantized · distilled</div></div>
+        <div class="node" data-node="tmglos" style="--nc:var(--g48)"><div class="az"></div><div class="nm">TM + Glossary RAG</div><div class="ty">l10n · XLIFF · vector</div></div>
+        <div class="node" data-node="lqa" style="--nc:var(--g48)"><div class="az"></div><div class="nm">LQA Agent · ReAct</div><div class="ty">tool-use · self-correct</div></div>
+        <div class="node" data-node="comet" style="--nc:var(--g48)"><div class="az"></div><div class="nm">COMET / BLEU Eval</div><div class="ty">quality gate · MLOps</div></div>
+        <div class="node" data-node="locops" style="--nc:var(--g48)"><div class="az"></div><div class="nm">Continuous Loc Pipeline</div><div class="ty">g11n · CI/CD · 50+ locales</div></div>
+      </div>
     </div>
   </div>
 
-  <div class="cluster cl-ai" style="--tc:var(--ai)">
-    <div class="clabel">Tier 4 · AI Office Core</div>
-    <div class="nodes" style="display:flex;flex-direction:column;gap:8px;">
-      <div class="node" data-node="aoai" style="--nc:var(--ai)"><div class="az"></div><div class="nm">Azure OpenAI / AI Foundry</div><div class="ty">generative · agent</div></div>
-      <div class="node" data-node="search" style="--nc:var(--ai)"><div class="az"></div><div class="nm">Azure AI Search</div><div class="ty">rag · retrieval</div></div>
-      <div class="node" data-node="aml" style="--nc:var(--ai)"><div class="az"></div><div class="nm">Azure Machine Learning</div><div class="ty">recommenders</div></div>
-      <div class="node" data-node="vindex" style="--nc:var(--ai)"><div class="az"></div><div class="nm">AI Video Indexer</div><div class="ty">video ai</div></div>
+  <!-- RIGHT RAIL · Tiers 2–3 and 4 merged, then Tier 5 -->
+  <div class="rail rail-r">
+    <div class="cluster cl-exp dense" style="--tc:var(--app)">
+      <div class="clabel">Tier 2–3 · App &amp; Channels</div>
+      <div class="nodes" style="display:flex;flex-direction:column;gap:6px;">
+        <div class="node" data-node="appsvc" style="--nc:var(--app)"><div class="az"></div><div class="nm">App Service / AKS</div><div class="ty">the hub</div></div>
+        <div class="node" data-node="cdn" style="--nc:var(--app)"><div class="az"></div><div class="nm">Azure CDN</div><div class="ty">delivery</div></div>
+        <div class="node" data-node="media" style="--nc:var(--app)"><div class="az"></div><div class="nm">Media Partner Encode</div><div class="ty">live video</div></div>
+        <div class="node" data-node="commerce" style="--nc:var(--app)"><div class="az"></div><div class="nm">Dynamics 365 Commerce</div><div class="ty">commerce</div></div>
+        <div class="node" data-node="maps" style="--nc:var(--app)"><div class="az"></div><div class="nm">Azure Maps</div><div class="ty">venue · wayfind</div></div>
+      </div>
+      <div class="clabel sub" style="--tc:var(--ai)">Tier 4 · AI Office Core</div>
+      <div class="nodes" style="display:flex;flex-direction:column;gap:6px;">
+        <div class="node" data-node="aoai" style="--nc:var(--ai)"><div class="az"></div><div class="nm">Azure OpenAI / AI Foundry</div><div class="ty">generative · agent</div></div>
+        <div class="node" data-node="search" style="--nc:var(--ai)"><div class="az"></div><div class="nm">Azure AI Search</div><div class="ty">rag · retrieval</div></div>
+        <div class="node" data-node="aml" style="--nc:var(--ai)"><div class="az"></div><div class="nm">Azure Machine Learning</div><div class="ty">recommenders</div></div>
+        <div class="node" data-node="vindex" style="--nc:var(--ai)"><div class="az"></div><div class="nm">AI Video Indexer</div><div class="ty">video ai</div></div>
+      </div>
     </div>
-  </div>
 
-  <div class="cluster cl-exp" style="--tc:var(--app)">
-    <div class="clabel">Tier 2–3 · App &amp; Channels</div>
-    <div class="nodes" style="display:flex;flex-direction:column;gap:8px;">
-      <div class="node" data-node="appsvc" style="--nc:var(--app)"><div class="az"></div><div class="nm">App Service / AKS</div><div class="ty">the hub</div></div>
-      <div class="node" data-node="cdn" style="--nc:var(--app)"><div class="az"></div><div class="nm">Azure CDN</div><div class="ty">delivery</div></div>
-      <div class="node" data-node="media" style="--nc:var(--app)"><div class="az"></div><div class="nm">Media Partner Encode</div><div class="ty">live video</div></div>
-      <div class="node" data-node="commerce" style="--nc:var(--app)"><div class="az"></div><div class="nm">Dynamics 365 Commerce</div><div class="ty">commerce</div></div>
-      <div class="node" data-node="maps" style="--nc:var(--app)"><div class="az"></div><div class="nm">Azure Maps</div><div class="ty">venue · wayfind</div></div>
-    </div>
-  </div>
-
-  <div class="cluster cl-data" style="--tc:var(--data)">
-    <div class="clabel">Tier 5 · Data &amp; Analytics</div>
-    <div class="nodes" style="display:flex;flex-direction:column;gap:8px;">
-      <div class="node" data-node="fabric" style="--nc:var(--data)"><div class="az"></div><div class="nm">Microsoft Fabric</div><div class="ty">Fan 360 · lakehouse</div></div>
-      <div class="node" data-node="eventhubs" style="--nc:var(--data)"><div class="az"></div><div class="nm">Event Hubs</div><div class="ty">ingestion</div></div>
-      <div class="node" data-node="stream" style="--nc:var(--data)"><div class="az"></div><div class="nm">Stream Analytics</div><div class="ty">real-time</div></div>
-      <div class="node" data-node="cosmos" style="--nc:var(--data)"><div class="az"></div><div class="nm">Cosmos DB / Azure SQL</div><div class="ty">operational</div></div>
-      <div class="node" data-node="lake" style="--nc:var(--data)"><div class="az"></div><div class="nm">Data Lake Storage</div><div class="ty">storage</div></div>
+    <div class="cluster cl-data dense" style="--tc:var(--data)">
+      <div class="clabel">Tier 5 · Data &amp; Analytics</div>
+      <div class="nodes" style="display:flex;flex-direction:column;gap:6px;">
+        <div class="node" data-node="fabric" style="--nc:var(--data)"><div class="az"></div><div class="nm">Microsoft Fabric</div><div class="ty">Fan 360 · lakehouse</div></div>
+        <div class="node" data-node="eventhubs" style="--nc:var(--data)"><div class="az"></div><div class="nm">Event Hubs</div><div class="ty">ingestion</div></div>
+        <div class="node" data-node="stream" style="--nc:var(--data)"><div class="az"></div><div class="nm">Stream Analytics</div><div class="ty">real-time</div></div>
+        <div class="node" data-node="cosmos" style="--nc:var(--data)"><div class="az"></div><div class="nm">Cosmos DB / Azure SQL</div><div class="ty">operational</div></div>
+        <div class="node" data-node="lake" style="--nc:var(--data)"><div class="az"></div><div class="nm">Data Lake Storage</div><div class="ty">storage</div></div>
+      </div>
     </div>
   </div>
 
@@ -498,6 +644,8 @@ const NODE_META = {
   web:{n:"Web App",c:"#8a93a8"}, ios:{n:"iOS / Android",c:"#8a93a8"}, signalr:{n:"Web PubSub / SignalR",c:"#8a93a8"},
   frontdoor:{n:"Front Door + WAF",c:"#8b7bff"}, ddos:{n:"DDoS Protection",c:"#8b7bff"}, entra:{n:"Entra External ID",c:"#8b7bff"}, apim:{n:"API Management",c:"#8b7bff"},
   appsvc:{n:"App Service / AKS",c:"#ff7a45"}, cdn:{n:"Azure CDN",c:"#ff7a45"}, media:{n:"Media Partner Encode",c:"#ff7a45"}, commerce:{n:"Dynamics 365 Commerce",c:"#ff7a45"}, maps:{n:"Azure Maps",c:"#ff7a45"},
+  locale:{n:"Locale Resolver",c:"#22d3ee"}, mt:{n:"Neural MT Serving",c:"#22d3ee"}, tmglos:{n:"TM + Glossary RAG",c:"#22d3ee"},
+  lqa:{n:"LQA Agent · ReAct",c:"#22d3ee"}, comet:{n:"COMET / BLEU Eval",c:"#22d3ee"}, locops:{n:"Continuous Loc Pipeline",c:"#22d3ee"},
   aoai:{n:"Azure OpenAI / AI Foundry",c:"#2899f5"}, search:{n:"Azure AI Search",c:"#2899f5"}, aml:{n:"Azure Machine Learning",c:"#2899f5"}, vindex:{n:"AI Video Indexer",c:"#2899f5"},
   fabric:{n:"Microsoft Fabric",c:"#2bb673"}, eventhubs:{n:"Event Hubs",c:"#2bb673"}, stream:{n:"Stream Analytics",c:"#2bb673"}, cosmos:{n:"Cosmos DB / Azure SQL",c:"#2bb673"}, lake:{n:"Data Lake Storage",c:"#2bb673"},
   defender:{n:"Defender for Cloud",c:"#ff5d8f"}, sentinel:{n:"Microsoft Sentinel",c:"#ff5d8f"}, purview:{n:"Microsoft Purview",c:"#ff5d8f"}, keyvault:{n:"Key Vault",c:"#ff5d8f"}
@@ -657,7 +805,51 @@ const DEEPDIVE = {
     why:"Nothing sensitive in app config or code; managed identities pull secrets at runtime with full audit.",
     sla:"99.99%", scale:"High-throughput secret/key ops; HSM-backed (Premium)",
     cost:"Per operation + per key/cert; Premium HSM keys cost more",
-    note:"Pair with Managed Identity so services authenticate without ever holding a credential."}
+    note:"Pair with Managed Identity so services authenticate without ever holding a credential."},
+
+  /* ---------- Tier 6 · g48t engine ---------- */
+  locale:{tier:"Tier 6 · Internationalization", icon:"🧭",
+    role:"Negotiates the fan's locale the moment they pick a nation — BCP-47 tag, script, text direction, plural category, and every ICU/CLDR format the UI needs (dates, numbers, currency, name order).",
+    why:"i18n is the part you cannot bolt on later. Resolving locale once, at the edge of the request, means no screen ever hardcodes a format — the same component renders 1.234,56 kr and ١٬٢٣٤٫٥٦ ر.س without a branch.",
+    sla:"In-process resolution (<1 ms); CLDR data versioned with the build",
+    scale:"50+ languages · 150+ markets · every client platform from one catalog",
+    cost:"Negligible compute; cost is in the CLDR/ICU data footprint shipped to clients",
+    note:"Pseudo-localization in CI (accented + 40% expansion) catches clipped layouts before a translator is ever paid."},
+  mt:{tier:"Tier 6 · Machine Translation", icon:"🔤",
+    role:"Serves the neural MT models that fill any string the translation memory can't answer — domain-adapted on football/basketball corpora so 'pitch', 'draw' and 'half' translate as sport, not as music or furniture.",
+    why:"A generic MT endpoint mistranslates domain terms and blows the latency budget. Fine-tuning plus distillation and INT8 quantization is what makes on-demand translation viable inside a screen render.",
+    sla:"p95 under 90 ms per segment batch; regional endpoints with failover",
+    scale:"Distilled + INT8-quantized checkpoints; batched inference, autoscaled per locale demand",
+    cost:"Per-character MT + GPU inference hours for the fine-tuned checkpoints",
+    note:"Quantization pays twice — the latency win is obvious, but the memory win is what lets you hold many locale-adapted checkpoints warm on one GPU."},
+  tmglos:{tier:"Tier 6 · Localization Memory", icon:"📚",
+    role:"Retrieval layer over approved translation memory and termbase — vector + exact match on XLIFF/TMX/TBX so previously-approved wording is reused verbatim instead of re-translated.",
+    why:"This is RAG applied to localization. A TM hit is free, instant, and already human-approved; only the misses cost an MT call. Retrieval-first is both the quality strategy and the cost strategy.",
+    sla:"Hybrid vector + keyword retrieval, single-digit-ms lookups",
+    scale:"Millions of approved segments; per-locale indexes with fuzzy-match thresholds",
+    cost:"Vector index storage + query volume; dwarfed by the MT spend it prevents",
+    note:"The termbase is non-negotiable ground truth — team names, sponsor marks and legal copy are pinned so no model may creatively rewrite them."},
+  lqa:{tier:"Tier 6 · Agentic QA", icon:"🕵️",
+    role:"A ReAct-pattern agent that reviews every generated string: reasons about the segment, calls tools (glossary lookup, placeholder validator, length/overflow check, back-translation), then either accepts or revises and re-checks.",
+    why:"Tool-use closes the loop that a single LLM pass leaves open. The agent catches the failures that actually ship bugs — a dropped %@ placeholder, a broken plural, a string that overflows a Watch button — none of which a fluency score would flag.",
+    sla:"Async review queue; blocking gate only on high-visibility surfaces",
+    scale:"Runs per-segment in parallel; escalates low-confidence items to human reviewers",
+    cost:"LLM tokens per review cycle + tool calls; self-correction loops capped per segment",
+    note:"Bound the reason→act loop. An agent allowed to iterate forever on an ambiguous string burns budget and still ends up needing a human."},
+  comet:{tier:"Tier 6 · Quality Gate", icon:"📐",
+    role:"Scores candidate translations with learned metrics (COMET) alongside lexical ones (BLEU/chrF), tracks them per locale over time, and blocks a release when a locale regresses past threshold.",
+    why:"You cannot ship 50 languages on vibes. Automated scoring is the only way to know a model update improved Norwegian without quietly breaking Arabic — and COMET correlates with human judgement far better than BLEU alone.",
+    sla:"Scored in CI on every model or catalog change",
+    scale:"Full regression suite per locale per build; sampled human eval on the deltas",
+    cost:"Evaluation compute + the human-eval budget the sampling protects",
+    note:"Automated metrics rank systems; they don't certify quality. Keep human evaluation on a sampled basis or the gate slowly drifts away from what fans actually read."},
+  locops:{tier:"Tier 6 · Continuous Localization", icon:"🔁",
+    role:"The pipeline itself: extracts strings from the build, pushes to MT + TM, runs the LQA agent and quality gate, and merges approved catalogs back — no manual handoff, no string freeze.",
+    why:"Localization stops being a release blocker when it's a pipeline. A new screen merged on Monday is live in every locale by Tuesday, with the same review rigor a manual handoff gave you.",
+    sla:"Runs on every merge; catalogs versioned and rollback-able per locale",
+    scale:"Every string across every platform surface, 50+ locales, continuously",
+    cost:"CI compute + the MT/LLM spend it orchestrates",
+    note:"Version catalogs independently of the app binary — that way you can fix a bad translation in one market without shipping a new build."}
 };
 
 /* ============================================================
@@ -819,6 +1011,17 @@ const MODULES = {
       ["aoai","Azure OpenAI writes the fun one-liner — 'hasn't missed a home opener in 30 years.'"],
       ["signalr","SignalR pushes a 'just spotted' alert the instant a new face is matched courtside."],
       ["purview","Microsoft Purview enforces consent — only opted-in public figures surface; private fans are never shown."]
+    ]},
+  g48t:{ title:"g48t · Locale Engine", icon:"🌐", type:"globalization pipeline",
+    nodes:["locale","tmglos","mt","lqa","comet","locops","aoai","search","cosmos","cdn","apim","frontdoor"],
+    story:[
+      ["locale","<b>i18n:</b> picking a nation resolves a full locale — BCP-47 tag, script, text direction, plural rules and every ICU/CLDR date, number and currency format."],
+      ["tmglos","<b>l10n:</b> approved translation memory and termbase are retrieved first (vector + exact match over XLIFF/TBX). A TM hit is free, instant and already human-approved."],
+      ["mt","<b>t9n:</b> only the misses reach neural MT — domain-adapted on sport corpora, then distilled and INT8-quantized to stay inside the render latency budget."],
+      ["lqa","A <b>ReAct agent</b> reviews each segment: reason → call a tool (glossary, placeholder validator, length check, back-translation) → revise → re-check."],
+      ["comet","<b>COMET</b> and BLEU/chrF score every candidate per locale. A regression past threshold blocks the release; sampled human eval keeps the metrics honest."],
+      ["locops","<b>g11n:</b> the whole loop runs continuously in CI — strings extracted on merge, catalogs versioned per locale, rollback without shipping a binary."],
+      ["cdn","Localized catalogs and locale-specific media ship from the edge, so a fan in Oslo and a fan in Osaka both get a first paint in their own language."]
     ]}
 };
 
@@ -979,9 +1182,9 @@ const SCREENS = {
           <div class="mid"><span class="sc">78</span><span class="sc" style="opacity:.5"> · </span><span class="sc">74</span><div class="tiny" style="margin-top:4px">7:42 remaining</div></div>
           <div class="t">${logo(opp(fan.team))}<span class="nm">${opp(fan.team)}</span></div>
         </div>
-        <button class="btn blue" style="margin-top:12px" onclick="go('live')">▶ Watch ${state.mode==='venue'?'Replays & POV':'Live · Player POV'}</button>
+        <button class="btn blue" style="margin-top:12px" onclick="go('live')">▶ ${state.mode==='venue'?'Watch Replays &amp; POV':T("watchlive")}</button>
       </div>
-      <div class="eyebrow">Trending for you</div>
+      <div class="eyebrow">${T("trending")}</div>
       <div class="card tap listitem" onclick="go('highlights')"><div class="ico">🎬</div><div class="gr"><b>${fan.player}: Top 5 plays</b><span>Auto-clipped · AI Video Indexer</span></div><div class="rt">2m</div></div>
       <div class="card tap listitem" onclick="go('trivia')"><div class="ico">🧠</div><div class="gr"><b>On this day: ${t.name} history</b><span>Daily trivia drop</span></div><div class="rt">Play</div></div>
       <div class="card tap listitem" onclick="go('events')"><div class="ico">📍</div><div class="gr"><b>${fan.player.split(" ")[0]} hosts a youth camp</b><span>This weekend · near you</span></div><div class="rt">2.4mi</div></div>
@@ -1628,7 +1831,7 @@ const FIFA_STORIES = {
 const FIFA_SCREENS = {
   setup(){
     if(!fan.team){
-      return appShell("Pick Your Nation", "Step 1 of 2 · build your Fan 360", `
+      return appShell(T("picknation"), "Step 1 of 2 · build your Fan 360", `
         <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI:</b> Welcome to World Cup 2026! Choose your nation and I'll personalize everything — your feed, your POV, your memory lane.</div></div>
         <div class="grid2">
           ${Object.keys(TEAMS).map(ab=>`<div class="card tap" onclick="pickTeam('${ab}')" style="display:flex;align-items:center;gap:10px;margin:0;min-width:0;">
@@ -1636,17 +1839,23 @@ const FIFA_SCREENS = {
         </div>`, false);
     }
     const t=TEAMS[fan.team]; const roster=ROSTERS[fan.team];
-    return appShell("Pick Your Player", "Step 2 of 2 · "+t.city+" · "+t.name, `
+    const lt = LOC[localeFor(fan.team)] || LOC["en-US"];
+    return appShell(T("pickplayer"), "Step 2 of 2 · "+t.city+" · "+t.name, `
       <div class="ailine"><div class="sp">✦</div><div class="tx"><b>Azure OpenAI:</b> Great pick. Who's your guy? You'll get their POV cam, news & local events.</div></div>
+      <div class="card" style="border-color:rgba(34,211,238,.4);background:linear-gradient(180deg,rgba(34,211,238,.09),transparent);display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">${lt.flag}</span>
+        <div style="flex:1"><b style="font-size:12px">Tier 6 will switch this app to ${lt.lang}</b>
+          <div class="tiny">Locale <span class="mono" style="color:#22d3ee">${localeFor(fan.team)}</span> · ${lt.dir.toUpperCase()} · pick a player to run the pipeline</div></div>
+      </div>
       ${roster.map(p=>`<div class="card tap listitem" style="margin-bottom:9px" onclick="pickPlayer('${p.n}')">
         ${playerAvatar(fan.team,p.n,p.no,42)}
-        <div class="gr"><b>${p.n}</b><span>${p.pos} · ${p.note}</span></div><div class="rt">Follow →</div></div>`).join("")}
+        <div class="gr"><b>${p.n}</b><span>${p.pos} · ${p.note}</span></div><div class="rt">${T("follow")} →</div></div>`).join("")}
     `, false);
   },
 
   home(){
     const t=TEAMS[fan.team]; const venue = state.mode==="venue";
-    return appShell("For You", `${t.city} · following ${sname(fan.player)}`, `
+    return appShell(T("foryou"), `${t.city} · ${T("following")} ${sname(fan.player)}`, `
       ${venue?`<div class="card" style="border-color:#c8102e;background:linear-gradient(180deg,rgba(200,16,46,.14),rgba(200,16,46,.03))">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="live">IN STADIUM</span><b style="font-size:12px">Welcome to ${arenaOf(fan.team)}</b></div>
         <div class="muted">Section 104 · Row 12. Your seat upgrade & matchday order are one tap away in the Venue tab.</div></div>`:""}
@@ -1656,22 +1865,22 @@ const FIFA_SCREENS = {
           <div class="ctr"><div class="play">▶</div></div>
           <div class="badge"><span class="chip" style="background:rgba(5,10,20,.5);font-size:10px">🎵 AI HYPE REEL · 0:60</span></div>
         </div>
-        <div style="padding:10px 13px;display:flex;align-items:center;gap:9px"><span style="font-size:16px">🎵</span><div style="flex:1"><b style="font-size:12.5px">Your pre-match hype reel is ready</b><div class="tiny">Generated in the ${t.city} anthem voice · just for you</div></div><span class="rt">Play</span></div>
+        <div style="padding:10px 13px;display:flex;align-items:center;gap:9px"><span style="font-size:16px">🎵</span><div style="flex:1"><b style="font-size:12.5px">${T("hypeready")}</b><div class="tiny">Generated in the ${t.city} anthem voice · just for you</div></div><span class="rt">${T("play")}</span></div>
       </div>
       <div class="row" style="margin-bottom:11px">
-        <div class="card tap" onclick="go('sixthman')" style="margin:0;flex:1;text-align:center"><div style="font-size:22px">🎙</div><b style="font-size:12px;display:block;margin-top:4px">Twelfth Man</b><div class="tiny">AI co-host</div></div>
-        <div class="card tap" onclick="go('haptic')" style="margin:0;flex:1;text-align:center"><div style="font-size:22px">⌚️</div><b style="font-size:12px;display:block;margin-top:4px">Crowd-Sync</b><div class="tiny">feel the stadium</div></div>
+        <div class="card tap" onclick="go('sixthman')" style="margin:0;flex:1;text-align:center"><div style="font-size:22px">🎙</div><b style="font-size:12px;display:block;margin-top:4px">${T("twelfth")}</b><div class="tiny">AI co-host</div></div>
+        <div class="card tap" onclick="go('haptic')" style="margin:0;flex:1;text-align:center"><div style="font-size:22px">⌚️</div><b style="font-size:12px;display:block;margin-top:4px">${T("crowdsync")}</b><div class="tiny">feel the stadium</div></div>
       </div>
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px"><span class="live">LIVE · 2ND HALF</span><span class="tiny">${arenaOf(fan.team)}</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:9px;margin-bottom:11px"><span class="live">${T("live")} · ${T("secondhalf")}</span><span class="tiny" style="text-align:end;min-width:0">${arenaOf(fan.team)}</span></div>
         <div class="scorebar">
           <div class="t">${logo(fan.team)}<span class="nm">${t.ab}</span></div>
           <div class="mid"><span class="sc">2</span><span class="sc" style="opacity:.5"> · </span><span class="sc">1</span><div class="tiny" style="margin-top:4px">62' · added time looms</div></div>
           <div class="t">${logo(opp(fan.team))}<span class="nm">${opp(fan.team)}</span></div>
         </div>
-        <button class="btn blue" style="margin-top:12px" onclick="go('live')">▶ Watch ${state.mode==='venue'?'Replays & POV':'Live · Player POV'}</button>
+        <button class="btn blue" style="margin-top:12px" onclick="go('live')">▶ ${state.mode==='venue'?'Watch Replays &amp; POV':T("watchlive")}</button>
       </div>
-      <div class="eyebrow">Trending for you</div>
+      <div class="eyebrow">${T("trending")}</div>
       <div class="card tap listitem" onclick="go('highlights')"><div class="ico">🎬</div><div class="gr"><b>${fan.player}: Top 5 moments</b><span>Auto-clipped · AI Video Indexer</span></div><div class="rt">2m</div></div>
       <div class="card tap listitem" onclick="go('trivia')"><div class="ico">🧠</div><div class="gr"><b>On this day: ${t.city} at the World Cup</b><span>Daily trivia drop</span></div><div class="rt">Play</div></div>
       <div class="card tap listitem" onclick="go('events')"><div class="ico">📍</div><div class="gr"><b>${fname(fan.player)} hosts a youth clinic</b><span>This weekend · near you</span></div><div class="rt">2.4mi</div></div>
@@ -1690,16 +1899,16 @@ const FIFA_SCREENS = {
       </div>
       <div class="ailine"><div class="sp">✦</div><div class="tx">${fan.pov==='player'?`<b>${fan.player} POV active:</b> tracking-data + AI Video Indexer cut you to his on-ball camera. Win-prob ${t.ab} 61%.`:`<b>Companion mode:</b> sync to your big screen. Tap a player camera to ride along. Win-prob ${t.ab} 61%.`}</div></div>
       <div class="grid3">
-        <div class="stat"><b>58%</b><span>Possession</span></div>
-        <div class="stat"><b>1.9</b><span>${t.ab} xG</span></div>
-        <div class="stat"><b>61%</b><span>Win Prob</span></div>
+        <div class="stat"><b>${fmtPct(58)}</b><span>${T("possession")}</span></div>
+        <div class="stat"><b>${fmtNum(1.9,{minimumFractionDigits:1})}</b><span>${t.ab} xG</span></div>
+        <div class="stat"><b>${fmtPct(61)}</b><span>${T("winprob")}</span></div>
       </div>
-      <div class="eyebrow">Live commentary</div>
+      <div class="eyebrow">${T("livecomm")}</div>
       <div class="card" style="padding:4px 13px">
         <div class="listitem"><div class="ico" style="font-size:13px">⚽</div><div class="gr"><b>${fan.player} — goal, 61'</b><span>curled into the far corner · +1 momentum</span></div><div class="rt">SignalR</div></div>
         <div class="listitem"><div class="ico" style="font-size:13px">🅰</div><div class="gr"><b>Through-ball assist</b><span>54' · cut the back line open</span></div><div class="rt">live</div></div>
       </div>
-      <div class="row"><button class="btn ghost" onclick="go('stats')" style="flex:1">📊 Live stats</button><button class="btn blue" onclick="go('sixthman')" style="flex:1">🎙 Twelfth Man</button></div>
+      <div class="row"><button class="btn ghost" onclick="go('stats')" style="flex:1">📊 ${T("stats")}</button><button class="btn blue" onclick="go('sixthman')" style="flex:1">🎙 ${T("twelfth")}</button></div>
     `);
   },
 
@@ -2126,9 +2335,9 @@ const BRASA_SCREENS = {
           <div class="mid"><span class="sc">2</span><span class="sc" style="opacity:.5"> · </span><span class="sc">1</span><div class="tiny" style="margin-top:4px">62' · acréscimos chegando</div></div>
           <div class="t">${logo(opp(fan.team))}<span class="nm">${opp(fan.team)}</span></div>
         </div>
-        <button class="btn blue" style="margin-top:12px" onclick="go('live')">▶ Watch ${state.mode==='venue'?'Replays & POV':'Live · Player POV'}</button>
+        <button class="btn blue" style="margin-top:12px" onclick="go('live')">▶ ${state.mode==='venue'?'Watch Replays &amp; POV':T("watchlive")}</button>
       </div>
-      <div class="eyebrow">Trending for you</div>
+      <div class="eyebrow">${T("trending")}</div>
       <div class="card tap listitem" onclick="go('highlights')"><div class="ico">🎬</div><div class="gr"><b>${fan.player}: Top 5 lances</b><span>Auto-clipped · AI Video Indexer</span></div><div class="rt">2m</div></div>
       <div class="card tap listitem" onclick="go('trivia')"><div class="ico">🧠</div><div class="gr"><b>On this day: ${t.name} history</b><span>Daily trivia drop</span></div><div class="rt">Play</div></div>
       <div class="card tap listitem" onclick="go('events')"><div class="ico">📍</div><div class="gr"><b>${fname(fan.player)} hosts a youth clinic</b><span>This weekend · near you</span></div><div class="rt">2.4mi</div></div>
@@ -2156,7 +2365,7 @@ const BRASA_SCREENS = {
         <div class="listitem"><div class="ico" style="font-size:13px">⚽</div><div class="gr"><b>${fan.player} — GOL, 61'</b><span>no ângulo · +1 momentum</span></div><div class="rt">SignalR</div></div>
         <div class="listitem"><div class="ico" style="font-size:13px">🅰</div><div class="gr"><b>Assistência de letra</b><span>54' · rasgou a defesa</span></div><div class="rt">live</div></div>
       </div>
-      <div class="row"><button class="btn ghost" onclick="go('stats')" style="flex:1">📊 Live stats</button><button class="btn blue" onclick="go('sixthman')" style="flex:1">🎙 Twelfth Man</button></div>
+      <div class="row"><button class="btn ghost" onclick="go('stats')" style="flex:1">📊 ${T("stats")}</button><button class="btn blue" onclick="go('sixthman')" style="flex:1">🎙 ${T("twelfth")}</button></div>
     `);
   },
 
@@ -2904,11 +3113,390 @@ const F1_SCREENS = {
 };
 
 /* ============================================================
+   TIER 6 · g48t ENGINE
+   ------------------------------------------------------------
+   g11n + i18n + l10n + t9n = 11 + 18 + 10 + 9 = 48.
+   The four GILT numeronyms sum to the number of nations at
+   World Cup 2026 — which is why this engine is called g48t.
+
+   Picking a nation resolves a locale, and the locale drives:
+     · i18n — BCP-47 tag, script, direction, ICU/CLDR formats
+     · l10n — TM + termbase retrieval (approved wording first)
+     · t9n  — neural MT for whatever the memory can't answer
+     · g11n — the continuous pipeline that ships all of it
+   ============================================================ */
+
+/* ---- locale registry: endonym, direction, currency, TM coverage, COMET ---- */
+const LOC = {
+  "en-US":{lang:"English",  en:"English",     reg:"United States",   dir:"ltr", cur:"USD", flag:"🇺🇸", tm:100, comet:1.00},
+  "en-GB":{lang:"English",  en:"English",     reg:"United Kingdom",  dir:"ltr", cur:"GBP", flag:"🇬🇧", tm:99,  comet:0.99},
+  "en-CA":{lang:"English",  en:"English",     reg:"Canada",          dir:"ltr", cur:"CAD", flag:"🇨🇦", tm:98,  comet:0.98},
+  "en-AU":{lang:"English",  en:"English",     reg:"Australia",       dir:"ltr", cur:"AUD", flag:"🇦🇺", tm:98,  comet:0.98},
+  "en-NZ":{lang:"English",  en:"English",     reg:"New Zealand",     dir:"ltr", cur:"NZD", flag:"🇳🇿", tm:97,  comet:0.98},
+  "en-ZA":{lang:"English",  en:"English",     reg:"South Africa",    dir:"ltr", cur:"ZAR", flag:"🇿🇦", tm:96,  comet:0.97},
+  "en-GH":{lang:"English",  en:"English",     reg:"Ghana",           dir:"ltr", cur:"GHS", flag:"🇬🇭", tm:95,  comet:0.97},
+  "fr-FR":{lang:"Français", en:"French",      reg:"France",          dir:"ltr", cur:"EUR", flag:"🇫🇷", tm:98,  comet:0.91},
+  "fr-CA":{lang:"Français", en:"French",      reg:"Canada",          dir:"ltr", cur:"CAD", flag:"🇨🇦", tm:95,  comet:0.90},
+  "fr-SN":{lang:"Français", en:"French",      reg:"Senegal",         dir:"ltr", cur:"XOF", flag:"🇸🇳", tm:88,  comet:0.88},
+  "fr-CI":{lang:"Français", en:"French",      reg:"Côte d'Ivoire",   dir:"ltr", cur:"XOF", flag:"🇨🇮", tm:88,  comet:0.88},
+  "fr-CD":{lang:"Français", en:"French",      reg:"DR Congo",        dir:"ltr", cur:"CDF", flag:"🇨🇩", tm:86,  comet:0.87},
+  "fr-HT":{lang:"Français", en:"French",      reg:"Haiti",           dir:"ltr", cur:"HTG", flag:"🇭🇹", tm:85,  comet:0.87},
+  "es-ES":{lang:"Español",  en:"Spanish",     reg:"Spain",           dir:"ltr", cur:"EUR", flag:"🇪🇸", tm:98,  comet:0.92},
+  "es-AR":{lang:"Español",  en:"Spanish",     reg:"Argentina",       dir:"ltr", cur:"ARS", flag:"🇦🇷", tm:96,  comet:0.91},
+  "es-MX":{lang:"Español",  en:"Spanish",     reg:"Mexico",          dir:"ltr", cur:"MXN", flag:"🇲🇽", tm:97,  comet:0.92},
+  "es-CO":{lang:"Español",  en:"Spanish",     reg:"Colombia",        dir:"ltr", cur:"COP", flag:"🇨🇴", tm:95,  comet:0.91},
+  "es-UY":{lang:"Español",  en:"Spanish",     reg:"Uruguay",         dir:"ltr", cur:"UYU", flag:"🇺🇾", tm:94,  comet:0.90},
+  "es-EC":{lang:"Español",  en:"Spanish",     reg:"Ecuador",         dir:"ltr", cur:"USD", flag:"🇪🇨", tm:94,  comet:0.90},
+  "es-PY":{lang:"Español",  en:"Spanish",     reg:"Paraguay",        dir:"ltr", cur:"PYG", flag:"🇵🇾", tm:93,  comet:0.90},
+  "es-PA":{lang:"Español",  en:"Spanish",     reg:"Panama",          dir:"ltr", cur:"PAB", flag:"🇵🇦", tm:93,  comet:0.90},
+  "pt-BR":{lang:"Português",en:"Portuguese",  reg:"Brasil",          dir:"ltr", cur:"BRL", flag:"🇧🇷", tm:97,  comet:0.92},
+  "pt-PT":{lang:"Português",en:"Portuguese",  reg:"Portugal",        dir:"ltr", cur:"EUR", flag:"🇵🇹", tm:95,  comet:0.91},
+  "pt-CV":{lang:"Português",en:"Portuguese",  reg:"Cabo Verde",      dir:"ltr", cur:"CVE", flag:"🇨🇻", tm:87,  comet:0.88},
+  "de-DE":{lang:"Deutsch",  en:"German",      reg:"Deutschland",     dir:"ltr", cur:"EUR", flag:"🇩🇪", tm:97,  comet:0.91},
+  "de-AT":{lang:"Deutsch",  en:"German",      reg:"Österreich",      dir:"ltr", cur:"EUR", flag:"🇦🇹", tm:94,  comet:0.90},
+  "de-CH":{lang:"Deutsch",  en:"German",      reg:"Schweiz",         dir:"ltr", cur:"CHF", flag:"🇨🇭", tm:94,  comet:0.90},
+  "nl-NL":{lang:"Nederlands",en:"Dutch",      reg:"Nederland",       dir:"ltr", cur:"EUR", flag:"🇳🇱", tm:95,  comet:0.90},
+  "nl-BE":{lang:"Nederlands",en:"Dutch",      reg:"België",          dir:"ltr", cur:"EUR", flag:"🇧🇪", tm:93,  comet:0.89},
+  "nl-CW":{lang:"Nederlands",en:"Dutch",      reg:"Curaçao",         dir:"ltr", cur:"ANG", flag:"🇨🇼", tm:84,  comet:0.86},
+  "it-IT":{lang:"Italiano", en:"Italian",     reg:"Italia",          dir:"ltr", cur:"EUR", flag:"🇮🇹", tm:96,  comet:0.91},
+  "nb-NO":{lang:"Norsk",    en:"Norwegian",   reg:"Norge",           dir:"ltr", cur:"NOK", flag:"🇳🇴", tm:93,  comet:0.89},
+  "sv-SE":{lang:"Svenska",  en:"Swedish",     reg:"Sverige",         dir:"ltr", cur:"SEK", flag:"🇸🇪", tm:93,  comet:0.89},
+  "cs-CZ":{lang:"Čeština",  en:"Czech",       reg:"Česko",           dir:"ltr", cur:"CZK", flag:"🇨🇿", tm:90,  comet:0.87},
+  "hr-HR":{lang:"Hrvatski", en:"Croatian",    reg:"Hrvatska",        dir:"ltr", cur:"EUR", flag:"🇭🇷", tm:89,  comet:0.87},
+  "tr-TR":{lang:"Türkçe",   en:"Turkish",     reg:"Türkiye",         dir:"ltr", cur:"TRY", flag:"🇹🇷", tm:92,  comet:0.88},
+  "ja-JP":{lang:"日本語",    en:"Japanese",    reg:"日本",             dir:"ltr", cur:"JPY", flag:"🇯🇵", tm:96,  comet:0.90},
+  "ko-KR":{lang:"한국어",    en:"Korean",      reg:"대한민국",          dir:"ltr", cur:"KRW", flag:"🇰🇷", tm:96,  comet:0.90},
+  "ar-SA":{lang:"العربية",  en:"Arabic",      reg:"السعودية",         dir:"rtl", cur:"SAR", flag:"🇸🇦", tm:91,  comet:0.88},
+  "ar-EG":{lang:"العربية",  en:"Arabic",      reg:"مصر",              dir:"rtl", cur:"EGP", flag:"🇪🇬", tm:90,  comet:0.88},
+  "ar-MA":{lang:"العربية",  en:"Arabic",      reg:"المغرب",           dir:"rtl", cur:"MAD", flag:"🇲🇦", tm:89,  comet:0.87},
+  "ar-DZ":{lang:"العربية",  en:"Arabic",      reg:"الجزائر",          dir:"rtl", cur:"DZD", flag:"🇩🇿", tm:88,  comet:0.87},
+  "ar-TN":{lang:"العربية",  en:"Arabic",      reg:"تونس",             dir:"rtl", cur:"TND", flag:"🇹🇳", tm:88,  comet:0.87},
+  "ar-QA":{lang:"العربية",  en:"Arabic",      reg:"قطر",              dir:"rtl", cur:"QAR", flag:"🇶🇦", tm:89,  comet:0.87},
+  "ar-IQ":{lang:"العربية",  en:"Arabic",      reg:"العراق",           dir:"rtl", cur:"IQD", flag:"🇮🇶", tm:87,  comet:0.86},
+  "ar-JO":{lang:"العربية",  en:"Arabic",      reg:"الأردن",           dir:"rtl", cur:"JOD", flag:"🇯🇴", tm:88,  comet:0.87},
+  "fa-IR":{lang:"فارسی",    en:"Persian",     reg:"ایران",            dir:"rtl", cur:"IRR", flag:"🇮🇷", tm:86,  comet:0.86},
+  /* no approved catalog yet — these ride machine translation under LQA review */
+  "bs-BA":{lang:"Bosanski", en:"Bosnian",     reg:"Bosna i Hercegovina", dir:"ltr", cur:"BAM", flag:"🇧🇦", tm:41, comet:0.81},
+  "uz-UZ":{lang:"Oʻzbekcha",en:"Uzbek",       reg:"Oʻzbekiston",     dir:"ltr", cur:"UZS", flag:"🇺🇿", tm:29,  comet:0.78}
+};
+
+/* ---- nation / club / constructor → locale ---- */
+const FIFA_LOCALE = {
+  BRA:"pt-BR", ARG:"es-AR", FRA:"fr-FR", ENG:"en-GB", ESP:"es-ES", GER:"de-DE", POR:"pt-PT", NED:"nl-NL",
+  BEL:"nl-BE", USA:"en-US", MEX:"es-MX", CAN:"en-CA", CRO:"hr-HR", URU:"es-UY", COL:"es-CO", JPN:"ja-JP",
+  KOR:"ko-KR", MAR:"ar-MA", SEN:"fr-SN", AUS:"en-AU", SUI:"de-CH", ECU:"es-EC", PAR:"es-PY", AUT:"de-AT",
+  TUR:"tr-TR", NOR:"nb-NO", CZE:"cs-CZ", SCO:"en-GB", SWE:"sv-SE", BIH:"bs-BA", EGY:"ar-EG", ALG:"ar-DZ",
+  CIV:"fr-CI", GHA:"en-GH", TUN:"ar-TN", CPV:"pt-CV", COD:"fr-CD", RSA:"en-ZA", IRN:"fa-IR", KSA:"ar-SA",
+  QAT:"ar-QA", IRQ:"ar-IQ", UZB:"uz-UZ", JOR:"ar-JO", PAN:"es-PA", CUW:"nl-CW", HAI:"fr-HT", NZL:"en-NZ"
+};
+const F1_LOCALE = {
+  FER:"it-IT", MER:"de-DE", RBR:"en-GB", MCL:"en-GB", AST:"en-GB", ALP:"fr-FR",
+  WIL:"en-GB", RB:"it-IT", SAU:"de-CH", HAA:"en-US", AUD:"de-DE", CAD:"en-US"
+};
+function localeFor(team){
+  if(state.league==="fifa") return FIFA_LOCALE[team] || "en-US";
+  if(state.league==="brasa") return "pt-BR";
+  if(state.league==="f1")   return F1_LOCALE[team] || "en-GB";
+  return team==="TOR" ? "en-CA" : "en-US";   /* NBA */
+}
+
+/* ---- approved catalogs (the translation memory, in miniature) ---- */
+const STRINGS = {
+  en:{tab_home:"For You",tab_live:"Watch",tab_venue:"Venue",tab_shop:"Shop",tab_me:"Memory",
+      picknation:"Pick Your Nation",pickplayer:"Pick Your Player",foryou:"For You",following:"following",
+      live:"LIVE",trending:"Trending for you",watchlive:"Watch Live · Player POV",
+      hypeready:"Your pre-match hype reel is ready",twelfth:"Twelfth Man",crowdsync:"Crowd-Sync",
+      livecomm:"Live commentary",possession:"Possession",winprob:"Win Prob",play:"Play",follow:"Follow",
+      stats:"Live stats",secondhalf:"2nd Half"},
+  nb:{tab_home:"For deg",tab_live:"Se",tab_venue:"Stadion",tab_shop:"Butikk",tab_me:"Minner",
+      picknation:"Velg nasjon",pickplayer:"Velg spiller",foryou:"For deg",following:"følger",
+      live:"DIREKTE",trending:"Aktuelt for deg",watchlive:"Se direkte · Spiller-POV",
+      hypeready:"Oppvarmingsvideoen din er klar",twelfth:"Tolvte mann",crowdsync:"Publikumspuls",
+      livecomm:"Direktekommentar",possession:"Ballbesittelse",winprob:"Seierssjanse",play:"Spill av",follow:"Følg",
+      stats:"Livestatistikk",secondhalf:"2. omgang"},
+  fr:{tab_home:"Pour vous",tab_live:"Regarder",tab_venue:"Stade",tab_shop:"Boutique",tab_me:"Souvenirs",
+      picknation:"Choisissez votre nation",pickplayer:"Choisissez votre joueur",foryou:"Pour vous",following:"vous suivez",
+      live:"EN DIRECT",trending:"Tendances pour vous",watchlive:"Regarder en direct · POV joueur",
+      hypeready:"Votre clip d'avant-match est prêt",twelfth:"Douzième homme",crowdsync:"Vibration du stade",
+      livecomm:"Commentaire en direct",possession:"Possession",winprob:"Prob. de victoire",play:"Lire",follow:"Suivre",
+      stats:"Stats en direct",secondhalf:"2e mi-temps"},
+  es:{tab_home:"Para ti",tab_live:"Ver",tab_venue:"Estadio",tab_shop:"Tienda",tab_me:"Recuerdos",
+      picknation:"Elige tu selección",pickplayer:"Elige tu jugador",foryou:"Para ti",following:"siguiendo",
+      live:"EN VIVO",trending:"Tendencias para ti",watchlive:"Ver en directo · POV del jugador",
+      hypeready:"Tu vídeo de calentamiento está listo",twelfth:"Duodécimo jugador",crowdsync:"Pulso de la grada",
+      livecomm:"Narración en directo",possession:"Posesión",winprob:"Prob. victoria",play:"Reproducir",follow:"Seguir",
+      stats:"Estadísticas en vivo",secondhalf:"2ª parte"},
+  pt:{tab_home:"Para você",tab_live:"Assistir",tab_venue:"Estádio",tab_shop:"Loja",tab_me:"Memórias",
+      picknation:"Escolha sua seleção",pickplayer:"Escolha seu jogador",foryou:"Para você",following:"seguindo",
+      live:"AO VIVO",trending:"Em alta para você",watchlive:"Assistir ao vivo · POV do jogador",
+      hypeready:"Seu vídeo de aquecimento está pronto",twelfth:"Décimo segundo jogador",crowdsync:"Pulso da torcida",
+      livecomm:"Narração ao vivo",possession:"Posse de bola",winprob:"Prob. vitória",play:"Reproduzir",follow:"Seguir",
+      stats:"Estatísticas ao vivo",secondhalf:"2º tempo"},
+  de:{tab_home:"Für dich",tab_live:"Ansehen",tab_venue:"Stadion",tab_shop:"Shop",tab_me:"Erinnerungen",
+      picknation:"Wähle deine Nation",pickplayer:"Wähle deinen Spieler",foryou:"Für dich",following:"du folgst",
+      live:"LIVE",trending:"Für dich im Trend",watchlive:"Live ansehen · Spieler-POV",
+      hypeready:"Dein Einstimmungsvideo ist fertig",twelfth:"Zwölfter Mann",crowdsync:"Stadionpuls",
+      livecomm:"Livekommentar",possession:"Ballbesitz",winprob:"Siegchance",play:"Abspielen",follow:"Folgen",
+      stats:"Live-Statistiken",secondhalf:"2. Halbzeit"},
+  nl:{tab_home:"Voor jou",tab_live:"Kijken",tab_venue:"Stadion",tab_shop:"Winkel",tab_me:"Herinneringen",
+      picknation:"Kies je land",pickplayer:"Kies je speler",foryou:"Voor jou",following:"je volgt",
+      live:"LIVE",trending:"Trending voor jou",watchlive:"Live kijken · Speler-POV",
+      hypeready:"Je opwarmvideo staat klaar",twelfth:"Twaalfde man",crowdsync:"Stadionpuls",
+      livecomm:"Livecommentaar",possession:"Balbezit",winprob:"Winstkans",play:"Afspelen",follow:"Volgen",
+      stats:"Livestatistieken",secondhalf:"2e helft"},
+  it:{tab_home:"Per te",tab_live:"Guarda",tab_venue:"Stadio",tab_shop:"Negozio",tab_me:"Ricordi",
+      picknation:"Scegli la tua nazionale",pickplayer:"Scegli il tuo giocatore",foryou:"Per te",following:"segui",
+      live:"IN DIRETTA",trending:"Di tendenza per te",watchlive:"Guarda in diretta · POV giocatore",
+      hypeready:"Il tuo video di riscaldamento è pronto",twelfth:"Dodicesimo uomo",crowdsync:"Battito dello stadio",
+      livecomm:"Telecronaca in diretta",possession:"Possesso palla",winprob:"Prob. vittoria",play:"Riproduci",follow:"Segui",
+      stats:"Statistiche live",secondhalf:"2° tempo"},
+  hr:{tab_home:"Za tebe",tab_live:"Gledaj",tab_venue:"Stadion",tab_shop:"Trgovina",tab_me:"Uspomene",
+      picknation:"Odaberi reprezentaciju",pickplayer:"Odaberi igrača",foryou:"Za tebe",following:"pratiš",
+      live:"UŽIVO",trending:"U trendu za tebe",watchlive:"Gledaj uživo · POV igrača",
+      hypeready:"Tvoj video za zagrijavanje je spreman",twelfth:"Dvanaesti igrač",crowdsync:"Puls stadiona",
+      livecomm:"Komentar uživo",possession:"Posjed lopte",winprob:"Vjerojatnost pobjede",play:"Reproduciraj",follow:"Prati",
+      stats:"Statistika uživo",secondhalf:"2. poluvrijeme"},
+  cs:{tab_home:"Pro tebe",tab_live:"Sledovat",tab_venue:"Stadion",tab_shop:"Obchod",tab_me:"Vzpomínky",
+      picknation:"Vyber si reprezentaci",pickplayer:"Vyber si hráče",foryou:"Pro tebe",following:"sleduješ",
+      live:"ŽIVĚ",trending:"Populární pro tebe",watchlive:"Sledovat živě · POV hráče",
+      hypeready:"Tvůj sestřih před zápasem je připraven",twelfth:"Dvanáctý hráč",crowdsync:"Puls stadionu",
+      livecomm:"Živý komentář",possession:"Držení míče",winprob:"Pravděpodobnost výhry",play:"Přehrát",follow:"Sledovat",
+      stats:"Živé statistiky",secondhalf:"2. poločas"},
+  tr:{tab_home:"Senin İçin",tab_live:"İzle",tab_venue:"Stat",tab_shop:"Mağaza",tab_me:"Anılar",
+      picknation:"Ülkeni seç",pickplayer:"Oyuncunu seç",foryou:"Senin İçin",following:"takip ediyorsun",
+      live:"CANLI",trending:"Senin için trendde",watchlive:"Canlı izle · Oyuncu POV",
+      hypeready:"Maç öncesi videon hazır",twelfth:"On İkinci Adam",crowdsync:"Tribün Nabzı",
+      livecomm:"Canlı anlatım",possession:"Topla oynama",winprob:"Kazanma olasılığı",play:"Oynat",follow:"Takip et",
+      stats:"Canlı istatistikler",secondhalf:"2. yarı"},
+  sv:{tab_home:"För dig",tab_live:"Titta",tab_venue:"Arena",tab_shop:"Butik",tab_me:"Minnen",
+      picknation:"Välj din nation",pickplayer:"Välj din spelare",foryou:"För dig",following:"följer",
+      live:"LIVE",trending:"Trendar för dig",watchlive:"Se live · Spelar-POV",
+      hypeready:"Din uppvärmningsvideo är klar",twelfth:"Tolfte spelaren",crowdsync:"Publikpuls",
+      livecomm:"Livekommentar",possession:"Bollinnehav",winprob:"Vinstchans",play:"Spela",follow:"Följ",
+      stats:"Livestatistik",secondhalf:"2:a halvlek"},
+  ja:{tab_home:"あなたへ",tab_live:"観る",tab_venue:"スタジアム",tab_shop:"ショップ",tab_me:"思い出",
+      picknation:"代表チームを選択",pickplayer:"選手を選択",foryou:"あなたへ",following:"フォロー中",
+      live:"ライブ",trending:"あなたへのおすすめ",watchlive:"ライブ観戦 · 選手POV",
+      hypeready:"試合前ハイプ動画の準備ができました",twelfth:"12番目の選手",crowdsync:"スタジアムの鼓動",
+      livecomm:"実況",possession:"ボール支配率",winprob:"勝率",play:"再生",follow:"フォロー",
+      stats:"ライブスタッツ",secondhalf:"後半"},
+  ko:{tab_home:"추천",tab_live:"시청",tab_venue:"경기장",tab_shop:"스토어",tab_me:"추억",
+      picknation:"국가를 선택하세요",pickplayer:"선수를 선택하세요",foryou:"추천",following:"팔로우 중",
+      live:"라이브",trending:"인기 콘텐츠",watchlive:"라이브 시청 · 선수 시점",
+      hypeready:"경기 전 하이프 영상이 준비됐어요",twelfth:"12번째 선수",crowdsync:"관중 싱크",
+      livecomm:"실시간 중계",possession:"점유율",winprob:"승리 확률",play:"재생",follow:"팔로우",
+      stats:"실시간 기록",secondhalf:"후반"},
+  ar:{tab_home:"لك",tab_live:"شاهد",tab_venue:"الملعب",tab_shop:"المتجر",tab_me:"الذكريات",
+      picknation:"اختر منتخبك",pickplayer:"اختر لاعبك",foryou:"لك",following:"تتابع",
+      live:"مباشر",trending:"الأكثر رواجًا لك",watchlive:"شاهد مباشرة · منظور اللاعب",
+      hypeready:"فيديو الحماس قبل المباراة جاهز",twelfth:"اللاعب الثاني عشر",crowdsync:"نبض الجماهير",
+      livecomm:"التعليق المباشر",possession:"الاستحواذ",winprob:"احتمال الفوز",play:"تشغيل",follow:"متابعة",
+      stats:"إحصائيات مباشرة",secondhalf:"الشوط الثاني"},
+  fa:{tab_home:"برای شما",tab_live:"تماشا",tab_venue:"ورزشگاه",tab_shop:"فروشگاه",tab_me:"خاطرات",
+      picknation:"کشور خود را انتخاب کنید",pickplayer:"بازیکن خود را انتخاب کنید",foryou:"برای شما",following:"دنبال می‌کنید",
+      live:"زنده",trending:"پرطرفدار برای شما",watchlive:"تماشای زنده · نمای بازیکن",
+      hypeready:"ویدیوی پیش از بازی شما آماده است",twelfth:"بازیکن دوازدهم",crowdsync:"ضربان ورزشگاه",
+      livecomm:"گزارش زنده",possession:"مالکیت توپ",winprob:"احتمال برد",play:"پخش",follow:"دنبال کردن",
+      stats:"آمار زنده",secondhalf:"نیمه دوم"}
+};
+
+/* ---- resolution: exact tag → base language → English source ---- */
+function pack(tag){ return STRINGS[tag] || STRINGS[(tag||"").split("-")[0]] || null; }
+/* named T, not t — the screen renderers already bind `t` to the active team */
+function T(k){ const p=pack(state.locale); return (p && p[k]) || STRINGS.en[k] || k; }
+/* true when the string came from an approved catalog rather than English fallback */
+function fromTM(k){ const p=pack(state.locale); return !!(p && p[k]); }
+function locMeta(){ return LOC[state.locale] || LOC["en-US"]; }
+function isRTL(){ return locMeta().dir==="rtl"; }
+
+/* ---- ICU/CLDR formatting, delegated to the platform's Intl ---- */
+function fmtNum(n,opt){ try{ return new Intl.NumberFormat(state.locale,opt).format(n); }catch(e){ return String(n); } }
+function fmtCur(n){ return fmtNum(n,{style:"currency",currency:locMeta().cur,maximumFractionDigits:0}); }
+function fmtPct(n){ return fmtNum(n/100,{style:"percent"}); }
+function fmtDate(d,style){ try{ return new Intl.DateTimeFormat(state.locale,{dateStyle:style||"long"}).format(d); }catch(e){ return d.toDateString(); } }
+
+/* ============================================================
+   THE SWITCH — a locale change, staged so you can watch it
+   ============================================================ */
+const G48_NODES = ["locale","tmglos","mt","lqa","comet","locops"];
+let g48Timers = [];
+function clearG48(){ g48Timers.forEach(clearTimeout); g48Timers = []; }
+
+function g48Steps(tag){
+  const L = LOC[tag] || LOC["en-US"];
+  const hit = L.tm, fill = 100 - hit;
+  const segs = 1284, tmSegs = Math.round(segs*hit/100), mtSegs = segs - tmSegs;
+  return [
+    {n:"locale", b:"Locale resolved",
+     s:`BCP-47 ${tag} · ${L.dir.toUpperCase()} · ${L.cur} · CLDR plural rules loaded`, ms:"1 ms"},
+    {n:"tmglos", b:"Translation memory queried",
+     s:`${fmtInt(tmSegs)} of ${fmtInt(segs)} segments matched approved TM + termbase`, ms:"7 ms"},
+    {n:"mt", b: mtSegs ? "Neural MT filled the gaps" : "No MT required",
+     s: mtSegs ? `${fmtInt(mtSegs)} segments translated · distilled INT8 checkpoint, batched`
+               : `Catalog complete — every segment served from memory`, ms: mtSegs?"84 ms":"0 ms"},
+    {n:"lqa", b:"LQA agent reviewed",
+     s:`ReAct loop · glossary, placeholder and overflow tools called · ${mtSegs?Math.max(1,Math.round(mtSegs*0.04)):0} segments revised`, ms:"210 ms"},
+    {n:"comet", b:"Quality gate passed",
+     s:`COMET ${L.comet.toFixed(2)} · above the ${L.en} release threshold`, ms:"46 ms"},
+    {n:"locops", b:"Catalog published",
+     s:`Versioned for ${tag} and pushed to the edge — no app build required`, ms:"12 ms"}
+  ];
+}
+function fmtInt(n){ try{ return new Intl.NumberFormat(state.locale).format(n); }catch(e){ return String(n); } }
+
+/* the three strings the fan will actually see change */
+const MORPH_KEYS = ["tab_home","live","watchlive"];
+
+function g48Takeover(tag, shown){
+  const L = LOC[tag] || LOC["en-US"];
+  const from = LOC[state.locale] || LOC["en-US"];
+  const steps = g48Steps(tag);
+  const tgt = STRINGS[tag] || STRINGS[tag.split("-")[0]] || null;
+  const morph = shown > steps.length ? MORPH_KEYS.map((k,i)=>{
+    const src = STRINGS.en[k], dst = (tgt && tgt[k]) || src, hit = !!(tgt && tgt[k]);
+    return `<div class="g48row" style="animation-delay:${i*0.11}s">
+      <span class="src">${src}</span><span class="arw">→</span><span class="dst">${dst}</span>
+      <span class="tag ${hit?'tm':'mt'}">${hit?'TM':'MT'}</span></div>`;
+  }).join("") : "";
+  return `<div class="g48screen">
+    <div class="eb">Tier 6 · g48t engine</div>
+    <div class="hop"><span class="from">${from.flag} ${state.locale}</span><span class="arw">→</span>
+      <span class="to">${L.flag} ${tag}</span></div>
+    <div class="lang"><b>${L.lang}</b> · ${L.reg} · ${L.dir==='rtl'?'right-to-left':'left-to-right'}</div>
+    ${steps.slice(0,shown).map((s,i)=>`<div class="g48step" style="animation-delay:${i===shown-1?0:0}s">
+      <span class="pip"></span><span class="tx"><b>${s.b}</b><span>${s.s}</span></span><span class="ms">${s.ms}</span>
+    </div>`).join("")}
+    ${morph?`<div class="g48morph"><div class="mh">Strings now rendering</div>${morph}</div>`:""}
+  </div>`;
+}
+
+/* run the switch: stage the pipeline on screen while Tier 6 lights up */
+function runG48(tag, done){
+  clearG48();
+  const screen = document.getElementById("screen");
+  const head = document.getElementById("g48Head");
+  const steps = g48Steps(tag);
+  if(head) head.classList.add("hot");
+  /* the numeronyms fire in GILT order as their stage completes */
+  const numFor = {locale:1, tmglos:2, mt:3, lqa:3, comet:3, locops:0};
+  document.querySelectorAll("#g48Nums .nn").forEach(n=>n.classList.remove("lit"));
+  document.getElementById("g48Sum").classList.remove("lit");
+  document.querySelectorAll(".cl-g48 .node").forEach(n=>n.classList.remove("active"));
+
+  const STEP = 380;
+  activeNodes = [];
+  steps.forEach((s,i)=>{
+    g48Timers.push(setTimeout(()=>{
+      const sc = document.getElementById("screen");
+      if(sc) sc.innerHTML = g48Takeover(tag, i+1);
+      const node = document.querySelector(`.node[data-node="${s.n}"]`);
+      if(node) node.classList.add("active");
+      const nn = document.querySelector(`#g48Nums .nn[data-nn="${numFor[s.n]}"]`);
+      if(nn) nn.classList.add("lit");
+      activeNodes.push(s.n);          /* so a wire runs from the node to the device */
+      drawWires();
+    }, i*STEP));
+  });
+  /* string morph, then commit the locale and re-render the app in it */
+  g48Timers.push(setTimeout(()=>{
+    const sc = document.getElementById("screen");
+    if(sc) sc.innerHTML = g48Takeover(tag, steps.length+1);
+    document.getElementById("g48Sum").classList.add("lit");
+  }, steps.length*STEP));
+  g48Timers.push(setTimeout(()=>{
+    state.locale = tag;
+    updateG48Readout();
+    if(head) head.classList.remove("hot");
+    if(done){ done(); return; }
+    render();
+    /* the app is now in the new locale, but leave Tier 6 lit and wired — the trigger
+       reads "g48t · Locale Engine", so the written story is one click away without
+       the panel covering the tiers it's describing */
+    activateBrain("g48t");
+  }, steps.length*STEP + 1250));
+}
+
+/* keep the masthead + top-bar chip in sync with the active locale */
+function updateG48Readout(){
+  const L = locMeta(), tag = state.locale;
+  const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  set("g48Flag", L.flag); set("g48Tag", tag); set("g48Dir", L.dir.toUpperCase());
+  const nat=document.getElementById("g48Native");
+  if(nat) nat.innerHTML = `<b>${L.lang}</b> · ${L.reg}`;
+  const tmEl=document.getElementById("g48Tm"), mtEl=document.getElementById("g48Mt");
+  if(tmEl) tmEl.style.width = L.tm+"%";
+  if(mtEl) mtEl.style.width = (100-L.tm)+"%";
+  set("g48Cov", `TM ${L.tm}% · MT ${100-L.tm}% · COMET ${L.comet.toFixed(2)}`);
+  set("lcFlag", L.flag); set("lcTag", tag); set("lcName", L.en);
+  const chip=document.getElementById("localeChip");
+  if(chip) chip.classList.toggle("engaged", tag!=="en-US");
+}
+
+/* ---- the g48t control screen (reachable from the top-bar locale chip) ---- */
+function g48tScreen(){
+  const L = locMeta(), tag = state.locale;
+  const p = pack(tag);
+  const kick = new Date(2026,5,13,20,0);
+  const marquee = [["NOR","nb-NO"],["FRA","fr-FR"],["JPN","ja-JP"],["MAR","ar-MA"],["BRA","pt-BR"],["GER","de-DE"]];
+  /* this is an inspector surface: its copy is English commentary, not product strings,
+     so each English run is marked LTR rather than inheriting an RTL locale's direction */
+  return appShell(`<span style="text-transform:none">g48t</span>`, `${L.lang} · ${tag}`, `
+    <div class="ailine"><div class="sp">🌐</div><div class="tx" dir="ltr">
+      <b>g11n + i18n + l10n + t9n = 48.</b> The four GILT numeronyms sum to the number of nations at this World Cup — so that is what the engine is called.</div></div>
+
+    <div class="card" style="border-color:rgba(34,211,238,.4)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="font-size:26px">${L.flag}</span>
+        <div style="flex:1"><b style="font-size:15px;font-family:'IBM Plex Mono',monospace">${tag}</b>
+          <div class="tiny">${L.lang} · ${L.reg}</div></div>
+        <span class="chip" style="border-color:rgba(34,211,238,.45);color:#22d3ee">${L.dir.toUpperCase()}</span>
+      </div>
+      <div class="grid2">
+        <div class="mc-cell"><div class="lbl">Numbers</div><b>${fmtNum(1234567.89)}</b></div>
+        <div class="mc-cell"><div class="lbl">Currency</div><b>${fmtCur(129)}</b></div>
+        <div class="mc-cell"><div class="lbl">Kick-off</div><b>${fmtDate(kick,"medium")}</b></div>
+        <div class="mc-cell"><div class="lbl">Win probability</div><b>${fmtPct(61)}</b></div>
+      </div>
+      <div class="tiny" style="margin-top:9px" dir="ltr">Every value above is formatted by ICU/CLDR from the locale alone — no per-market branch in any screen.</div>
+    </div>
+
+    <div class="eyebrow">Catalog coverage</div>
+    <div class="card">
+      <div class="g48-cov" style="margin:0 0 8px">
+        <div class="g48-bar" style="height:6px"><i class="tm" style="width:${L.tm}%"></i><i class="mt" style="width:${100-L.tm}%"></i></div>
+      </div>
+      <div style="display:flex;gap:14px;font-size:11px">
+        <span style="color:#22d3ee">■ TM ${L.tm}% approved</span>
+        <span style="color:var(--gold)">■ MT ${100-L.tm}% under review</span>
+      </div>
+      <div class="tiny" style="margin-top:8px" dir="ltr">${p
+        ? `An approved catalog exists for ${L.en}. Retrieval answers most segments outright; machine translation only fills what memory can't, and the LQA agent reviews every one of those.`
+        : `No approved catalog for ${L.en} yet — this locale is served by machine translation under LQA review, which is why coverage reads low. It ships, and it is honestly labelled.`}</div>
+    </div>
+
+    <div class="eyebrow">Switch locale</div>
+    <div class="chiprow">${marquee.map(([ab,lt])=>`<button class="chip ${lt===tag?'on':''}" onclick="demoLocale('${lt}')">${LOC[lt].flag} ${LOC[lt].lang}</button>`).join("")}</div>
+    <div class="tiny" style="margin:-4px 2px 10px" dir="ltr">Jump straight to a locale to watch the pipeline run again.</div>
+
+    <div class="eyebrow">Pipeline · last run</div>
+    ${g48Steps(tag).map(s=>`<div class="card listitem" style="margin-bottom:8px;padding:9px 12px" dir="ltr">
+      <div class="ico" style="font-size:14px;border-color:rgba(34,211,238,.35)">${DEEPDIVE[s.n].icon}</div>
+      <div class="gr"><b>${s.b}</b><span>${s.s}</span></div>
+      <div class="rt" style="color:#22d3ee">${s.ms}</div></div>`).join("")}
+  `);
+}
+function demoLocale(tag){
+  if(tag===state.locale){ return; }
+  state.module="g48t";
+  runG48(tag);
+}
+
+/* ============================================================
    APP SHELL  (wraps a screen with status bar, header, tab bar)
    ============================================================ */
 function appShell(title, sub, body, withTabs=true){
   const venue = state.mode==="venue";
-  return `<div class="app">
+  return `<div class="app" dir="${locMeta().dir}" lang="${state.locale}">
     <div class="statusbar"><span>9:41</span><div class="r"><span>${venue?'📶 Arena Wi-Fi':'📶'}</span><span>🔋</span></div></div>
     <div class="app-body">
       <div class="app-head"><div><h2>${title}</h2><div class="sub">${sub}</div></div>${fan.onboarded?`<div class="av">${playerAvatar(fan.team,fan.player,playerNo(fan.team,fan.player),32)}</div>`:""}</div>
@@ -2917,8 +3505,12 @@ function appShell(title, sub, body, withTabs=true){
     ${withTabs?tabBar():""}
   </div>`;
 }
+const TAB_KEY = {home:"tab_home", live:"tab_live", tickets:"tab_venue", merch:"tab_shop", memory:"tab_me"};
 function tabBar(){
-  return `<div class="tabbar">${TABS.map(t=>{let ic=t.icon; if(t.id==="home"){ ic = state.league==="f1"?"🏎" : isSoccer()?"⚽" : t.icon; } return `<button class="${state.module===t.id||groupActive(t.id)?'on':''}" onclick="go('${t.id}')"><span class="ic">${ic}</span>${t.label}</button>`;}).join("")}</div>`;
+  return `<div class="tabbar" dir="${locMeta().dir}">${TABS.map(tb=>{
+    let ic=tb.icon; if(tb.id==="home"){ ic = state.league==="f1"?"🏎" : isSoccer()?"⚽" : tb.icon; }
+    return `<button class="${state.module===tb.id||groupActive(tb.id)?'on':''}" onclick="go('${tb.id}')"><span class="ic">${ic}</span>${T(TAB_KEY[tb.id]||"tab_home")}</button>`;
+  }).join("")}</div>`;
 }
 function groupActive(tabId){
   const map={home:["home","trivia","highlights","watchguide","social","events","hype"],live:["live","stats","sixthman","haptic"],tickets:["tickets","betting","routing","celebs"],merch:["merch"],memory:["memory"]};
@@ -2991,7 +3583,7 @@ function watchScreen(){
 /* ============================================================
    STATE + WIRING
    ============================================================ */
-const state = { device:"iphone", mode:"home", module:"setup", league:null };
+const state = { device:"iphone", mode:"home", module:"setup", league:null, locale:"en-US" };
 
 /* ---- League chooser landing (shown before anything else) ---- */
 function landingScreen(){
@@ -3023,16 +3615,30 @@ function chooseLeague(id){
   setLeague(id);
   fan.team=null; fan.player=null; fan.onboarded=false; fan.pov="broadcast";
   state.module="setup"; state.mode="home";
+  resetLocale();
   [...document.querySelectorAll('#modePill button')].forEach(b=>b.classList.toggle('on',b.dataset.mode==='home'));
   render();
 }
-function backToLanding(){ state.league=null; fan.onboarded=false; fan.team=null; fan.player=null; render(); }
+function backToLanding(){
+  state.league=null; fan.onboarded=false; fan.team=null; fan.player=null;
+  state.module="setup"; resetLocale(); render();
+}
+/* every run starts from the source language, so the switch is visible each time */
+function resetLocale(){
+  clearG48();
+  state.locale="en-US";
+  document.querySelectorAll("#g48Nums .nn").forEach(n=>n.classList.remove("lit"));
+  const sum=document.getElementById("g48Sum"); if(sum) sum.classList.remove("lit");
+  const head=document.getElementById("g48Head"); if(head) head.classList.remove("hot");
+  updateG48Readout();
+}
 
 function render(){
   const screen=document.getElementById("screen");
   if(!state.league){ screen.innerHTML=landingScreen(); activateBrain(null); return; }
   const SC=activeScreens();
-  if(state.device==="watch"){ screen.innerHTML=watchScreen(); }
+  if(state.module==="g48t" && state.device!=="watch"){ screen.innerHTML=g48tScreen(); }
+  else if(state.device==="watch"){ screen.innerHTML=watchScreen(); }
   else {
     if(!fan.onboarded){ screen.innerHTML=SC.setup(); }
     else { screen.innerHTML=(SC[state.module]||SC.home)(); }
@@ -3042,13 +3648,20 @@ function render(){
 
 function go(mod){
   if(!state.league){ return; }
-  if(!fan.onboarded && mod!=="setup"){ return; }
+  /* the locale engine is inspectable at any point, including before onboarding */
+  if(!fan.onboarded && mod!=="setup" && mod!=="g48t"){ return; }
   state.module=mod;
   render();
 }
 
 function pickTeam(ab){ fan.team=ab; fan.player=null; render(); flashBrain("setup"); }
-function pickPlayer(name){ fan.player=name; fan.onboarded=true; state.module="home"; render(); }
+/* choosing a player completes the profile — and that is what resolves the locale */
+function pickPlayer(name){
+  fan.player=name; fan.onboarded=true; state.module="home";
+  const target = localeFor(fan.team);
+  if(target !== state.locale){ runG48(target); }   /* takeover, then render in the new locale */
+  else { render(); }
+}
 function setPov(p){ fan.pov=p; render(); }
 
 /* device switching */
@@ -3118,7 +3731,7 @@ function updatePanel(mod){
     document.getElementById("bpFoot").textContent="idle · governance rail monitoring all tiers";
     document.getElementById("btTitle").textContent="Architecture";
     document.getElementById("btMeta").textContent="idle · tap to inspect";
-    trig.classList.remove("live"); return; }
+    trig.classList.remove("engaged"); return; }
   let story=m.story;
   if(isSoccer() && typeof FIFA_STORIES!=="undefined" && FIFA_STORIES[mod]) story=FIFA_STORIES[mod];
   else if(state.league==="f1" && typeof F1_STORIES!=="undefined" && F1_STORIES[mod]) story=F1_STORIES[mod];
@@ -3129,7 +3742,7 @@ function updatePanel(mod){
   document.getElementById("bpFoot").textContent=`${m.nodes.length} services engaged · ${state.mode==='venue'?'venue':'home'} context`;
   document.getElementById("btTitle").textContent=m.title;
   document.getElementById("btMeta").textContent=`${m.nodes.length} services engaged · ${state.mode==='venue'?'venue':'home'} context`;
-  trig.classList.add("live");
+  trig.classList.add("engaged");
   // brief pulse so the user notices the brain refreshed
   trig.classList.remove("pulse"); void trig.offsetWidth; trig.classList.add("pulse");
 }
@@ -3217,6 +3830,7 @@ document.addEventListener("click",e=>{
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeBrain(); document.getElementById("disclaimer").classList.remove("open"); }});
 
 /* boot */
+updateG48Readout();
 render();
 setTimeout(drawWires,200);
 </script>

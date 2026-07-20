@@ -122,18 +122,22 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
 .cl-gov{bottom:16px;left:50%;transform:translateX(-50%);width:660px;}
 
 /* ---- vertical rails: clusters stack instead of floating to corners ---- */
-.rail{position:absolute;top:96px;z-index:8;display:flex;flex-direction:column;gap:18px;}
-/* the left rail carries only two tiers, so it can afford to breathe */
-.rail-l{left:24px;gap:34px;}
+/* Spacing is sized for a tall screen and pulled back by the max-height rules
+   below. Tiers are separate ideas, so the gap between two clusters is always
+   larger than the gap between nodes inside one. */
+.rail{position:absolute;top:96px;z-index:8;display:flex;flex-direction:column;gap:26px;}
+/* the left rail carries only two tiers, so it can afford the most air */
+.rail-l{left:24px;gap:44px;}
 .rail-r{right:24px;}
-.rail .cluster .clabel{margin-bottom:5px;}
-.rail-l .cluster .clabel{margin-bottom:9px;}
-.rail-l .cluster .nodes{gap:9px !important;}
+.rail .cluster .clabel{margin-bottom:8px;}
+.rail-l .cluster .clabel{margin-bottom:11px;}
+.rail-l .cluster .nodes{gap:10px !important;}
+.rail-r .cluster.dense .nodes{gap:8px !important;}
 .rail-l .cluster.dense .node{padding:7px 11px;}
 .rail .cluster{position:relative;top:auto;left:auto;right:auto;bottom:auto;transform:none;}
 .rail-r .cluster{width:214px;}
 /* second group inside a merged cluster */
-.cluster .clabel.sub{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);}
+.cluster .clabel.sub{margin-top:15px;padding-top:13px;border-top:1px dashed var(--line);}
 /* g48t is a numeronym like i18n — it stays lowercase even in an uppercased label */
 .clabel .lc{text-transform:none;font-weight:600;color:var(--g48);letter-spacing:.04em;}
 /* dense variant so the merged rail fits without scrolling */
@@ -474,11 +478,26 @@ button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:n
   .g48-switch button{width:19px;height:19px;font-size:10px;}
   .g48-switch .fl{gap:3px;}
 }
-/* the left rail's generous spacing is a tall-screen luxury — reclaim it below that */
+/* On a big display the rails would otherwise hang from the top with all the
+   slack pooled at the bottom. Centre them between the client row and the
+   governance rail, and open the gaps a little further. Gaps stop reading as
+   grouping past roughly this point, so the rest of the room stays as margin. */
+@media (min-height:1060px){
+  .rail{top:50%;transform:translateY(-50%);gap:32px;}
+  .rail-l{gap:54px;}
+  .rail-l .cluster .nodes{gap:12px !important;}
+  .rail-r .cluster.dense .nodes{gap:10px !important;}
+  .cluster .clabel.sub{margin-top:18px;padding-top:15px;}
+}
+/* that spacing is a tall-screen luxury — reclaim it on laptop-height displays */
 @media (max-height:960px){
+  .rail{gap:18px;}
   .rail-l{gap:22px;}
+  .rail .cluster .clabel{margin-bottom:5px;}
   .rail-l .cluster .clabel{margin-bottom:6px;}
   .rail-l .cluster .nodes{gap:7px !important;}
+  .rail-r .cluster.dense .nodes{gap:6px !important;}
+  .cluster .clabel.sub{margin-top:9px;padding-top:9px;}
   .g48-head{margin-bottom:10px;}
 }
 /* the device frame is a fixed height — scale the dock so it never collides with
